@@ -24,6 +24,13 @@ const bar = pct => {
 
 /** Output tokens per second across every chair that reported both, or null. */
 export function throughput(chairs) {
+  // Prefer the model's MEASURED generation rate where the backend reports it (Ollama does). The
+  // end-to-end fallback bundles model load and prompt processing into the number, which once had
+  // this bench disqualifying a local model at '21 tok/s' that actually generates at 66.
+  const measured = Object.values(chairs).map(r => r.genRate).filter(v => typeof v === 'number' && v > 0);
+  if (measured.length >= 3) {
+    return Math.round((measured.reduce((a, b) => a + b, 0) / measured.length) * 10) / 10;
+  }
   const rows = Object.values(chairs).filter(r => r.tokens > 0 && r.ms > 0);
   if (rows.length < 3) return null;
   const tokens = rows.reduce((n, r) => n + r.tokens, 0);

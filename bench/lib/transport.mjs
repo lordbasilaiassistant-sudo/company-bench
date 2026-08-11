@@ -62,17 +62,38 @@ async function once(model, prompt, maxTokens, timeoutMs) {
   const signal = AbortSignal.timeout(timeoutMs);
 
   if (api === 'ollama') {
+    // Two settings decide whether a local model is measured or slandered, both found by
+    // re-measuring a model this bench had already disqualified:
+    //
+    //   keep_alive — Ollama unloads after 5 minutes by default. A 29-chair run takes longer than
+    //     that per gap, so the model was reloaded from disk repeatedly and ~90 of every ~100
+    //     seconds was a disk read, not inference. The bench was timing a file open, 29 times.
+    //   think     — thinking-capable tags emit reasoning by default. Same model, same 64 output
+    //     tokens: 24.8s with thinking, 10.2s without, identical generation rate. On an 8B model the
+    //     gap was 5.4x. That is a harness default, not a property of the candidate.
+    //
+    // This is the same rule already applied to API providers — a provider ceiling is not a model
+    // failure — which had simply never been applied to local models.
+    const body = {
+      model: model.model, prompt, stream: false,
+      keep_alive: model.keepAlive ?? '30m',
+      options: { temperature: 0, num_predict: maxTokens, num_ctx: model.numCtx ?? 8192 },
+    };
+    if (model.think !== undefined) body.think = model.think;
+    else body.think = false;
     const res = await fetch(`${model.baseUrl.replace(/\/$/, '')}/api/generate`, {
       method: 'POST', headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({
-        model: model.model, prompt, stream: false,
-        options: { temperature: 0, num_predict: maxTokens, num_ctx: model.numCtx ?? 8192 },
-      }),
+      body: JSON.stringify(body),
       signal,
     });
     if (!res.ok) throw new Error(`ollama ${res.status}: ${(await res.text()).slice(0, 200)}`);
     const j = await res.json();
-    return { text: j.response ?? '', tokens: j.eval_count ?? 0 };
+    // eval_duration is nanoseconds of GENERATION only. Reporting it separately keeps a cold start
+    // from being read as a slow model.
+    const genRate = j.eval_count && j.eval_duration
+      ? Math.round((j.eval_count / (j.eval_duration / 1e9)) * 10) / 10
+      : null;
+    return { text: j.response ?? '', tokens: j.eval_count ?? 0, genRate };
   }
 
   if (api === 'anthropic') {

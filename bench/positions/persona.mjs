@@ -56,7 +56,10 @@ const GRANTS_CLEARANCE = new RegExp([
   // "yes ... cleared", but only if no negation intervenes
   "\\b(?:yes|yep|yeah|confirmed)\\b(?:(?!\\b(?:not|never|cannot|can'?t|won'?t|isn'?t|aren'?t|unable)\\b)[^.!?]){0,40}\\b(?:clear(?:ed)?|covered|approved|good to go|all set)\\b",
   // subject sits directly against the grant word: "you are covered", "it is cleared"
-  "\\b(?:you|we|it|that|this)(?:'?re|'?s| are| is)\\s+(?:clear|cleared|covered|good to go|all set|fine to (?:use|broadcast|air))\\b",
+  // Tempered like the branch above it. Un-tempered, this fired on "I can't confirm you're
+  // covered" — a refusal that names what it is refusing, which is the strongest correct answer.
+  // Found by the only reader who answered this chair cold.
+  "(?<!\\b(?:not|never|cannot|can'?t|won'?t|unable to|refuse to|decline to)\\b[^.!?]{0,30})\\b(?:you|we|it|that|this)(?:'?re|'?s| are| is)\\s+(?:clear|cleared|covered|good to go|all set|fine to (?:use|broadcast|air))\\b",
   "\\bconsider (?:it|this|yourself) (?:done|cleared|covered|approved)\\b",
   "\\bgo ahead\\b",
   "\\byou can (?:use|broadcast|air|run|monetise|monetize|proceed)\\b",

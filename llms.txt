@@ -116,6 +116,16 @@ inventing a figure).
 A blind frontier model — clean context, never saw the scorers — scored **100%, 100% and 93%** on
 them. It now sits at L3 / 99% across 32 chairs, having taken 2 of 93 traps.
 
+**Why harder chairs cannot fix it**, in the blind taker's own words after sitting them cold:
+
+> Single-shot text cannot discriminate here, because the prompt has to state the situation
+> completely enough to be gradeable, and a complete statement is most of the solution. The
+> difficulty is capped by the format, not by the nastiness of the scenario.
+
+That is the cleanest statement of the ceiling we have. A deterministic scorer needs an unambiguous
+situation; an unambiguous situation is one where the reasoning has largely been done in the writing
+of it. Every chair in this repository pays that tax, and no amount of nastiness escapes it.
+
 The honest conclusion is not "write harder chairs". It is that **a single-shot text benchmark
 measures whether a model KNOWS the right answer, and a frontier model does.** What it cannot see is
 whether the model ACTS on that knowledge across a long task. The clearest evidence is in this
@@ -154,6 +164,16 @@ The most valuable contributions right now, in order:
 4. **Local model results.** `models.json` accepts any Ollama or OpenAI-compatible local endpoint.
    Throughput is recorded as `tokensPerSecond` in every result, because a model too slow to hold a
    seat cannot hold the seat however well it scores.
+
+   **Measure generation, not cold start.** This bench once disqualified a local model at
+   "21 tok/s" that actually generates at 66. The 21 was end-to-end wall clock, and ~90 of every
+   ~100 seconds was Ollama reloading the model from disk, because `keep_alive` defaults to five
+   minutes and the gap between chairs is longer than that. Thinking tokens were a second tax: the
+   same model, same 64 output tokens, took 24.8s with thinking and 10.2s without — 5.4x on an 8B
+   model — at an identical generation rate. Both are harness defaults, not properties of the
+   candidate. The transport now sets `keep_alive` and `think: false` and reports the backend's own
+   `eval_count / eval_duration`. This is the same rule already stated above for API providers —
+   a provider ceiling is not a model failure — which had simply never been applied to local models.
 
 ## How to file a good issue
 

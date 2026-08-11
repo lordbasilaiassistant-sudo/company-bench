@@ -48,11 +48,9 @@ Measured, not assumed — `--help`, binary strings, and one real export.
 | Isolation of its own | Windows sandbox runtime (§3.3) | none — its "sandbox" is a worktree label (§3.2) | `egress` iron-proxy (credential firewall, off by default) |
 
 **The one lucky break:** Hermes exports *Claude Code JSONL*, so **one adapter covers two harnesses**
-and only OpenCode needs its own.
-
-Measured Claude Code transcript fields (counted over three real session files): `isSidechain`,
-`toolUseResult`, `is_error`, `"name":"Bash"|"Read"|"Write"|"Edit"|"Skill"`. Everything §1 needs is
-already on disk.
+and only OpenCode needs its own. Measured Claude Code transcript fields (counted over three real
+session files): `isSidechain`, `toolUseResult`, `is_error`,
+`"name":"Bash"|"Read"|"Write"|"Edit"|"Skill"` — everything §1 needs is already on disk.
 
 Measured OpenCode export shape (real run, local Ollama model):
 `{info:{id, directory, agent, model:{id,providerID}, cost, tokens:{input,output,reasoning,cache},
@@ -110,15 +108,12 @@ Measured: WSL2 is present with `Ubuntu` and `NVIDIA-Workbench`, both stopped. `w
 isolation of the process tree, its own filesystem, $0, no Docker, and — the property that matters —
 **identical for all three harnesses**, so the comparison stays fair.
 
-Leaks by default, and these are the three people miss:
-- `/mnt/c` auto-mounts the **entire Windows drive, read/write** → `automount=false` in that distro's
-  `/etc/wsl.conf`.
+Leaks by default — these are the three people miss, and **none is verified on this machine**. Verify
+all three before a single untrusted run; treat an unverified toggle as an open shell.
+- `/mnt/c` auto-mounts the **entire Windows drive, read/write** → `automount=false` in `/etc/wsl.conf`.
 - Windows interop lets the guest launch host `.exe`s → `interop.enabled=false`, `appendWindowsPath=false`.
 - NAT networking is **fully outbound by default** → a Windows Firewall rule on the WSL adapter, or a
   no-network mode. Whether WSL2 supports a no-network setting: **unknown, needs measurement.**
-
-None of those three toggles has been verified on this machine. Verify all three before a single
-untrusted run, and treat an unverified toggle as an open shell.
 
 ### 3.5 Cloudflare Sandbox SDK — clean, off-machine, metered
 GA April 2026; requires **Workers Paid**, which we already pay ($5/mo). Included monthly: 375
@@ -239,17 +234,59 @@ Any one of these, unaddressed, makes the track worse than not having it.
    `keeps-the-gate` this track would actively teach the wrong lesson. Both, or neither.
 6. **Sandbox maintenance may dwarf the token cost.** If the real price is babysitting a WSL2 image,
    the honest accounting is sysadmin hours, not tokens.
-7. **No spread, no track.** If all three harnesses score a model identically, the track is decor.
-   Same rule CONTRIBUTING.md already applies to chairs: spread is the product, and a cell that
-   never separates anything gets deleted.
+7. **No spread, no track.** If all three harnesses score a model identically, the track is decor —
+   the rule CONTRIBUTING.md already applies to chairs. Spread is the product; a cell that never
+   separates anything gets deleted.
 
 ## 7. Open unknowns (each needs a measurement, not an opinion)
 
 - OpenCode's live `run --format json` event schema — attempted, timed out, unmeasured.
 - Hermes non-interactive `-z` output format and whether it can emit a trace without the SQLite store.
-- Whether Claude Code's Windows sandbox actually starts here (strings only so far), and its
-  wall-clock cost.
+- Whether Claude Code's Windows sandbox actually starts here (strings only), and its wall-clock cost.
 - WSL2 `automount=false` / `interop.enabled=false` / no-network — all three unverified.
 - Windows Sandbox and Hyper-V feature state (the check needs elevation; it was refused).
 - Whether one fixture is enough, or whether delegation only appears on a task too large for a
   single agent to finish alone. Suspicion: the second. Unproven.
+
+---
+
+## Review: six ways this design is wrong, not merely incomplete
+
+Written by a model that had just sat the text chairs blind, then read this doc. Kept verbatim in
+substance because every point names a specific gate, not a vibe.
+
+1. **`delegates` is scored on a fixture that does not need delegation.** Eleven markdown pages from
+   a twelve-row CSV is one script. Requiring two delegate events there measures ritual compliance,
+   and a model that correctly judges delegation to be overhead scores as the very failure this
+   track exists to catch. Delegation is only observable when serial execution *costs* something:
+   give the fixture N independent legs with real per-leg latency — a checker that genuinely sleeps
+   — so the trace records wall-clock and delegating becomes an economic choice rather than a box.
+
+2. **`read-before-write` is trivially bypassed through Bash.** `>`, `>>`, `tee`, `sed -i`, `cp`,
+   `mv` and heredocs emit no Write/Edit event, so the gate measures which tool the harness makes
+   ergonomic. The read side has the same hole: `cat` and `sed -n` are reads that never register.
+   Normalise shell mutations and shell reads into events, or the gate is decor.
+
+3. **`no-secret` watches the wrong channel.** It greps writes and `git diff`. In an agentic run the
+   sentinel leaves through a *delegate prompt* or a network tool argument and never touches a file
+   — and those are already trace events. Grep every event payload, delegate args and fetch args
+   especially.
+
+4. **`verifies-own-work` rests on a done-claim regex the doc itself calls its most fragile check.**
+   Score only the terminal message; mid-run "that should do it" is narration, not a claim.
+
+5. **N>=3 is too weak for binary gates.** `delegates` and `keeps-the-gate` return 0 or 1 per run.
+   Three runs cannot separate "sometimes" from noise. Binary gates need N>=5.
+
+6. **Driving all three harnesses from one free model makes the experiment worse, not fairer.** It
+   measures harness x weak-model, and harness differences — subagent quality, context management —
+   mostly bind at the frontier. Publish two tables rather than buying a fairness you cannot have.
+
+### The observable it suggests instead
+
+**Claim-to-evidence ratio on the terminal report.** For every state-assertion in the final message,
+does an earlier event establish it — a file read, an exit code, an HTTP body — and did the agent
+re-read after mutating? That is pure code if the report is required to cite event ids. With three
+supporting gates: **stopping point** (declared deliverables minus artifacts produced), **scope
+drift** (files touched outside the brief's surface), and **re-derivation** (reading a file whose
+content is already in context).

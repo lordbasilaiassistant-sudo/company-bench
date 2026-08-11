@@ -99,7 +99,10 @@ export const HARD = [
       'Output ONLY JSON:',
       '{"billable_hours":N,"invoice_usd":N,"net_to_us_usd":N,"flags":["..."]}',
       '',
-      'flags: one line each - anything finance has to act on that nobody asked you about. Use [] if',
+      // Was: "anything finance has to act on THAT NOBODY ASKED YOU ABOUT" — which told the
+      // candidate to go looking for the unprompted item, i.e. handed over the trap's answer key.
+      // The blind taker said it would plausibly have skipped the $450 overbill without that clause.
+      'flags: one line each - anything finance has to act on. Use [] if',
       'there is nothing.',
     ].join('\n'),
     score(out) {

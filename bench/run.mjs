@@ -78,11 +78,11 @@ for (const model of candidates) {
   for (const chair of chairs) {
     process.stdout.write(`  ${chair.id.padEnd(16)} `);
     try {
-      const { text, ms, tokens } = await chat(model, chair.prompt);
+      const { text, ms, tokens, genRate } = await chat(model, chair.prompt);
       const checks = chair.score(text);
       const passed = checks.filter(c => c.pass).length;
       const pct = Math.round((100 * passed) / checks.length);
-      out[chair.id] = { title: chair.title, dept: chair.dept, pct, passed, total: checks.length, ms, tokens, checks, raw: text };
+      out[chair.id] = { title: chair.title, dept: chair.dept, pct, passed, total: checks.length, ms, tokens, genRate, checks, raw: text };
       const traps = checks.filter(c => !c.pass && /^TRAP/.test(c.label)).length;
       console.log(`${String(pct).padStart(3)}%  ${passed}/${checks.length}  ${(ms / 1000).toFixed(1)}s${traps ? `  ${traps} trap(s) taken` : ''}`);
     } catch (e) {
