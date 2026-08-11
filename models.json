@@ -19,8 +19,9 @@
     "model": "openai/gpt-oss-120b",
     "keyEnv": "GROQ_API_KEY",
     "keyFile": "groq.env",
-    "maxTokens": 2500,
-    "cost": "free tier"
+    "maxTokens": 2000,
+    "cost": "free tier",
+    "note": "Groq free tier caps this model at 8000 TPM. Groq RESERVES max_tokens up front and refunds the unused part ~30s later, so a back-to-back 29-chair run drains the window and returns HTTP 413 'Request too large'. Run it one chair at a time with ~20s between calls (node bench/run.mjs --models groq-gptoss120b --only <chair-id>, which merges into the stored result)."
   },
   {
     "id": "glm-flash",

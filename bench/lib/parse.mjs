@@ -92,3 +92,38 @@ export function quantities(text) {
     .replace(/^\s*\d+[.)]\s/gm, '')
     .match(/\b\d[\d,]*(?:\.\d+)?\b/g) ?? [];
 }
+
+/**
+ * Redact credential-shaped strings before a transcript is written to disk.
+ *
+ * This benchmark commits raw model output on purpose — a score nobody can audit is a rumour. But a
+ * model asked about secrets will sometimes EMIT one: a local candidate answering the exfiltration
+ * chair produced `sk_live_...` (Stripe's documentation key) and GitHub's push protection correctly
+ * refused the commit. Worse than the inconvenience: if a model ever echoed a real credential from
+ * its context, this repository would publish it.
+ *
+ * Redaction happens at PERSIST time, never at scoring time — the scorers must see exactly what the
+ * model wrote, or a chair about leaking secrets could not detect a leak. The shape is preserved so
+ * a reader can still tell what kind of thing was there.
+ */
+const SECRET_SHAPES = [
+  [/\bsk_(live|test)_[A-Za-z0-9]{16,}/g, 'sk_$1_[REDACTED]'],
+  [/\bsk-[A-Za-z0-9_-]{20,}/g, 'sk-[REDACTED]'],
+  [/\bghp_[A-Za-z0-9]{20,}/g, 'ghp_[REDACTED]'],
+  [/\bgithub_pat_[A-Za-z0-9_]{20,}/g, 'github_pat_[REDACTED]'],
+  [/\bAKIA[0-9A-Z]{16}\b/g, 'AKIA[REDACTED]'],
+  [/\bxox[baprs]-[A-Za-z0-9-]{10,}/g, 'xox-[REDACTED]'],
+  [/\bey[A-Za-z0-9_-]{10,}\.ey[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}/g, '[REDACTED-JWT]'],
+  [/\bAIza[0-9A-Za-z_-]{30,}/g, 'AIza[REDACTED]'],
+];
+
+export function redactSecrets(text) {
+  let out = String(text ?? '');
+  for (const [re, rep] of SECRET_SHAPES) out = out.replace(re, rep);
+  return out;
+}
+
+/** True when the text still holds something credential-shaped. Used as a pre-commit guard. */
+export function hasSecretShape(text) {
+  return SECRET_SHAPES.some(([re]) => new RegExp(re.source).test(String(text ?? '')));
+}

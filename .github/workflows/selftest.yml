@@ -17,5 +17,7 @@ jobs:
         run: node bench/selftest.mjs
       - name: The org chart loads
         run: node bench/run.mjs --list
+      - name: No published file carries a credential-shaped string
+        run: node scripts-guard.mjs
       - name: The exam pack generates
         run: node bench/take.mjs --out /tmp/pack && test -s /tmp/pack/TAKE-THE-BENCH.md

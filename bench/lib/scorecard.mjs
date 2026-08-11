@@ -6,6 +6,7 @@
  * are directly comparable, or the self-administered path would be a participation trophy.
  */
 import { DEPARTMENTS } from '../positions/index.mjs';
+import { redactSecrets } from './parse.mjs';
 import { placement, verdictOf, gradeOf } from './placement.mjs';
 
 const C = {
@@ -31,6 +32,11 @@ export function throughput(chairs) {
 }
 
 export function buildResult({ candidate, chairs, mode }) {
+  // Scoring already ran against the untouched text; from here on the transcript is written to
+  // disk, so anything credential-shaped is redacted before it can be committed or published.
+  for (const r of Object.values(chairs)) {
+    if (typeof r.raw === 'string') r.raw = redactSecrets(r.raw);
+  }
   const forPlacement = Object.fromEntries(Object.entries(chairs).map(([id, r]) => [id, { pct: r.pct, dept: r.dept, error: r.error }]));
   const deptsRun = [...new Set(Object.values(chairs).map(r => r.dept))];
   return {
