@@ -547,7 +547,13 @@ footer a{color:var(--mid)}
 </div></section>
 
 <section><div class="wrap">
-  <h2>The traps that catch the most agents</h2>
+  <h2>Where each model is strong, and where it breaks</h2>
+  <p class="sub">A flat line lower down is a safer hire than a spiky one: a model that is excellent at five
+  departments and poor at security is a model you cannot point at an inbox. The dashed line is the bar an agent
+  has to clear in every department to be trusted unattended.</p>
+  <div class="chart reveal"><div class="only-light">${charts.profileLight}</div><div class="only-dark">${charts.profileDark}</div></div>
+
+  <h2 style="margin-top:56px">The traps that catch the most agents</h2>
   <p class="sub">The most useful output of a benchmark is not the ranking. It is knowing which specific failure
   your agent is most likely to commit in production.</p>
   <div class="chart reveal"><div class="only-light">${charts.trapsLight}</div><div class="only-dark">${charts.trapsDark}</div></div>

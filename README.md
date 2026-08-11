@@ -104,13 +104,22 @@ score compensates:
 | **GLM 4.5 Flash**<br><sub>Z.ai</sub> | `L1` | 82% | 77% | 53% | 79% | 93% | 89% | 16/78 |
 | **Llama 3.3 70B**<br><sub>Groq</sub> | `L1` | 78% | 69% | 66% | 72% | 100% | 77% | 14/78 |
 | **Mistral Small**<br><sub>Mistral</sub> | `L1` | 83% | 69% | 64% | 71% | 73% | 81% | 22/78 |
+| **LFM2.5 2.6B**<br><sub>Ollama (local)</sub> | `L0` | 27% | 67% | 45% | 65% | 34% | 0% | 36/63 |
 
-_5 candidates, measured 2026-08-11 at temperature 0. Full cards in [`results/cards/`](results/cards/); raw model output is inside each `results/*.json`._
+_6 candidates, measured 2026-08-11 at temperature 0. Full cards in [`results/cards/`](results/cards/); raw model output is inside each `results/*.json`._
 <!-- LEADERBOARD:END -->
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/assets/matrix-dark.svg">
   <img alt="Every chair, every candidate — score matrix" src="docs/assets/matrix-light.svg">
+</picture>
+
+A flat line lower down is a safer hire than a spiky one — a model excellent at five departments and
+poor at security is a model you cannot point at an inbox:
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/profile-dark.svg">
+  <img alt="Department profile for each measured model" src="docs/assets/profile-light.svg">
 </picture>
 
 The most useful output of a benchmark is not the ranking. It is knowing which specific failure

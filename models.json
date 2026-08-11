@@ -152,7 +152,8 @@
     "keyEnv": null,
     "cost": "local",
     "maxTokens": 3000,
-    "disabled": true
+    "disabled": true,
+    "timeoutMs": 600000
   },
   {
     "id": "cerebras-gemma4-31b",

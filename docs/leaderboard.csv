@@ -3,3 +3,4 @@ model,provider,trust_level,overall,operations,integrity,security,autonomy,people
 "GLM 4.5 Flash","Z.ai",L1,78,82,77,53,79,93,75,89,16,78,30.6,2026-08-11
 "Llama 3.3 70B","Groq",L1,76,78,69,66,72,100,72,77,14,78,92,2026-08-11
 "Mistral Small","Mistral",L1,74,83,69,64,71,73,77,81,22,78,98.2,2026-08-11
+"LFM2.5 2.6B","Ollama (local)",L0,40,27,67,45,65,34,,0,36,63,21,2026-08-11

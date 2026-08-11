@@ -232,6 +232,60 @@ function ladderSvg(rows, P) {
   return out.join('\n');
 }
 
+
+/* ─────────────────── chart 4: department profile (lines + numbers) ─────────────────── */
+
+function profileSvg(rows, P) {
+  const depts = DEPARTMENTS.filter(d => rows.some(r => r.placement.dept[d.id] !== undefined));
+  const LEFT = 64, RIGHT = 214, TOP = 74, H_PLOT = 300;
+  const W = LEFT + (depts.length - 1) * 132 + RIGHT;
+  const H = TOP + H_PLOT + 74;
+  const x = i => LEFT + i * ((W - LEFT - RIGHT) / Math.max(1, depts.length - 1));
+  const y = v => TOP + H_PLOT - (v / 100) * H_PLOT;
+  const line = ['#E0873F', '#6FB295', '#7FA8D9', '#C98BC0', '#D9B65A', '#8C8878'];
+
+  const out = [];
+  out.push(`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" font-family="${FONT}">`);
+  out.push(`<rect width="${W}" height="${H}" fill="${P.paper}"/>`);
+  out.push(`<text x="20" y="28" font-size="13.5" font-weight="600" fill="${P.ink}">Where each model is strong, and where it breaks</text>`);
+  out.push(`<text x="20" y="46" font-size="10.5" fill="${P.muted}">Department score, 0-100. The SHAPE matters more than the height: a flat-but-lower line is a safer hire than a spiky one.</text>`);
+
+  // gridlines + y labels
+  for (let v = 0; v <= 100; v += 25) {
+    out.push(`<line x1="${LEFT}" y1="${y(v)}" x2="${W - RIGHT + 8}" y2="${y(v)}" stroke="${P.rule}" stroke-width="1"${v === 0 ? '' : ' stroke-dasharray="3 4"'}/>`);
+    out.push(`<text x="${LEFT - 12}" y="${y(v) + 3.5}" font-size="9.5" text-anchor="end" fill="${P.muted}" font-family="${MONO}">${v}</text>`);
+  }
+  // the L2 bar most models fail to clear
+  out.push(`<line x1="${LEFT}" y1="${y(85)}" x2="${W - RIGHT + 8}" y2="${y(85)}" stroke="${P.accent}" stroke-width="1" stroke-dasharray="5 3" opacity=".65"/>`);
+  out.push(`<text x="${W - RIGHT + 12}" y="${y(85) + 3.5}" font-size="9" fill="${P.accent}" font-family="${MONO}">L2 bar</text>`);
+
+  // x labels
+  depts.forEach((d, i) => {
+    out.push(`<text x="${x(i)}" y="${TOP + H_PLOT + 22}" font-size="10" text-anchor="middle" fill="${P.muted}" letter-spacing=".05em">${esc(d.label)}</text>`);
+    out.push(`<line x1="${x(i)}" y1="${TOP}" x2="${x(i)}" y2="${TOP + H_PLOT}" stroke="${P.rule}" stroke-width="1" opacity=".55"/>`);
+  });
+
+  rows.forEach((r, ri) => {
+    const col = line[ri % line.length];
+    const pts = depts.map((d, i) => ({ i, v: r.placement.dept[d.id], x: x(i), y: y(r.placement.dept[d.id] ?? 0) }))
+      .filter(p => p.v !== undefined);
+    if (pts.length < 2) return;
+    out.push(`<polyline fill="none" stroke="${col}" stroke-width="2.25" stroke-linejoin="round" stroke-linecap="round" opacity=".92" points="${pts.map(p => `${p.x},${p.y}`).join(' ')}"/>`);
+    for (const p of pts) {
+      out.push(`<circle cx="${p.x}" cy="${p.y}" r="3.6" fill="${P.paper}" stroke="${col}" stroke-width="2"/>`);
+      out.push(`<text x="${p.x}" y="${p.y - 9}" font-size="8.5" text-anchor="middle" fill="${col}" font-family="${MONO}" font-weight="600">${p.v}</text>`);
+    }
+    const last = pts[pts.length - 1];
+    out.push(`<line x1="${last.x + 6}" y1="${last.y}" x2="${W - RIGHT + 20}" y2="${TOP + 14 + ri * 21}" stroke="${col}" stroke-width="1" opacity=".4"/>`);
+    out.push(`<circle cx="${W - RIGHT + 24}" cy="${TOP + 14 + ri * 21}" r="3.4" fill="${col}"/>`);
+    out.push(`<text x="${W - RIGHT + 33}" y="${TOP + 17.5 + ri * 21}" font-size="10.5" fill="${P.ink}">${esc(r.candidate.name)}</text>`);
+    out.push(`<text x="${W - RIGHT + 33}" y="${TOP + 29 + ri * 21}" font-size="8.5" fill="${P.muted}" font-family="${MONO}">${r.placement.level} · ${r.placement.overall}%${r.tokensPerSecond ? ` · ${r.tokensPerSecond} tok/s` : ''}</text>`);
+  });
+
+  out.push('</svg>');
+  return out.join('\n');
+}
+
 /* ─────────────────────────── markdown leaderboard ─────────────────────────── */
 
 function leaderboardMd(rows) {
@@ -257,7 +311,7 @@ if (!rows.length) {
 }
 
 const ranked = rows.filter(r => !r.reference);
-for (const [k, fn] of [['matrix', matrixSvg], ['traps', trapsSvg], ['ladder', ladderSvg]]) {
+for (const [k, fn] of [['matrix', matrixSvg], ['traps', trapsSvg], ['ladder', ladderSvg], ['profile', profileSvg]]) {
   fs.writeFileSync(path.join(ASSETS, `${k}-light.svg`), fn(ranked, LIGHT));
   fs.writeFileSync(path.join(ASSETS, `${k}-dark.svg`), fn(ranked, DARK));
 }
@@ -269,7 +323,8 @@ const totals = {
 const bare = svg => svg.replace(/^<\?xml[^>]*\?>\s*/, '');
 fs.writeFileSync(path.join(DOCS, 'index.html'), siteHtml(rows, {
   totals,
-  charts: { trapsLight: bare(trapsSvg(rows.filter(r => !r.reference), LIGHT)), trapsDark: bare(trapsSvg(rows.filter(r => !r.reference), DARK)) },
+  charts: { trapsLight: bare(trapsSvg(ranked, LIGHT)), trapsDark: bare(trapsSvg(ranked, DARK)),
+    profileLight: bare(profileSvg(ranked, LIGHT)), profileDark: bare(profileSvg(ranked, DARK)) },
 }));
 // Machine-readable endpoints. An agent pointed at the page should not have to parse HTML, and a
 // crawler cannot read a chart — so every number in the SVGs also exists here as data.
