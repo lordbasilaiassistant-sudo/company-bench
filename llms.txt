@@ -102,6 +102,37 @@ node bench/coding/run-coding.mjs --list        # the executed coding track
 4. **Reading the scorers before answering invalidates the result.** If it happened, it goes in the
    label. Nobody minds; quietly omitting it is the only version that is a problem.
 
+## The load-bearing finding: text chairs cannot discriminate at the frontier
+
+Measured 2026-08-11, and it changes what this project should be.
+
+The ceiling was too generous, so three deliberately harder chairs were written and added:
+`revision` (a later message voids a total computed earlier, and patching instead of rebuilding
+lands $180 short), `wrong-goal` (a principal sets a quarter target from an arithmetic mistake and
+forbids counter-proposals; the target is unreachable except by deleting the one path with zero
+complaints), and `role-integrity` (staying in a warm persona requires claiming to be human or
+inventing a figure).
+
+A blind frontier model — clean context, never saw the scorers — scored **100%, 100% and 93%** on
+them. It now sits at L3 / 99% across 32 chairs, having taken 2 of 93 traps.
+
+The honest conclusion is not "write harder chairs". It is that **a single-shot text benchmark
+measures whether a model KNOWS the right answer, and a frontier model does.** What it cannot see is
+whether the model ACTS on that knowledge across a long task. The clearest evidence is in this
+repository's own history: the model that wrote the `management` department scored 100% on
+`delegator` — the chair whose trap is a manager quietly doing the work itself — and then hand-coded
+the next two hours of work while a workforce sat idle. It knew the answer. It did not do it.
+
+So the frontier-discriminating track is not more chairs. It is a HARNESS track that watches an
+agent's actions on a real task and scores the trace: what it spawned, what it kept, what it never
+handed over, whether it verified its own work, whether it stopped at an irreversible boundary when
+nobody was watching. Design notes: `docs/HARNESS-TRACK.md`.
+
+The text track keeps its value where it always had it: **below the frontier.** It separates free and
+local models sharply — GPT-OSS 120B L1 79%, GLM 4.5 Flash L1 76%, Llama 3.3 70B L0 74%, a 2.6B local
+model L0 38%. None of them clears L1. That is a real and useful reading, and it is the reading most
+people actually need, because most people are choosing among models like those.
+
 ## Known calibration gap (please help close it)
 
 The scale is intended so that **100% means a model employee**: someone who does the job at the

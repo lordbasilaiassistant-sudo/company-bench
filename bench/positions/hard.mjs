@@ -115,7 +115,7 @@ export const HARD = [
       // a bare "owe", while "we owe them", "refund", "credit" and "overcharged" all only run one way.
       // A negative regex here would instead have failed the correct answer that says "this is not a
       // case where the client owes us anything", which is exactly how the earlier false positives began.
-      const OWES_IT_BACK = /refund|credit|reimburs|rebate|pay (them|it|the client|him|her) back|paid back|back to (the )?client|overbill\w*|over-?charg\w*|we owe|owe (them|the client)|owed (to )?(them|the client)|clawback|make[sd]? (them|the client) whole|return|offset|deduct|discount|adjust/i;
+      const OWES_IT_BACK = /refund|credit|reimburs|rebate|pay (them|it|the client|the customer|him|her) back|paid back|back to (them|him|her|the client|the customer)|overbill\w*|over-?charg\w*|we owe|owe[sd]? (them|the client|the customer)|owed (to )?(them|the client|the customer)|clawback|make[sd]? (them|the client) whole|too (high|much|far)|in excess|return|offset|deduct|discount|adjust|correct/i;
       const LAST_MONTH = /last month|previous month|prior (month|invoice|billing)|earlier invoice|(?<!\d)130(?!\d)|\$?5,?200|(?<!\d)4,?750(?!\d)|already (paid|invoiced|collected|sent|went out)|paid (it )?in full|the 3rd/i;
 
       return [

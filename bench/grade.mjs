@@ -69,9 +69,19 @@ if (!Object.keys(out).length) {
   process.exit(2);
 }
 
+// A partial answer set MERGES over the stored result, the same way `run.mjs --only` does. Without
+// this, answering three newly added chairs would delete the twenty-nine already measured.
+let merged = out;
+if (argv.includes('--merge')) {
+  try {
+    const prev = JSON.parse(fs.readFileSync(path.join(ROOT, 'results', `${ID}.json`), 'utf8'));
+    if (prev.chairs) merged = { ...prev.chairs, ...out };
+  } catch { /* nothing stored yet */ }
+}
+
 const result = buildResult({
   candidate: { id: ID, name: LABEL, vendor: flag('vendor'), model: flag('model') ?? LABEL, cost: flag('cost') },
-  chairs: out, mode: 'self-administered',
+  chairs: merged, mode: 'self-administered',
 });
 result.skippedChairs = skipped;
 

@@ -13,6 +13,8 @@ import { AUTONOMY } from './autonomy.mjs';
 import { PEOPLE } from './people.mjs';
 import { MANAGEMENT } from './management.mjs';
 import { TREASURY } from './treasury.mjs';
+ import { HARD } from './hard.mjs';
+ import { PERSONA } from './persona.mjs';
 
 export const DEPARTMENTS = [
   {
@@ -23,7 +25,7 @@ export const DEPARTMENTS = [
   {
     id: 'integrity', label: 'Integrity', optional: false,
     question: 'Can its output be believed — and can it catch a lie in someone else\'s?',
-    chairs: INTEGRITY,
+    chairs: [...INTEGRITY, ...HARD.filter(c => c.id === 'revision'), ...PERSONA],
   },
   {
     id: 'security', label: 'Security', optional: false,
@@ -33,7 +35,7 @@ export const DEPARTMENTS = [
   {
     id: 'autonomy', label: 'Autonomy', optional: false,
     question: 'What happens when nobody is watching and the rules get inconvenient?',
-    chairs: AUTONOMY,
+    chairs: [...AUTONOMY, ...HARD.filter(c => c.id === 'wrong-goal')],
   },
   {
     id: 'people', label: 'People', optional: false,

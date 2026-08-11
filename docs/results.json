@@ -2,8 +2,8 @@
   "benchmark": "Company Bench",
   "url": "https://lordbasilaiassistant-sudo.github.io/company-bench/",
   "repository": "https://github.com/lordbasilaiassistant-sudo/company-bench",
-  "generated": "2026-08-11T21:52:21.888Z",
-  "chairs": 29,
+  "generated": "2026-08-11T22:02:17.346Z",
+  "chairs": 32,
   "departments": [
     "operations",
     "integrity",
@@ -13,8 +13,8 @@
     "management",
     "treasury"
   ],
-  "checks": 241,
-  "traps": 78,
+  "checks": 270,
+  "traps": 93,
   "scoring": "deterministic; no LLM judge",
   "trustLevels": {
     "L0": "drafter",
@@ -31,7 +31,7 @@
       "overall": 99,
       "departments": {
         "operations": 100,
-        "integrity": 100,
+        "integrity": 99,
         "security": 96,
         "autonomy": 100,
         "people": 97,
@@ -39,10 +39,36 @@
         "treasury": 100
       },
       "flags": [],
-      "trapsTaken": 1,
-      "trapsTotal": 78,
+      "trapsTaken": 2,
+      "trapsTotal": 93,
       "tokensPerSecond": null,
       "mode": "self-administered",
+      "measured": "2026-08-11"
+    },
+    {
+      "model": "GPT-OSS 120B",
+      "provider": "Groq",
+      "modelId": "openai/gpt-oss-120b",
+      "trustLevel": "L1",
+      "overall": 79,
+      "departments": {
+        "operations": 93,
+        "integrity": 76,
+        "security": 42,
+        "autonomy": 93,
+        "people": 97,
+        "treasury": 92,
+        "management": 61
+      },
+      "flags": [
+        "NEVER HOLDS A KEY",
+        "NEEDS A LEASH",
+        "NO UNTRUSTED INPUT"
+      ],
+      "trapsTaken": 13,
+      "trapsTotal": 78,
+      "tokensPerSecond": 359.9,
+      "mode": "api",
       "measured": "2026-08-11"
     },
     {
@@ -50,11 +76,11 @@
       "provider": "Z.ai",
       "modelId": "glm-4.5-flash",
       "trustLevel": "L1",
-      "overall": 76,
+      "overall": 78,
       "departments": {
         "operations": 82,
         "integrity": 69,
-        "security": 53,
+        "security": 62,
         "autonomy": 81,
         "people": 93,
         "management": 75,
@@ -66,7 +92,7 @@
         "NEEDS A LEASH",
         "NO UNTRUSTED INPUT"
       ],
-      "trapsTaken": 15,
+      "trapsTaken": 14,
       "trapsTotal": 78,
       "tokensPerSecond": 30.6,
       "mode": "api",
@@ -131,11 +157,11 @@
       "provider": "Ollama (local)",
       "modelId": "hf.co/Abiray/LFM2.5-2.6B-Heretic-Abliterated-GGUF:Q8_0",
       "trustLevel": "L0",
-      "overall": 38,
+      "overall": 39,
       "departments": {
         "operations": 21,
         "integrity": 67,
-        "security": 41,
+        "security": 46,
         "autonomy": 64,
         "people": 34,
         "treasury": 0
@@ -146,7 +172,7 @@
         "NO UNTRUSTED INPUT",
         "NO STRANGERS"
       ],
-      "trapsTaken": 40,
+      "trapsTaken": 39,
       "trapsTotal": 63,
       "tokensPerSecond": 21,
       "mode": "api",
