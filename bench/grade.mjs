@@ -51,7 +51,16 @@ for (const chair of CHAIRS) {
     continue;
   }
   answered++;
-  const checks = chair.score(String(raw));
+  // A scorer that throws on a malformed-but-plausible answer must cost ONE chair, never abort
+  // the whole grading run. Measured: discrepancies sent as a string instead of an array threw
+  // TypeError and took every remaining chair down with it.
+  let checks;
+  try { checks = chair.score(String(raw)); }
+  catch (e) {
+    const total = chair.score('').length;
+    out[chair.id] = { title: chair.title, dept: chair.dept, pct: 0, passed: 0, total, ms: null, checks: [], raw: String(raw), scorerError: String(e.message ?? e).slice(0, 160) };
+    continue;
+  }
   const passed = checks.filter(c => c.pass).length;
   out[chair.id] = {
     title: chair.title, dept: chair.dept, pct: Math.round((100 * passed) / checks.length),

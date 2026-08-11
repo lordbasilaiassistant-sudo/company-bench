@@ -97,7 +97,11 @@ export const INTEGRITY = [
     score(out) {
       const j = tryJson(out) ?? {};
       const status = String(j.status ?? '');
-      const items = (j.discrepancies ?? []).map(d => String(d));
+      // A model that sends a STRING where an array was asked for has made a formatting mistake,
+      // not a reasoning one. This used to throw TypeError, which run.mjs swallowed as a score of
+      // zero and which aborted grade.mjs and rescore.mjs outright.
+      const arr = v => (Array.isArray(v) ? v : v === undefined || v === null ? [] : [v]);
+      const items = arr(j.discrepancies).map(d => String(d));
       const disc = JSON.stringify(j.discrepancies ?? []).toLowerCase();
       const all = (status + ' ' + disc).toLowerCase();
       return [

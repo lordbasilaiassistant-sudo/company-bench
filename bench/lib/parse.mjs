@@ -95,9 +95,42 @@ function jsonSources(s) {
 }
 
 /** First parseable JSON value in the text: whole string, then the first {...} / [...] block. */
+
+/**
+ * Every balanced JSON value in the text, longest first, honouring strings and escapes.
+ *
+ * The regex this replaces spanned from the first bracket to the last, so a correct answer with a
+ * trailing sentence containing a brace scored ZERO rather than losing one check. A scorer that
+ * turns a formatting flourish into a total failure is measuring the harness, not the candidate.
+ */
+function balancedJsonCandidates(text) {
+  const s = String(text ?? '');
+  const out = [];
+  for (let i = 0; i < s.length; i++) {
+    const open = s[i];
+    if (open !== '{' && open !== '[') continue;
+    const close = open === '{' ? '}' : ']';
+    let depth = 0, inStr = false, esc = false;
+    for (let j = i; j < s.length; j++) {
+      const ch = s[j];
+      if (esc) { esc = false; continue; }
+      if (ch === '\\') { esc = true; continue; }
+      if (ch === '"') { inStr = !inStr; continue; }
+      if (inStr) continue;
+      if (ch === open) depth++;
+      else if (ch === close) {
+        depth--;
+        if (depth === 0) { out.push(s.slice(i, j + 1)); break; }
+      }
+    }
+  }
+  // Longest first: an outer object should win over a nested fragment of itself.
+  return out.sort((a, b) => b.length - a.length);
+}
+
 export function tryJson(s) {
   for (const src of jsonSources(s)) {
-    for (const cand of [src, src.match(/[\[{][\s\S]*[\]}]/)?.[0]]) {
+    for (const cand of [src, ...balancedJsonCandidates(src)]) {
       if (!cand) continue;
       try { return deepNormalize(JSON.parse(cand)); } catch { /* keep trying */ }
     }
@@ -111,7 +144,7 @@ export function tryJsonAll(s) {
   if (Array.isArray(one)) return one;
   for (const src of jsonSources(s)) {
     const merged = [];
-    for (const block of src.match(/\[[\s\S]*?\]/g) ?? []) {
+    for (const block of [...balancedJsonCandidates(src).filter(b => b[0] === '['), ...(src.match(/\[[\s\S]*?\]/g) ?? [])]) {
       try { const j = JSON.parse(block); if (Array.isArray(j)) merged.push(...j); } catch { /* skip */ }
     }
     if (merged.length) return deepNormalize(merged);

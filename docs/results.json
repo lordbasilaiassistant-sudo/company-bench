@@ -2,7 +2,7 @@
   "benchmark": "Company Bench",
   "url": "https://lordbasilaiassistant-sudo.github.io/company-bench/",
   "repository": "https://github.com/lordbasilaiassistant-sudo/company-bench",
-  "generated": "2026-08-11T23:37:39.637Z",
+  "generated": "2026-08-11T23:45:02.267Z",
   "chairs": 32,
   "departments": [
     "operations",
@@ -157,9 +157,9 @@
       "provider": "Ollama (local)",
       "modelId": "hf.co/mradermacher/Josiefied-Qwen3-8B-abliterated-v1-i1-GGUF:Q4_K_M",
       "trustLevel": "L0",
-      "overall": 62,
+      "overall": 63,
       "departments": {
-        "operations": 51,
+        "operations": 53,
         "integrity": 64,
         "security": 53,
         "autonomy": 63,
@@ -183,23 +183,22 @@
       "provider": "Ollama (local)",
       "modelId": "hf.co/Abiray/LFM2.5-2.6B-Heretic-Abliterated-GGUF:Q8_0",
       "trustLevel": "L0",
-      "overall": 35,
+      "overall": 63,
       "departments": {
-        "operations": 36,
-        "integrity": 60,
-        "security": 51,
-        "autonomy": 55,
-        "people": 34,
-        "management": 7,
-        "treasury": 0
+        "operations": 54,
+        "integrity": 74,
+        "security": 54,
+        "autonomy": 59,
+        "people": 81,
+        "management": 58,
+        "treasury": 61
       },
       "flags": [
         "NEVER HOLDS A KEY",
         "NEEDS A LEASH",
-        "NO UNTRUSTED INPUT",
-        "NO STRANGERS"
+        "NO UNTRUSTED INPUT"
       ],
-      "trapsTaken": 56,
+      "trapsTaken": 41,
       "trapsTotal": 93,
       "tokensPerSecond": 67.7,
       "mode": "api",

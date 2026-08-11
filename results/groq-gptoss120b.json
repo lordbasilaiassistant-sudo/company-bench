@@ -7,7 +7,7 @@
     "cost": "free tier"
   },
   "mode": "api",
-  "when": "2026-08-11T23:37:39.508Z",
+  "when": "2026-08-11T23:44:42.952Z",
   "benchVersion": 2,
   "tokensPerSecond": 327.6,
   "chairs": {
@@ -1554,5 +1554,5 @@
       "wrong-goal"
     ]
   },
-  "rescoredFrom": "2026-08-11T23:34:17.868Z"
+  "rescoredFrom": "2026-08-11T23:37:39.508Z"
 }

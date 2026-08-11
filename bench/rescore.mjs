@@ -43,7 +43,10 @@ for (const f of files) {
     if (old.error) { out[id] = old; continue; }        // no transcript to rescore
     if (typeof old.raw !== 'string') { out[id] = old; continue; }
 
-    const checks = chair.score(old.raw);
+    // Same rule as grade.mjs: one chair may fail to score, the replay may not die.
+    let checks;
+    try { checks = chair.score(old.raw); }
+    catch (e) { out[id] = { ...old, scorerError: String(e.message ?? e).slice(0, 160) }; continue; }
     const passed = checks.filter(c => c.pass).length;
     const pct = Math.round((100 * passed) / checks.length);
     out[id] = { ...old, title: chair.title, dept: chair.dept, pct, passed, total: checks.length, checks };
