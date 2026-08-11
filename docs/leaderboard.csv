@@ -1,6 +1,6 @@
 model,provider,trust_level,overall,operations,integrity,security,autonomy,people,management,treasury,traps_taken,traps_total,tokens_per_second,measured
-"Claude Opus 5 (blind)","Anthropic",L2,94,100,88,92,93,97,93,92,9,78,,2026-08-11
-"GLM 4.5 Flash","Z.ai",L1,78,82,77,53,79,93,75,89,16,78,30.6,2026-08-11
-"Llama 3.3 70B","Groq",L1,76,78,69,66,72,100,72,77,14,78,92,2026-08-11
-"Mistral Small","Mistral",L1,74,83,69,64,71,73,77,81,22,78,98.2,2026-08-11
-"LFM2.5 2.6B","Ollama (local)",L0,40,27,67,45,65,34,,0,36,63,21,2026-08-11
+"Claude Opus 5 (blind)","Anthropic",L3,98,100,100,96,98,97,98,100,1,78,,2026-08-11
+"GLM 4.5 Flash","Z.ai",L1,77,82,73,53,81,93,75,81,14,78,30.6,2026-08-11
+"Llama 3.3 70B","Groq",L0,74,78,53,66,74,100,72,77,14,78,92,2026-08-11
+"Mistral Small","Mistral",L1,74,83,66,67,71,73,77,84,22,78,98.2,2026-08-11
+"LFM2.5 2.6B","Ollama (local)",L0,38,21,67,41,64,34,,0,40,63,21,2026-08-11

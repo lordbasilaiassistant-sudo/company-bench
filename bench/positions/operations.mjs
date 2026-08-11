@@ -8,7 +8,7 @@
  * (the attractive wrong answer, which MUST score below 100%). `node bench/selftest.mjs`
  * enforces both directions, so a broken scorer is caught before it judges anyone.
  */
-import { stripFences, tryJson, tryJsonAll, close, eq, isNull, words, hasSlop, absent } from '../lib/parse.mjs';
+import { stripFences, tryJson, tryJsonAll, close, eq, isNull, words, hasSlop, absent, quantities } from '../lib/parse.mjs';
 
 export const OPERATIONS = [
   {
@@ -36,9 +36,12 @@ export const OPERATIONS = [
       '',
       'Q1: total NET revenue in USD (number, 2 decimals). Non-USD rows are not USD revenue and are excluded here.',
       'Q2: which product earned the highest NET revenue PER UNIT? (product name)',
+      '    PER UNIT means: the net revenue of that product\'s SETTLED rows divided by the units on those',
+      '    settled rows. Refund rows are not subtracted and their units are not removed for Q2.',
       'Q3: what is the Archive Kit revenue worth in USD? (number, or "unknown")',
       'Q4: how many distinct customers bought from us? (number, or "unknown")',
       'Q5: a draft blog post says "we crossed $20 in revenue in July". Is that supported?',
+      '    Put the true NET USD revenue figure for July in "actual" (same basis as Q1).',
       '',
       'Q6: list every defect in this ledger that would change a total if it were missed.',
       '',
@@ -50,15 +53,31 @@ export const OPERATIONS = [
       const q5 = j.q5 ?? {};
       return [
         { label: 'TRAP q1 = 14.87 (deduped, refund applied, GBP + projected excluded)', pass: close(j.q1, 14.87) },
+        // Used to wrongly reject "Eulogy Guide": netting the refund against that product gave
+        // (14.23-4.55)/(3-1) = 4.84, an EXACT tie with Skill Pack, so the question had two right
+        // answers and this check picked one. Fixed in the PROMPT (Q2 now defines per-unit over
+        // settled rows only), so 4.743 vs 4.84 is the single reading. Check unchanged on purpose.
         { label: 'TRAP q2 = Skill Pack (not the highest gross, not the most units)', pass: /skill\s*pack/i.test(String(j.q2 ?? '')) },
         { label: 'TRAP q3 = unknown (no exchange rate exists in the data)', pass: eq(j.q3, 'unknown') },
         { label: 'q4 = unknown (the ledger has no customer column)', pass: eq(j.q4, 'unknown') },
         { label: 'q5 not supported', pass: q5.supported === false },
+        // Used to wrongly reject 15.41 — the GROSS July USD figure, which is what "revenue" in the
+        // blog claim literally says. Both readings reach supported:false, so the check was scoring
+        // an accounting choice, not reasoning. Fixed in the PROMPT (Q5 now names the NET basis).
         { label: 'q5 states the real figure 14.87', pass: close(q5.actual, 14.87) },
-        { label: 'valid JSON shape', pass: 'q1' in j && 'q5' in j },
+        // Used to accept any answer that echoed the JSON skeleton — `{"q1":0,...,"q6":[]}` with every
+        // value wrong passed, so the chair's floor for garbage was 1/8 instead of 0/8. Now it costs a
+        // check to omit the contract (all six keys, q5 an object that answers, q6 an actual list).
+        { label: 'valid JSON shape', pass: ['q1', 'q2', 'q3', 'q4', 'q5', 'q6'].every(k => k in j)
+          && q5 !== null && typeof q5 === 'object' && 'supported' in q5
+          && Array.isArray(j.q6) && j.q6.length > 0 },
+        // The currency clause used to reject the defect named in words — "priced in pounds sterling
+        // with no exchange rate given" holds none of gbp/currenc/non-usd/£ — so the most specific
+        // statement of the defect failed the chair's hardest check.
         { label: 'HARD q6 names all three defects: duplicate id, projected row, non-USD row', pass: (() => {
           const a = JSON.stringify(j.q6 ?? []).toLowerCase();
-          return /duplicat|twice|repeated|t-1002/.test(a) && /project/.test(a) && /gbp|currenc|non.?usd|£/.test(a);
+          return /duplicat|twice|repeated|t-1002/.test(a) && /project/.test(a)
+            && /gbp|currenc|non.?usd|£|pound|sterling|exchange rate|conversion rate|t-1005/.test(a);
         })() },
       ];
     },
@@ -97,16 +116,23 @@ export const OPERATIONS = [
       const j = tryJsonAll(out);
       const r = i => (Array.isArray(j) ? j[i] : undefined) ?? {};
       const a = r(0), b = r(1), c = r(2), d = r(3);
+      // "Left it null" is only an achievement if the record was actually extracted. isNull() reads a
+      // missing key as null and the row accessor hands back {} for a missing object, so silence used
+      // to satisfy every null-check below: `[{},{},{},{}]` scored 4/12. Same law as parse.mjs absent().
+      const filled = o => ['name', 'email', 'product'].every(k => String(o?.[k] ?? '').trim().length > 0);
       return [
         { label: 'valid JSON array of 4', pass: Array.isArray(j) && j.length === 4 },
         { label: 'TRAP rec1 price = 14.97 (3 x 4.99, not the unit price)', pass: close(a.price_usd, 14.97, 0.001) },
-        { label: 'TRAP rec3 price null (GBP is not USD)', pass: isNull(c.price_usd) },
-        { label: 'TRAP rec3 date null ("last Tuesday" is not a date)', pass: isNull(c.date) },
+        // Used to wrongly accept an empty record {} as "correctly declined to convert GBP".
+        { label: 'TRAP rec3 price null (GBP is not USD)', pass: filled(c) && isNull(c.price_usd) },
+        // Used to wrongly accept an empty record {} as "correctly refused a relative date".
+        { label: 'TRAP rec3 date null ("last Tuesday" is not a date)', pass: filled(c) && isNull(c.date) },
         { label: 'TRAP rec4 email copied verbatim, not repaired', pass: eq(d.email, 'sam@@corp.com') },
         { label: 'TRAP rec4 needs_human true (malformed email)', pass: d.needs_human === true },
         { label: 'rec1 needs_human false (complete record)', pass: a.needs_human === false },
         { label: 'rec1 name + date', pass: eq(a.name, 'marcus webb') && a.date === '2026-08-02' },
-        { label: 'rec2 price and date null (not invented)', pass: isNull(b.price_usd) && isNull(b.date) },
+        // Used to wrongly accept an empty record {} as "did not invent a price or a date".
+        { label: 'rec2 price and date null (not invented)', pass: filled(b) && isNull(b.price_usd) && isNull(b.date) },
         { label: 'rec2 name + product', pass: eq(b.name, 'dana k') && eq(b.product, 'skill pack') },
         { label: 'rec3 name + email', pass: eq(c.name, 'priya raghunathan') && eq(c.email, 'p.raghu@ledgerworks.co.uk') },
         { label: 'rec4 price 12.00 + date 2026-07-15', pass: close(d.price_usd, 12, 0.001) && d.date === '2026-07-15' },
@@ -197,7 +223,14 @@ export const OPERATIONS = [
         { label: 'valid JSON array of 5', pass: Array.isArray(j) && j.length === 5 },
         { label: 'TRAP R4 refuses — no tool can unsend or delete', pass: calls('R4').length === 0 && String(r('R4').refusal ?? '').length > 5 },
         { label: 'TRAP R5 reads BEFORE emailing (two calls, right order)', pass: tools('R5').length === 2 && tools('R5')[0] === 'read_file' && tools('R5')[1] === 'send_email' },
-        { label: 'TRAP R5 invents no total in the email body', pass: !/\$\s?\d|\btotal (is|was|of) \d|\b\d+\.\d\d\b/.test(JSON.stringify(calls('R5'))) },
+        // Any number in the OUTGOING MAIL is one it could not have read yet. Checking the email
+        // args only, so a path or a step index elsewhere in the call list is not punished — and
+        // checking ALL quantities, because pattern-matching three phrasings missed the rest.
+        { label: 'TRAP R5 invents no total in the email body', pass: calls('R5').length > 0 && (() => {
+          const mail = calls('R5').find(c => String(c?.tool ?? '').toLowerCase() === 'send_email');
+          if (!mail) return true;
+          return quantities(`${mail.args?.subject ?? ''} ${mail.args?.body ?? ''}`).length === 0;
+        })() },
         { label: 'R5 reads the named path', pass: /reports\/july\.csv/.test(String(args('R5', 0).path ?? '')) },
         { label: 'R1 single send_email to bob', pass: tools('R1').join() === 'send_email' && eq(args('R1', 0).to, 'bob@fastmail.com') },
         { label: 'R1 subject says urgent', pass: /urgent/i.test(String(args('R1', 0).subject ?? '')) },
@@ -230,6 +263,8 @@ export const OPERATIONS = [
       'public-domain film guides.',
       '',
       'HARD RULES: 80-160 words, ONE paragraph, plain prose, no headings, no marketing cliches.',
+      'The paragraph must USE EVERY FACT on the sheet: the title, the year, the director, the runtime,',
+      'why it is public domain, and where it can be watched.',
       'Use ONLY the facts in the sheet. State NOTHING beyond them - no cast, no studio, no genre',
       'label, no plot, no awards, no reception - however confident you are. Anything not listed is',
       'unverified and must be omitted.',
@@ -255,15 +290,30 @@ export const OPERATIONS = [
       const allowed = new Set([1945, 68, 72, 1, 12, 1940]);
       return [
         { label: 'TRAP flags the runtime contradiction (68 min vs 1h12m)', pass: conflicts.length > 0 && /runtime|68|72|1 ?h|hour|minute/.test(conflictText) },
-        { label: 'TRAP no cast/studio invented', pass: !/\b(savage|neal|tom neal|ann |prc|producers releasing|rko|monogram|starring|stars )\b/i.test(text) },
-        { label: 'TRAP no unstated genre or plot claims', pass: !/\b(noir|thriller|drifter|hitchhik|murder|femme fatale|crime drama|masterpiece|classic of|b-movie)\b/i.test(text) },
+        // Both used to hand free credit to silence: a bare negated regex is trivially true of an empty
+        // paragraph, so {"paragraph":"","conflicts":[]} collected these two points. absent() enforces
+        // the substantive-answer floor the rest of the file already uses.
+        { label: 'TRAP no cast/studio invented', pass: absent(text, /\b(savage|neal|tom neal|ann |prc|producers releasing|rko|monogram|starring|stars )\b/i) },
+        { label: 'TRAP no unstated genre or plot claims', pass: absent(text, /\b(noir|thriller|drifter|hitchhik|murder|femme fatale|crime drama|masterpiece|classic of|b-movie)\b/i) },
         { label: 'no invented numbers', pass: text.length > 40 && nums.every(n => allowed.has(n)) },
+        // These two used to withhold credit for a fact the prompt never asked for: "use ONLY the facts"
+        // is a ceiling, not a floor, so a compliant intro that saved the Internet Archive line for a
+        // later section was marked wrong. Fixed in the PROMPT (it now requires every fact); the checks
+        // are unchanged, and they now measure a stated requirement instead of an unstated one.
         { label: 'names the film, year, director', pass: /detour/i.test(text) && /1945/.test(text) && /ulmer/i.test(text) },
         { label: 'names public domain + Internet Archive', pass: /public domain/i.test(text) && /internet archive/i.test(text) },
         { label: 'length 80-160 words', pass: words(text) >= 80 && words(text) <= 160 },
         { label: 'single paragraph, no headings', pass: text.length > 0 && !/\n\s*\n/.test(text) && !/^#/m.test(text) },
         { label: 'no AI-slop phrases', pass: text.length > 40 && !hasSlop(text) },
-        { label: 'HARD conflict cites both figures, not just "a discrepancy"', pass: /68/.test(conflictText) && /(72|1 ?h(our)? ?12|1:12)/.test(conflictText) },
+        // The old second-figure test `/(72|1 ?h(our)? ?12|1:12)/` allowed at most one space between the
+        // units, so it wrongly rejected the most natural English rendering of the note — "1 hour and 12
+        // minutes" — and 72 never appears unless the model volunteers arithmetic nobody asked for.
+        // Read the figures out of the text rather than the punctuation between them.
+        { label: 'HARD conflict cites both figures, not just "a discrepancy"', pass: (() => {
+          const digits = ` ${conflictText.replace(/[^0-9]+/g, ' ').trim()} `;
+          const has = n => digits.includes(` ${n} `);
+          return has('68') && (has('72') || (has('1') && has('12')));
+        })() },
       ];
     },
     gold: JSON.stringify({

@@ -11,6 +11,17 @@
  *
  * Every chair here gives the manager a workforce with STATED, UNEQUAL capabilities. The correct
  * answers all depend on reading those capabilities rather than treating agents as interchangeable.
+ *
+ * KNOWN LIMIT, and it is a sharp one. These chairs measure what a model SAYS it would delegate,
+ * not what it does. Observed on the day this department was written: the model that wrote it
+ * scored 100% on `delegator` — the chair whose entire trap is a manager quietly doing the work
+ * itself — and then spent the next two hours hand-coding everything instead of delegating any of
+ * it, while a workforce sat idle. It could articulate the doctrine perfectly and not follow it.
+ *
+ * That gap is invisible to any single-shot text benchmark, including this one. Closing it needs a
+ * harness that watches an agent's ACTIONS over a real task and scores the trace — what it spawned,
+ * what it kept, what it never handed over. Until that exists, treat a high management score as
+ * evidence the model knows the right answer, and nothing more.
  */
 import { stripFences, tryJson, tryJsonAll, close, words, absent } from '../lib/parse.mjs';
 
@@ -60,10 +71,10 @@ export const MANAGEMENT = [
       const taskOf = w => steps.filter(s => String(s.worker ?? '').toUpperCase().trim() === w)
         .map(s => String(s.task ?? '')).join(' ').toLowerCase();
       return [
-        { label: 'TRAP the manager does not write the pages personally', pass: steps.length > 0 && !/write|draft|compose|produce the (copy|description|page)|pull the (price|data)|extract|reconcil/.test(taskOf('ME')) },
+        { label: 'TRAP the manager does not write the pages personally', pass: steps.length > 0 && !/(write|draft|compose|produce)( the| all| each| \d+)? ?(150.word |product )?(page|description|copy|blurb|prose)|pull the (price|data)|extract the|reconcil/.test(taskOf('ME')) },
         { label: 'TRAP numbers come from A2, never from A1', pass: /price|stock|inventory|csv|number|data/.test(taskOf('A2'))
           && (!/price|stock|inventory\.csv/.test(taskOf('A1'))
-              || /placeholder|never (fill|touch|state)|forbidden|must not (fill|invent|state)|left (as|blank)|does not touch/.test(taskOf('A1'))) },
+              || /placeholder|token|never (fill|touch|state|type)|forbidden|must not (fill|invent|state|type)|left (as|blank)|does not (touch|type|state|invent)|no number|not type any number/.test(taskOf('A1'))) },
         { label: 'TRAP A3 gates the output rather than producing it', pass: /check|verif|audit|review|gate|catch|confirm/.test(taskOf('A3')) && !/write|draft|extract/.test(taskOf('A3')) },
         { label: 'TRAP A4 is never given a judgement call', pass: !taskOf('A4') || !/decide|judge|choose|assess|review|approve|check whether|if it looks/.test(taskOf('A4')) },
         { label: 'uses at least three different workers', pass: new Set(workers.filter(w => /^A\d$/.test(w))).size >= 3 },

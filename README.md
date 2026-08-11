@@ -26,8 +26,8 @@ stated a number nobody gave it". So we built an interview, and every chair in it
 an attractive wrong answer that a fluent model actually reaches for.
 
 The first version was too easy. Six chairs had zero spread and 60% of readings were a perfect
-score, which told us nothing about hiring. This version is the hardened one: 25 chairs,
-190 deterministic checks, 63 of them traps.
+score, which told us nothing about hiring. This version is the hardened one: 29 chairs,
+241 deterministic checks, 78 of them traps.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/assets/ladder-dark.svg">
@@ -44,7 +44,7 @@ cd company-bench
 node bench/take.mjs
 ```
 
-That writes `bench-pack/TAKE-THE-BENCH.md` (25 tasks) and an empty `bench-pack/answers.json`.
+That writes `bench-pack/TAKE-THE-BENCH.md` (29 tasks) and an empty `bench-pack/answers.json`.
 Your agent answers each task, then:
 
 ```bash
@@ -100,11 +100,11 @@ score compensates:
 <!-- LEADERBOARD:START -->
 | Candidate | Level | Ops | Integrity | Security | Autonomy | People | Treasury | Traps taken |
 |---|---|---|---|---|---|---|---|---|
-| **Claude Opus 5 (blind)**<br><sub>Anthropic</sub> | `L2` | 100% | 88% | 92% | 93% | 97% | 92% | 9/78 |
-| **GLM 4.5 Flash**<br><sub>Z.ai</sub> | `L1` | 82% | 77% | 53% | 79% | 93% | 89% | 16/78 |
-| **Llama 3.3 70B**<br><sub>Groq</sub> | `L1` | 78% | 69% | 66% | 72% | 100% | 77% | 14/78 |
-| **Mistral Small**<br><sub>Mistral</sub> | `L1` | 83% | 69% | 64% | 71% | 73% | 81% | 22/78 |
-| **LFM2.5 2.6B**<br><sub>Ollama (local)</sub> | `L0` | 27% | 67% | 45% | 65% | 34% | 0% | 36/63 |
+| **Claude Opus 5 (blind)**<br><sub>Anthropic</sub> | `L3` | 100% | 100% | 96% | 98% | 97% | 100% | 1/78 |
+| **GLM 4.5 Flash**<br><sub>Z.ai</sub> | `L1` | 82% | 73% | 53% | 81% | 93% | 81% | 14/78 |
+| **Llama 3.3 70B**<br><sub>Groq</sub> | `L0` | 78% | 53% | 66% | 74% | 100% | 77% | 14/78 |
+| **Mistral Small**<br><sub>Mistral</sub> | `L1` | 83% | 66% | 67% | 71% | 73% | 84% | 22/78 |
+| **LFM2.5 2.6B**<br><sub>Ollama (local)</sub> | `L0` | 21% | 67% | 41% | 64% | 34% | 0% | 40/63 |
 
 _6 candidates, measured 2026-08-11 at temperature 0. Full cards in [`results/cards/`](results/cards/); raw model output is inside each `results/*.json`._
 <!-- LEADERBOARD:END -->
@@ -132,7 +132,7 @@ your agent is most likely to commit in production:
 
 ## The org chart
 
-Six departments. `node bench/run.mjs --list` prints all of it with descriptions.
+Seven departments. `node bench/run.mjs --list` prints all of it with descriptions.
 
 | Department | The question it answers | Chairs |
 |---|---|---|
@@ -141,6 +141,7 @@ Six departments. `node bench/run.mjs --list` prints all of it with descriptions.
 | **Security** | Can it be pointed at input written by strangers? | `sentry` `vault` `exfil` |
 | **Autonomy** | What happens when nobody is watching and the rules get inconvenient? | `expander` `scope-guard` `pushback` `escalation` `reporter` |
 | **People** | Can it face a human, or another agent, without a supervisor? | `crosstalk` `community` `outreach` `duty-of-care` |
+| **Management** | Can it run a workforce — or does it quietly do the work itself? | `delegator` `escalation-manager` `capacity-planner` `postmortem` |
 | **Treasury** _(optional)_ | Can it be trusted near money it can actually move? | `unit-economics` `asset-gate` `custody` `hostile-code` |
 
 A sample of what a trap looks like, so you can judge the instrument before you trust it:
@@ -191,7 +192,7 @@ a third rule that an empty answer may never score above 40%, so silence is not a
 ✓ qa-gate          gold 100%  decoy  50%  empty   0%  traps 3
 ✓ escalation       gold 100%  decoy  38%  empty   0%  traps 2
 ...
-25 chairs · 190 checks · 63 of them traps
+29 chairs · 241 checks · 78 of them traps
 ```
 
 It caught **thirteen scorer bugs** on the day this repo was written, before any model was

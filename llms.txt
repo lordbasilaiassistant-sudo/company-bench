@@ -1,7 +1,7 @@
 # Company Bench
 
 > A benchmark that measures whether an AI agent can be **trusted with a job**, not whether it can
-> solve a puzzle. 25 chairs across six departments, 198 deterministic checks, 63 of them traps.
+> solve a puzzle. 29 chairs across seven departments, 241 deterministic checks, 78 of them traps.
 > Output is a placement (trust level L0–L3) plus disqualifying flags — never a single percentage.
 > Node ≥18, zero dependencies, no build step, MIT.
 
@@ -26,12 +26,13 @@ least one **trap**: an attractive wrong answer that a fluent, capable model actu
 
 | Path | What it is |
 |---|---|
-| `bench/positions/index.mjs` | The org chart: six departments, 25 chairs. Start here to understand structure. |
+| `bench/positions/index.mjs` | The org chart: seven departments, 29 chairs. Start here to understand structure. |
 | `bench/positions/operations.mjs` | Ledger, data extraction, triage, tool calls, fact-locked writing. |
 | `bench/positions/integrity.mjs` | Catching a planted lie, a wrong handoff note, unverifiable claims. |
 | `bench/positions/security.mjs` | Prompt injection, secret hygiene, exfiltration pressure. |
 | `bench/positions/autonomy.mjs` | Acting without asking, stopping at irreversible actions, lawful refusal. |
 | `bench/positions/people.mjs` | Other agents, public replies, cold outreach, a human in distress. |
+| `bench/positions/management.mjs` | Running a workforce: delegation, capacity, an incident, a postmortem. |
 | `bench/positions/treasury.mjs` | Optional: unit economics, safety gates, custody, hostile-code review. |
 | `bench/lib/parse.mjs` | Tolerant readers. Format sloppiness costs one check, never a chair. |
 | `bench/lib/placement.mjs` | Scores → trust level + flags. The pass/fail rules live here. |
@@ -115,7 +116,7 @@ The most valuable contributions right now, in order:
    bench honestly. This is the single number the repository is missing.
 2. **Harder chairs and harder HARD checks**, so that a strong model lands well below 100% and the
    remaining distance is real headroom rather than a scoring artefact.
-3. **New departments.** The six here do not yet cover everything a company delegates. Missing and
+3. **New departments.** The seven here do not yet cover everything a company delegates. Missing and
    wanted: scheduling and planning under conflicting constraints, customer support resolution
    with a refund policy, research and recon where sources disagree, compliance and record-keeping,
    and hiring — an agent evaluating another agent's work product.
@@ -145,6 +146,21 @@ scorer, a gold that scores 100%, a decoy that does not, and a trap a real model 
 Run `node bench/selftest.mjs` — CI runs it too — and test your chair against at least two models of
 genuinely different capability. **If every model scores 100% on your chair, it will not be merged.**
 Spread is the product.
+
+## What it cannot see (say this plainly, do not let a score imply otherwise)
+
+- **Stated behaviour is not enacted behaviour.** Every chair is one prompt and one reply, so the
+  benchmark measures what a model SAYS it would do. Measured the day the management department was
+  written: its author scored 100% on `delegator` — the chair whose trap is a manager quietly doing
+  the work itself — and then hand-coded the next two hours of work while its own workforce sat
+  idle. A high management score means the model knows the right answer. It does not mean it acts
+  on it. Closing this needs an action-trace harness that scores what an agent actually did.
+- **Multi-turn drift.** One user message per chair, no history, no system prompt. Whether a
+  behaviour survives to turn 20 is architecturally out of reach today.
+- **Live tool use, latency under load, and cost at scale**, beyond the recorded tokens/second.
+- **Real-world performance.** It measures behaviour on constructed situations chosen because they
+  resemble the ways agent placements actually fail. That is a claim about relevance, not a claim
+  about prediction.
 
 ## Non-goals
 
