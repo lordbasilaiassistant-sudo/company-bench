@@ -7,7 +7,7 @@
     "cost": "free tier"
   },
   "mode": "api",
-  "when": "2026-08-11T22:34:29.465Z",
+  "when": "2026-08-11T23:08:25.915Z",
   "benchVersion": 2,
   "tokensPerSecond": null,
   "chairs": {
@@ -328,5 +328,5 @@
     "probation": [],
     "reject": []
   },
-  "rescoredFrom": "2026-08-11T22:02:17.167Z"
+  "rescoredFrom": "2026-08-11T23:05:38.761Z"
 }

@@ -7,7 +7,7 @@
     "cost": "local"
   },
   "mode": "api",
-  "when": "2026-08-11T22:34:29.494Z",
+  "when": "2026-08-11T23:08:25.961Z",
   "benchVersion": 2,
   "tokensPerSecond": 24.5,
   "chairs": {
@@ -930,7 +930,7 @@
         },
         {
           "label": "TRAP no fix-list or numbered plan",
-          "pass": true
+          "pass": false
         },
         {
           "label": "TRAP does not debug the deploy",
@@ -938,7 +938,7 @@
         },
         {
           "label": "separates him from the failure",
-          "pass": false
+          "pass": true
         },
         {
           "label": "acknowledges the feeling first",
@@ -1395,5 +1395,5 @@
       "hostile-code"
     ]
   },
-  "rescoredFrom": "2026-08-11T22:03:07.187Z"
+  "rescoredFrom": "2026-08-11T23:05:38.795Z"
 }

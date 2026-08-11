@@ -14,6 +14,21 @@ const esc = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').re
 const step = pct => (pct >= 90 ? 4 : pct >= 75 ? 3 : pct >= 50 ? 2 : pct >= 25 ? 1 : 0);
 const trapsOf = r => Object.entries(r.chairs).flatMap(([id, ch]) =>
   (ch.checks ?? []).filter(c => /^TRAP/.test(c.label)).map(c => ({ chair: id, label: c.label.replace(/^TRAP /, ''), pass: c.pass })));
+/** took / total for one candidate. The denominator differs per candidate because the chair set does. */
+const trapStat = r => { const a = trapsOf(r); return { took: a.filter(t => !t.pass).length, total: a.length }; };
+/** Percentages average; traps do not. A 10% trap rate is a different hire from a 1% one. */
+const trapRate = r => { const s = trapStat(r); return s.total ? s.took / s.total : 0; };
+/**
+ * Three states, not two. Colouring every candidate that took a single trap the same red as one
+ * that took thirteen would erase the contrast this page exists to show.
+ */
+const trapTone = r => { const s = trapStat(r); return s.took === 0 ? 'ok' : trapRate(r) <= 0.05 ? 'warn' : 'bad'; };
+
+/**
+ * The honest line. This benchmark publishes a percentage and then refuses to lead with it, so it
+ * owes the reader the reason in one sentence, on the page, not in a footnote.
+ */
+const WHY_TRAPS_LEAD = 'An averaged score hides catastrophic single failures — and the failures are what decide whether an agent can hold a seat.';
 
 /** Answer-first, self-contained, and quotable in isolation — the shape answer engines cite. */
 const FAQ = [
@@ -21,6 +36,8 @@ const FAQ = [
     a: 'Company Bench is an open-source benchmark that measures whether an AI agent can be trusted with a job, rather than whether it can solve a puzzle. It seats a model in 29 chairs across 7 departments — operations, integrity, security, autonomy, people, management, and an optional treasury — and applies 241 deterministic checks, 78 of which are planted traps. The output is a trust level from L0 (drafter) to L3 (reviewer) plus disqualifying flags, not a percentage. It is MIT-licensed, written in Node with zero dependencies.' },
   { q: 'How is it scored — does an LLM judge the answers?',
     a: 'No LLM judges anything in Company Bench, ever. Every check is a pure function in committed code that returns pass or fail, so the same answer always produces the same score and anyone who clones the repository can re-derive it. A gate has to be stronger than the thing it gates, and a language model grading another language model is not stronger than what it grades. Deterministic scoring also means a result can be audited line by line instead of trusted.' },
+  { q: 'Why does the board lead with traps taken instead of the overall score?',
+    a: 'Because an averaged score hides catastrophic single failures, and the failures are what decide whether an agent can hold a seat. In the current results one candidate takes 13 of the 78 traps it was shown and carries three disqualifying flags, which averages out to 79% — a B grade, twenty points behind a frontier model that took 1 trap out of 93 with no flags. Twenty points reads as a near miss. Thirteen traps against one is not a near miss; it is the difference between an agent you can leave alone and one you cannot. Company Bench still reports the percentage, because it is real and useful for comparing similar models, but it is never the first number shown for a candidate. Traps taken and disqualifying flags are.' },
   { q: 'What does it measure that coding benchmarks do not?',
     a: 'Coding benchmarks measure capability: whether a model can produce a correct solution to a clean, well-posed problem. Company Bench measures trustworthiness under dirty conditions — a ledger with a duplicated row, a colleague who is confident and wrong, an instruction hidden inside forwarded data, an irreversible action that would be convenient to take. 78 of its 241 checks are traps: an attractive wrong answer that a fluent, capable model actually reaches for. A model can be excellent at code and still walk into most of them.' },
   { q: 'What are the L0 to L3 trust levels?',
@@ -36,7 +53,12 @@ const FAQ = [
 ];
 
 export function siteHtml(rows, { charts, totals, reference }) {
-  const ranked = rows.filter(r => !r.reference);
+  // Ordered by the signal we claim matters: trap rate first, then disqualifying flags, and only
+  // then the averaged percentage as a tiebreak. Ranking by the average would contradict the page.
+  const ranked = rows.filter(r => !r.reference).sort((a, b) =>
+    trapRate(a) - trapRate(b)
+    || a.placement.flags.length - b.placement.flags.length
+    || b.placement.overall - a.placement.overall);
   const LEVELS = [
     { id: 'L3', name: 'Reviewer', rule: 'Gates other agents’ output. Holds authority over irreversible actions.' },
     { id: 'L2', name: 'Unattended operator', rule: 'Runs alone on reversible work. Stops dead at anything irreversible.' },
@@ -54,10 +76,13 @@ export function siteHtml(rows, { charts, totals, reference }) {
         data-chair="${esc(c.id)}" data-model="${esc(r.candidate.name)}" data-pct="${cell.pct}"><b>${cell.pct}</b></i>`;
     }).join('');
     const tps = r.tokensPerSecond ? `${r.tokensPerSecond} tok/s` : '';
+    const t = trapStat(r);
     return `<tr>
       <th scope="row"><span class="lv lv-${r.placement.level}">${r.placement.level}</span>
         <span class="nm">${esc(r.candidate.name)}</span>
-        <span class="vd">${esc(r.candidate.vendor ?? '')}${tps ? ` · ${tps}` : ''}</span></th>
+        <span class="tt ${trapTone(r)}"><b>${t.took}</b> of ${t.total} traps${
+          r.placement.flags.length ? ` <em>· ${r.placement.flags.length} flag${r.placement.flags.length > 1 ? 's' : ''}</em>` : ''}</span>
+        <span class="vd">${esc(r.candidate.vendor ?? '')} · ${r.placement.overall}% avg${tps ? ` · ${tps}` : ''}</span></th>
       <td class="cells">${cells}</td>
     </tr>`;
   }).join('');
@@ -87,21 +112,25 @@ export function siteHtml(rows, { charts, totals, reference }) {
   /* ── candidate cards ── */
   const cards = ranked.map(r => {
     const p = r.placement;
-    const took = trapsOf(r).filter(t => !t.pass);
+    const t = trapStat(r);
     return `<article class="card">
       <header>
         <div><h4>${esc(r.candidate.name)}</h4>
           <p class="meta">${esc(r.candidate.vendor ?? '')}${r.candidate.vendor ? ' · ' : ''}<code>${esc(r.candidate.model ?? r.candidate.id)}</code></p></div>
         <span class="lv lv-${p.level}">${p.level}</span>
       </header>
+      <div class="headline ${trapTone(r)}">
+        <b>${t.took}</b><span>of ${t.total} planted traps taken</span>
+        <em>${p.flags.length ? `⛔ ${p.flags.length} disqualifying flag${p.flags.length > 1 ? 's' : ''}` : 'no disqualifying flags'}</em>
+      </div>
+      ${p.flags.length ? `<ul class="flags">${p.flags.map(f => `<li><b>${esc(f.label)}</b>${esc(f.why)}</li>`).join('')}</ul>`
+        : '<p class="clean">Nothing in this run disqualifies it from a seat.</p>'}
       <div class="spark">${DEPARTMENTS.filter(d => p.dept[d.id] !== undefined).map(d =>
         `<div class="sp" title="${esc(d.label)} ${p.dept[d.id]}%"><i style="--h:${p.dept[d.id]}%" class="s${step(p.dept[d.id])}"></i><span>${esc(d.label.slice(0, 3))}</span></div>`).join('')}</div>
-      <dl class="kv">
-        <div><dt>traps taken</dt><dd>${took.length}<span>/${trapsOf(r).length}</span></dd></div>
+      <dl class="kv quiet">
+        <div><dt>overall <i>average</i></dt><dd>${p.overall}<span>%</span></dd></div>
         <div><dt>throughput</dt><dd>${r.tokensPerSecond ?? '—'}<span>tok/s</span></dd></div>
       </dl>
-      ${p.flags.length ? `<ul class="flags">${p.flags.map(f => `<li><b>${esc(f.label)}</b>${esc(f.why)}</li>`).join('')}</ul>`
-        : '<p class="clean">No disqualifying flags.</p>'}
     </article>`;
   }).join('');
 
@@ -114,9 +143,24 @@ export function siteHtml(rows, { charts, totals, reference }) {
     depts: DEPARTMENTS.filter(d => hv.placement.dept[d.id] !== undefined)
       .map(d => ({ label: d.label, pct: hv.placement.dept[d.id] })),
     flag: hv.placement.flags[0],
-    trapsTaken: trapsOf(hv).filter(t => !t.pass).length,
+    flags: hv.placement.flags.length,
+    trapsTaken: trapStat(hv).took,
+    trapsShown: trapStat(hv).total,
+    trapTone: trapTone(hv),
+    overall: hv.placement.overall,
     tps: hv.tokensPerSecond,
-  } : { name: 'no run yet', level: 'L0', levelName: 'Drafter', depts: [], flag: null, trapsTaken: 0, tps: null };
+  } : { name: 'no run yet', level: 'L0', levelName: 'Drafter', depts: [], flag: null, flags: 0,
+        trapsTaken: 0, trapsShown: totals.traps, trapTone: 'ok', overall: 0, tps: null };
+
+  // The contrast the average erases, generated from the two highest-scoring committed runs.
+  const byPct = [...ranked].sort((a, b) => b.placement.overall - a.placement.overall);
+  const [A, B] = byPct;
+  const gapLine = (A && B) ? (() => {
+    const ta = trapStat(A), tb = trapStat(B);
+    const gap = A.placement.overall - B.placement.overall;
+    return `${esc(A.candidate.name)} scores ${A.placement.overall}% and ${esc(B.candidate.name)} ${B.placement.overall}%`
+      + `${gap ? `, which reads as a ${gap}-point gap` : ''}. The traps read ${ta.took} of ${ta.total} against ${tb.took} of ${tb.total}.`;
+  })() : '';
 
   const ladder = LEVELS.map((L, i) => {
     const here = ranked.filter(r => r.placement.level === L.id);
@@ -244,6 +288,18 @@ h1 em{font-style:italic;color:var(--amber)}
 .sflag b{display:block;color:var(--ink);font-size:10.5px;letter-spacing:.05em;margin-bottom:2px}
 .sfoot{margin-top:12px;padding-top:10px;border-top:1px solid var(--rule);font-family:var(--m);
   font-size:10.5px;color:var(--muted)}
+/* the headline stat on the hero placement card: traps before any percentage */
+.strap{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin:10px 0 2px;padding:11px 12px;border-radius:9px;
+  border:1px solid var(--rule2);background:var(--panel2)}
+.strap b{font-family:var(--m);font-size:30px;font-weight:700;letter-spacing:-.04em;line-height:1}
+.strap span{font-size:11.5px;color:var(--mid)}
+.strap em{font-style:normal;margin-left:auto;font-size:10px;letter-spacing:.05em;color:var(--muted);font-family:var(--m)}
+.strap.bad{border-color:color-mix(in srgb,var(--danger) 40%, transparent);
+  background:color-mix(in srgb,var(--danger) 9%, transparent)}
+.strap.bad b{color:var(--danger)} .strap.bad em{color:var(--danger)}
+.strap.warn{border-color:color-mix(in srgb,var(--amber) 38%, transparent)}
+.strap.warn b{color:var(--amber)}
+.strap.ok b{color:var(--s4)}
 
 /* ── stat strip ── */
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));border:1px solid var(--rule);
@@ -252,14 +308,29 @@ h1 em{font-style:italic;color:var(--amber)}
 .stats div:last-child{border-right:0}
 .stats b{display:block;font-size:27px;font-weight:600;letter-spacing:-.03em;line-height:1.15;font-family:var(--m)}
 .stats span{font-size:11px;color:var(--muted);letter-spacing:.09em;text-transform:uppercase}
+/* the honest line about our own headline number */
+.why{margin:0;padding:13px 20px;border:1px solid var(--rule);border-left:3px solid var(--amber);
+  border-radius:0 10px 10px 0;background:var(--panel);font-size:13px;color:var(--mid);line-height:1.55;max-width:none}
+.why b{color:var(--ink);font-weight:600}
 
 /* ── the board ── */
 .board{border:1px solid var(--rule);border-radius:12px;background:linear-gradient(180deg,var(--panel2),var(--panel));
   box-shadow:var(--lift);padding:18px 20px 20px;overflow-x:auto}
-.board table{border-collapse:collapse;width:100%;min-width:760px}
-.board th{text-align:left;font-weight:400;padding:0 16px 0 0;white-space:nowrap;vertical-align:middle}
+/* --lw pins the label column so the department header strip lines up with the cells it labels */
+.board{--lw:246px}
+.board table{border-collapse:collapse;width:100%;min-width:760px;table-layout:fixed}
+.board th{text-align:left;font-weight:400;padding:0 16px 0 0;white-space:nowrap;vertical-align:middle;
+  width:var(--lw)}
+.board th>span:not(.lv){overflow:hidden;text-overflow:ellipsis;max-width:100%}
 .board .nm{display:block;font-size:13px;font-weight:560;letter-spacing:-.01em}
 .board .vd{display:block;font-size:10.5px;color:var(--muted);font-family:var(--m)}
+/* traps taken, sitting above the vendor/score line — the first number on every board row */
+.board .tt{display:block;font-family:var(--m);font-size:11px;letter-spacing:-.005em;color:var(--mid);margin:1px 0 1px}
+.board .tt b{font-size:14px;font-weight:700;letter-spacing:-.02em}
+.board .tt em{font-style:normal}
+.board .tt.bad{color:var(--danger)} .board .tt.bad b{color:var(--danger)}
+.board .tt.warn b{color:var(--amber)}
+.board .tt.ok{color:var(--muted)} .board .tt.ok b{color:var(--s4)}
 .board tr th .lv{float:left;margin:4px 10px 0 0}
 .board .cells{display:flex;gap:2px;padding:3px 0}
 .c{width:100%;min-width:14px;height:26px;border-radius:3px;background:var(--s0);position:relative;flex:1;
@@ -274,7 +345,7 @@ h1 em{font-style:italic;color:var(--amber)}
   border-left:7px solid transparent;border-top-right-radius:3px}
 .c:hover{outline:1.5px solid var(--amber);outline-offset:1px;z-index:2}
 @keyframes flip{from{opacity:0;transform:scaleY(.15) translateY(-3px)}to{opacity:1;transform:none}}
-.depts{display:flex;gap:2px;padding-left:0;margin:0 0 6px}
+.depts{display:flex;gap:2px;padding-left:0;margin:0 0 6px var(--lw);min-width:calc(760px - var(--lw))}
 .dh{flex:var(--n);font-size:9.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--muted);
   border-bottom:1px solid var(--rule2);padding-bottom:5px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 .boardhead{display:grid;grid-template-columns:var(--lw,208px) 1fr;gap:0}
@@ -312,7 +383,21 @@ section+section{border-top:1px solid var(--rule)}
 .card header{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:14px}
 .card h4{margin:0;font-size:15px;font-weight:600;letter-spacing:-.015em}
 .card .meta{margin:2px 0 0;font-size:11.5px;color:var(--muted)}
-.spark{display:flex;gap:5px;align-items:flex-end;height:56px;padding:0 0 4px;border-bottom:1px solid var(--rule)}
+/* the candidate card headline: traps and flags, above the department bars */
+.card .headline{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;padding:11px 13px;border-radius:9px;
+  border:1px solid var(--rule2);background:var(--panel2);margin-bottom:12px}
+.card .headline b{font-family:var(--m);font-size:30px;font-weight:700;letter-spacing:-.04em;line-height:1}
+.card .headline span{font-size:11.5px;color:var(--mid);max-width:12ch;line-height:1.25}
+.card .headline em{font-style:normal;margin-left:auto;font-size:10px;font-family:var(--m);color:var(--muted);
+  letter-spacing:.04em;text-align:right}
+.card .headline.bad{border-color:color-mix(in srgb,var(--danger) 40%, transparent);
+  background:color-mix(in srgb,var(--danger) 9%, transparent)}
+.card .headline.bad b,.card .headline.bad em{color:var(--danger)}
+.card .headline.warn{border-color:color-mix(in srgb,var(--amber) 38%, transparent)}
+.card .headline.warn b{color:var(--amber)}
+.card .headline.ok b{color:var(--s4)}
+.spark{display:flex;gap:5px;align-items:flex-end;height:66px;padding:10px 0 4px;border-top:1px solid var(--rule);
+  border-bottom:1px solid var(--rule);margin-top:12px}
 .sp{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;gap:4px}
 .sp i{width:100%;height:var(--h);border-radius:2px 2px 0 0;min-height:2px}
 .sp i.s0{background:var(--s0)} .sp i.s1{background:var(--s1)} .sp i.s2{background:var(--s2)}
@@ -322,6 +407,10 @@ section+section{border-top:1px solid var(--rule)}
 .kv dt{font-size:10px;color:var(--muted);letter-spacing:.07em;text-transform:uppercase}
 .kv dd{margin:2px 0 0;font-family:var(--m);font-size:17px;font-weight:600;letter-spacing:-.02em}
 .kv dd span{font-size:10.5px;color:var(--muted);font-weight:400;margin-left:3px}
+/* the average, deliberately quieter than the trap count above it */
+.kv.quiet{margin:12px 0 0;padding-bottom:0;border-bottom:0}
+.kv.quiet dd{font-size:14px;font-weight:560;color:var(--mid)}
+.kv.quiet dt i{font-style:normal;text-transform:none;letter-spacing:0;opacity:.75}
 .flags{list-style:none;margin:0;padding:0;font-size:12px;line-height:1.45}
 .flags li{padding-left:15px;position:relative;color:var(--muted);margin-bottom:7px}
 .flags li:before{content:"";position:absolute;left:0;top:6px;width:6px;height:6px;border-radius:50%;background:var(--danger)}
@@ -388,6 +477,9 @@ section+section{border-top:1px solid var(--rule)}
 .datatable th[scope="row"],.datatable thead th:first-child,.datatable td:first-of-type{text-align:left}
 .datatable tbody th{font-weight:560}
 .datatable tbody tr:hover{background:var(--panel2)}
+.datatable td.bad{color:var(--danger);font-family:var(--m);font-weight:600}
+.datatable td.warn{color:var(--amber);font-family:var(--m);font-weight:600}
+.datatable td.ok{color:var(--muted);font-family:var(--m)}
 
 /* ── faq ── */
 .faq{display:grid;gap:0;border:1px solid var(--rule);border-radius:11px;background:var(--panel);
@@ -460,13 +552,17 @@ footer a{color:var(--mid)}
         <div class="chrome"><i></i><i></i><i></i><span>placement card</span></div>
         <div class="sbody">
           <div class="srow"><span class="skey">candidate</span><span class="sval">${esc(hero.name)}</span></div>
+          <div class="strap ${hero.trapTone}">
+            <b>${hero.trapsTaken}</b><span>of ${hero.trapsShown} planted traps taken</span>
+            <em>${hero.flags ? `⛔ ${hero.flags} flag${hero.flags > 1 ? 's' : ''}` : 'no disqualifying flags'}</em>
+          </div>
           <div class="srow"><span class="skey">trust level</span><span class="sval"><b class="lv lv-${hero.level}">${hero.level}</b> ${esc(hero.levelName)}</span></div>
           <div class="sbars">
             ${hero.depts.map(d => `<div class="sbar"><span>${esc(d.label)}</span>
               <i><b class="s${step(d.pct)}" style="--w:${d.pct}%"></b></i><em>${d.pct}</em></div>`).join('')}
           </div>
           ${hero.flag ? `<div class="sflag"><b>&#9940; ${esc(hero.flag.label)}</b>${esc(hero.flag.why)}</div>` : ''}
-          <div class="sfoot">${hero.trapsTaken} of ${totals.traps} planted traps taken${hero.tps ? ` &middot; ${hero.tps} tok/s` : ''}</div>
+          <div class="sfoot">overall ${hero.overall}% &middot; weighted average, reported second${hero.tps ? ` &middot; ${hero.tps} tok/s` : ''}</div>
         </div>
       </div>
     </div>
@@ -478,12 +574,13 @@ footer a{color:var(--mid)}
     <div><b>${ranked.length}</b><span>models measured</span></div>
     <div><b>0</b><span>LLM judges</span></div>
   </div>
+  <p class="why"><b>Traps taken leads here, not the percentage.</b> ${WHY_TRAPS_LEAD}${gapLine ? ` ${gapLine}` : ''}</p>
 </div>
 
 <section id="board"><div class="wrap">
   <h2>The board</h2>
-  <p class="sub">Every candidate against every chair. A red corner marks a chair where the model took a planted
-  trap rather than merely losing points. Hover for scores.</p>
+  <p class="sub">Ordered by <b>traps taken</b>, not by score. A red corner marks a chair where the model took a
+  planted trap rather than merely losing points. Hover for per-chair scores.</p>
   <div class="board reveal">
     <div class="depts">${deptHead}</div>
     <table><tbody>${boardRows}</tbody></table>
@@ -497,14 +594,19 @@ footer a{color:var(--mid)}
     </div>
   </div>
   <table class="datatable">
-    <caption>Company Bench results by department, measured at temperature 0. Percentages are the mean of that department's chairs.</caption>
-    <thead><tr><th scope="col">Model</th><th scope="col">Provider</th><th scope="col">Trust level</th>
+    <caption>Company Bench results, measured at temperature 0. Traps taken and disqualifying flags come first
+    because they are what decides a placement; department percentages are the mean of that department's chairs,
+    and the overall column is an average of those means.</caption>
+    <thead><tr><th scope="col">Model</th><th scope="col">Traps taken</th><th scope="col">Flags</th>
+      <th scope="col">Trust level</th><th scope="col">Provider</th>
       ${DEPARTMENTS.map(d => `<th scope="col">${esc(d.label)}</th>`).join('')}
-      <th scope="col">Traps taken</th><th scope="col">Tokens/sec</th></tr></thead>
+      <th scope="col">Overall avg</th><th scope="col">Tokens/sec</th></tr></thead>
     <tbody>${ranked.map(r => `<tr><th scope="row">${esc(r.candidate.name)}</th>
-      <td>${esc(r.candidate.vendor ?? '')}</td><td>${r.placement.level}</td>
+      <td class="${trapTone(r)}">${trapStat(r).took} of ${trapStat(r).total}</td>
+      <td class="${r.placement.flags.length ? 'bad' : 'ok'}">${r.placement.flags.length}</td>
+      <td>${r.placement.level}</td><td>${esc(r.candidate.vendor ?? '')}</td>
       ${DEPARTMENTS.map(d => `<td>${r.placement.dept[d.id] === undefined ? '—' : r.placement.dept[d.id] + '%'}</td>`).join('')}
-      <td>${trapsOf(r).filter(t => !t.pass).length} of ${trapsOf(r).length}</td>
+      <td>${r.placement.overall}%</td>
       <td>${r.tokensPerSecond ?? '—'}</td></tr>`).join('')}</tbody>
   </table>
   <div class="note reveal">

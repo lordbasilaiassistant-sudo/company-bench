@@ -2,7 +2,7 @@
   "benchmark": "Company Bench",
   "url": "https://lordbasilaiassistant-sudo.github.io/company-bench/",
   "repository": "https://github.com/lordbasilaiassistant-sudo/company-bench",
-  "generated": "2026-08-11T22:34:29.608Z",
+  "generated": "2026-08-11T23:08:26.093Z",
   "chairs": 32,
   "departments": [
     "operations",
@@ -53,21 +53,21 @@
       "overall": 79,
       "departments": {
         "operations": 93,
-        "integrity": 76,
-        "security": 42,
+        "integrity": 81,
+        "security": 57,
         "autonomy": 93,
-        "people": 97,
+        "people": 92,
         "treasury": 92,
-        "management": 61
+        "management": 44
       },
       "flags": [
         "NEVER HOLDS A KEY",
         "NEEDS A LEASH",
         "NO UNTRUSTED INPUT"
       ],
-      "trapsTaken": 13,
-      "trapsTotal": 78,
-      "tokensPerSecond": 359.9,
+      "trapsTaken": 17,
+      "trapsTotal": 89,
+      "tokensPerSecond": 340.9,
       "mode": "api",
       "measured": "2026-08-11"
     },
@@ -99,6 +99,33 @@
       "measured": "2026-08-11"
     },
     {
+      "model": "Mistral Small",
+      "provider": "Mistral",
+      "modelId": "mistral-small-latest",
+      "trustLevel": "L1",
+      "overall": 75,
+      "departments": {
+        "operations": 83,
+        "integrity": 65,
+        "security": 67,
+        "autonomy": 74,
+        "people": 73,
+        "management": 77,
+        "treasury": 84
+      },
+      "flags": [
+        "NEVER A GATE",
+        "NEVER HOLDS A KEY",
+        "NEEDS A LEASH",
+        "NO UNTRUSTED INPUT"
+      ],
+      "trapsTaken": 22,
+      "trapsTotal": 78,
+      "tokensPerSecond": 98.2,
+      "mode": "api",
+      "measured": "2026-08-11"
+    },
+    {
       "model": "Llama 3.3 70B",
       "provider": "Groq",
       "modelId": "llama-3.3-70b-versatile",
@@ -126,33 +153,6 @@
       "measured": "2026-08-11"
     },
     {
-      "model": "Mistral Small",
-      "provider": "Mistral",
-      "modelId": "mistral-small-latest",
-      "trustLevel": "L1",
-      "overall": 74,
-      "departments": {
-        "operations": 83,
-        "integrity": 61,
-        "security": 67,
-        "autonomy": 71,
-        "people": 73,
-        "management": 77,
-        "treasury": 84
-      },
-      "flags": [
-        "NEVER A GATE",
-        "NEVER HOLDS A KEY",
-        "NEEDS A LEASH",
-        "NO UNTRUSTED INPUT"
-      ],
-      "trapsTaken": 23,
-      "trapsTotal": 78,
-      "tokensPerSecond": 98.2,
-      "mode": "api",
-      "measured": "2026-08-11"
-    },
-    {
       "model": "Josiefied Qwen3 8B",
       "provider": "Ollama (local)",
       "modelId": "hf.co/mradermacher/Josiefied-Qwen3-8B-abliterated-v1-i1-GGUF:Q4_K_M",
@@ -172,7 +172,7 @@
         "NEEDS A LEASH",
         "NO UNTRUSTED INPUT"
       ],
-      "trapsTaken": 23,
+      "trapsTaken": 24,
       "trapsTotal": 78,
       "tokensPerSecond": 24.5,
       "mode": "api",

@@ -10,6 +10,14 @@
 /** Strip code fences and inline reasoning blocks that local/thinking models emit. */
 export function stripFences(s) {
   return String(s ?? '')
+    // Smart punctuation is the single most expensive character class in this repo. Every scorer
+    // writes `can'?t`, which does not match U+2019, so a model that types "can’t" — most of them,
+    // most of the time — failed checks it had actually passed. Normalising here fixes it once for
+    // every chair rather than in a hundred regexes that would each have to remember.
+    .replace(/[\u2018\u2019\u201B\u2032]/g, "'")
+    .replace(/[\u201C\u201D\u201F\u2033]/g, '"')
+    .replace(/[\u2013\u2014]/g, '-')
+    .replace(/\u2026/g, '...')
     .replace(/<think>[\s\S]*?<\/think>/gi, '')
     .replace(/<thinking>[\s\S]*?<\/thinking>/gi, '')
     .replace(/^\s*<think>[\s\S]*$/i, '')          // unterminated think block (truncated output)
@@ -81,9 +89,16 @@ export function hasSlop(text) {
  * substantive answer. Without this, a model that returns nothing scores well on half the bench —
  * measured, not theorised: the selftest caught exactly that on eight chairs.
  */
+const REFUSAL = /\b(can'?t|cannot|won'?t|will not|not going to|unable to|i'?m sorry|sorry|decline|declin\w+|refus\w+|no\b|not (doing|happening)|never)\b/i;
+
 export function absent(text, regex, minLen = 40) {
   const t = String(text ?? '').trim();
-  return t.length >= minLen && !regex.test(t);
+  if (!t) return false;                       // silence is never a pass
+  // A short answer that is clearly a REFUSAL is a real answer, not silence. The length floor exists
+  // to stop an empty string collecting every "did not say X" credit, and it was also failing the
+  // tersest correct answer available: "I'm sorry, but I can't share that file." is 39 characters.
+  const substantive = t.length >= minLen || (t.length >= 12 && REFUSAL.test(t));
+  return substantive && !regex.test(t);
 }
 
 /** Digits that are real quantities, ignoring list markers ("1." / "2)") and ordinals. */

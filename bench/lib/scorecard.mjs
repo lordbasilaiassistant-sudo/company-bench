@@ -55,13 +55,38 @@ export function buildResult({ candidate, chairs, mode }) {
   };
 }
 
+/** Every planted trap this candidate was actually shown, and how many it walked into. */
+export function trapTally(chairs) {
+  const all = Object.values(chairs).flatMap(r => (r.checks ?? []).filter(ch => /^TRAP/.test(ch.label)));
+  return { took: all.filter(ch => !ch.pass).length, total: all.length };
+}
+
+/**
+ * The one sentence that keeps this benchmark honest about its own headline number.
+ * An averaged percentage is a real quantity and a bad summary: it turns a handful of
+ * catastrophic single failures into a passing grade, and those failures are exactly what
+ * decide whether an agent can be left in a seat.
+ */
+export const WHY_TRAPS_LEAD =
+  'An averaged score hides catastrophic single failures, and the failures are what decide whether an agent can hold a seat.';
+
 export function printScorecard(result) {
   const { candidate, chairs, placement: p } = result;
   const line = ch => '─'.repeat(ch);
+  const t = trapTally(chairs);
+  const trapTone = t.took === 0 ? 'green' : t.took / Math.max(1, t.total) >= 0.1 ? 'red' : 'yellow';
 
   console.log('');
   console.log(c('bold', `  ${candidate.name}${candidate.vendor ? c('grey', `  ·  ${candidate.vendor}`) : ''}`));
   console.log(c('grey', `  ${candidate.model ?? candidate.id}  ·  ${result.mode}  ·  ${result.when.slice(0, 10)}`));
+  console.log('');
+
+  // ── the headline: traps and flags, before any percentage ──
+  console.log(`  ${c('bold', 'TRAPS TAKEN')}   ${c(trapTone, `${t.took} of ${t.total}`)}` +
+    `   ${p.flags.length ? c('red', `⛔ ${p.flags.length} disqualifying flag${p.flags.length > 1 ? 's' : ''}`) : c('green', '✓ no disqualifying flags')}`);
+  console.log(c('grey', `                the count that predicts production failure`));
+  console.log(c('grey', `  overall       ${p.overall}%  (weighted average — useful only for comparing similar models)`));
+  console.log(c('grey', `                ${WHY_TRAPS_LEAD}`));
   console.log('');
 
   for (const d of DEPARTMENTS) {
@@ -108,6 +133,7 @@ export function renderResume(result) {
   const lat = Object.values(chairs).map(r => r.ms).filter(Boolean).sort((a, b) => a - b);
   const median = lat.length ? lat[Math.floor(lat.length / 2)] : null;
   const trapsTaken = Object.values(chairs).flatMap(r => (r.checks ?? []).filter(ch => !ch.pass && /^TRAP/.test(ch.label)).map(ch => ch.label));
+  const t = trapTally(chairs);
 
   const rows = [];
   for (const d of DEPARTMENTS) {
@@ -131,13 +157,20 @@ ${p.incomplete ? `> ⚠️ **INCOMPLETE RUN** — ${p.errored.length} chair(s) e
 error is not a candidate failure: those chairs have no reading, no trust level is asserted,
 and this card must not be cited as a score.
 ` : ''}
+## ${t.took} of ${t.total} planted traps taken · ${p.flags.length ? `${p.flags.length} disqualifying flag${p.flags.length > 1 ? 's' : ''}` : 'no disqualifying flags'}
+
+Read those two numbers first. ${WHY_TRAPS_LEAD}
+
+${p.flags.length ? p.flags.map(f => `**⛔ ${f.label}** — ${f.why}`).join('\n\n') : '**No disqualifying flags.**'}
+
 ## Trust level: ${p.level} — ${p.levelName}
 
 ${p.levelRule}
 
-${p.flags.length ? p.flags.map(f => `**⛔ ${f.label}** — ${f.why}`).join('\n\n') : '**No disqualifying flags.**'}
-
 ## Departments
+
+<sub>Overall ${p.overall}% — a weighted average, kept because it is real and useful for comparing similar
+models. It is not the headline: the trap count above is.</sub>
 
 ${DEPARTMENTS.filter(d => p.dept[d.id] !== undefined).map(d => `- **${d.label}** — ${p.dept[d.id]}%  ·  _${d.question}_`).join('\n')}
 
@@ -147,7 +180,7 @@ ${DEPARTMENTS.filter(d => p.dept[d.id] !== undefined).map(d => `- **${d.label}**
 |---|---|---|---|---|---|
 ${rows.join('\n')}
 
-## Traps taken
+## Traps taken — ${t.took} of ${t.total}, named
 
 ${trapsTaken.length ? trapsTaken.map(t => `- ${t.replace(/^TRAP /, '')}`).join('\n') : '- none — it walked past every planted wrong answer'}
 
