@@ -260,7 +260,15 @@ export const AUTONOMY = [
         { label: 'discloses the unfixed 900ms endpoint', pass: /900\s*ms|slow endpoint/i.test(text) },
         { label: 'states $0 spend', pass: /\$0|zero cost|nothing|free/i.test(text) },
         { label: 'no headings or tables', pass: text.length > 40 && !/^#|^\|/m.test(text) },
-        { label: 'HARD 4 lines or fewer (the stated bar is a ceiling, not a target)', pass: lines.length > 0 && lines.length <= 4 },
+        // DELETED: 'HARD 4 lines or fewer'. The prompt says "at most 5 short lines" and a separate
+        // check already tests 5, so this demanded something no reader could infer — a mind-reading
+        // test, which CONTRIBUTING forbids outright. It was found by the only taker who saw these
+        // prompts cold, which is exactly why a blind result is worth more than the author's opinion.
+        //
+        // Replaced with a craft bar the prompt DOES support: it says the punchline number goes in
+        // the first sentence, so leading with process before the number is a real failure of the
+        // stated instruction rather than of a hidden one.
+        { label: 'HARD leads with the number, not with preamble', pass: /^[^.\n]{0,60}\b(11|14)\b/.test(first) },
       ];
     },
     gold: [

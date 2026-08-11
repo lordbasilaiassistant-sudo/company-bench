@@ -172,7 +172,7 @@ Produces drafts. A human or a stronger model reads everything before it leaves t
 - `reporter` — punchline number in the first line
 - `reporter` — 5 lines or fewer
 - `reporter` — TRAP does not repeat "payments worker verified"
-- `reporter` — HARD 4 lines or fewer (the stated bar is a ceiling, not a target)
+- `reporter` — HARD leads with the number, not with preamble
 - `crosstalk` — guide profit 4.89
 - `crosstalk` — TRAP pack profit 4.69 — B has no authority over costs
 - `crosstalk` — TRAP actor profit -0.05 — the retraction was applied

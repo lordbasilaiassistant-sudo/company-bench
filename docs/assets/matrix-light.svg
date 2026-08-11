@@ -52,8 +52,8 @@
 <text x="611.5" y="77.5" font-size="8.5" text-anchor="middle" font-family="ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace" fill="#FFFFFF">100</text>
 <rect x="625" y="64" width="23" height="21" rx="2.5" fill="#376856"/>
 <text x="636.5" y="77.5" font-size="8.5" text-anchor="middle" font-family="ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace" fill="#FFFFFF">100</text>
-<rect x="650" y="64" width="23" height="21" rx="2.5" fill="#6E9C84"/>
-<text x="661.5" y="77.5" font-size="8.5" text-anchor="middle" font-family="ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace" fill="#FFFFFF">89</text>
+<rect x="650" y="64" width="23" height="21" rx="2.5" fill="#376856"/>
+<text x="661.5" y="77.5" font-size="8.5" text-anchor="middle" font-family="ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace" fill="#FFFFFF">100</text>
 <rect x="689" y="64" width="23" height="21" rx="2.5" fill="#376856"/>
 <text x="700.5" y="77.5" font-size="8.5" text-anchor="middle" font-family="ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace" fill="#FFFFFF">100</text>
 <rect x="714" y="64" width="23" height="21" rx="2.5" fill="#376856"/>
@@ -101,7 +101,7 @@
 <rect x="372" y="90" width="23" height="21" rx="2.5" fill="#A9C0AE"/>
 <text x="383.5" y="103.5" font-size="8.5" text-anchor="middle" font-family="ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace" fill="#25382D">71</text>
 <rect x="397" y="90" width="23" height="21" rx="2.5" fill="#A9C0AE"/>
-<text x="408.5" y="103.5" font-size="8.5" text-anchor="middle" font-family="ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace" fill="#25382D">67</text>
+<text x="408.5" y="103.5" font-size="8.5" text-anchor="middle" font-family="ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace" fill="#25382D">50</text>
 <path d="M413.5 90 L420 90 L420 96.5 Z" fill="#B3341C"/>
 <rect x="422" y="90" width="23" height="21" rx="2.5" fill="#A9C0AE"/>
 <text x="433.5" y="103.5" font-size="8.5" text-anchor="middle" font-family="ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace" fill="#25382D">67</text>
@@ -246,8 +246,8 @@
 <rect x="372" y="142" width="23" height="21" rx="2.5" fill="#A9C0AE"/>
 <text x="383.5" y="155.5" font-size="8.5" text-anchor="middle" font-family="ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace" fill="#25382D">57</text>
 <path d="M388.5 142 L395 142 L395 148.5 Z" fill="#B3341C"/>
-<rect x="397" y="142" width="23" height="21" rx="2.5" fill="#A9C0AE"/>
-<text x="408.5" y="155.5" font-size="8.5" text-anchor="middle" font-family="ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace" fill="#25382D">50</text>
+<rect x="397" y="142" width="23" height="21" rx="2.5" fill="#CFD6C6"/>
+<text x="408.5" y="155.5" font-size="8.5" text-anchor="middle" font-family="ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace" fill="#4A5344">33</text>
 <path d="M413.5 142 L420 142 L420 148.5 Z" fill="#B3341C"/>
 <rect x="422" y="142" width="23" height="21" rx="2.5" fill="#A9C0AE"/>
 <text x="433.5" y="155.5" font-size="8.5" text-anchor="middle" font-family="ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace" fill="#25382D">67</text>

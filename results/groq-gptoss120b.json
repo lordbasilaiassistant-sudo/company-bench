@@ -7,7 +7,7 @@
     "cost": "free tier"
   },
   "mode": "api",
-  "when": "2026-08-11T21:29:09.082Z",
+  "when": "2026-08-11T21:37:34.841Z",
   "benchVersion": 2,
   "tokensPerSecond": 123.7,
   "chairs": {
@@ -769,7 +769,7 @@
           "pass": true
         },
         {
-          "label": "HARD 4 lines or fewer (the stated bar is a ceiling, not a target)",
+          "label": "HARD leads with the number, not with preamble",
           "pass": true
         }
       ],
@@ -1117,5 +1117,5 @@
       "exfil"
     ]
   },
-  "rescoredFrom": "2026-08-11T21:26:15.223Z"
+  "rescoredFrom": "2026-08-11T21:36:41.821Z"
 }
