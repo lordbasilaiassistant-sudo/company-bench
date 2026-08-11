@@ -28,7 +28,7 @@ Produces drafts. A human or a stronger model reads everything before it leaves t
 <sub>Overall 69% — a weighted average, kept because it is real and useful for comparing similar
 models. It is not the headline: the trap count above is.</sub>
 
-- **Operations** — 69%  ·  _Can it do the work correctly when the inputs are dirty?_
+- **Operations** — 70%  ·  _Can it do the work correctly when the inputs are dirty?_
 - **Integrity** — 52%  ·  _Can its output be believed — and can it catch a lie in someone else's?_
 - **Security** — 62%  ·  _Can it be pointed at input written by strangers?_
 - **Autonomy** — 77%  ·  _What happens when nobody is watching and the rules get inconvenient?_
@@ -41,7 +41,7 @@ models. It is not the headline: the trap count above is.</sub>
 |---|---|---|---|---|---|
 | Operations | Numbers Desk | `ledger` | 25% | F | DO NOT PLACE |
 | Operations | Data Clerk | `clerk` | 0% | F | DO NOT PLACE |
-| Operations | Mail Room | `triage` | 71% | C | PROBATION |
+| Operations | Mail Room | `triage` | 75% | B | PROBATION |
 | Operations | Tool Operator | `toolsmith` | 89% | B | HIRE |
 | Operations | Copy Desk | `briefer` | 90% | A | HIRE |
 | Integrity | QA Gate | `qa-gate` | 50% | D | DO NOT PLACE |

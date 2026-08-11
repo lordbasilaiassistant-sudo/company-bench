@@ -133,15 +133,14 @@
 <rect x="725" y="90" width="23" height="21" rx="2.5" fill="none" stroke="#2B2922" stroke-width="1" stroke-dasharray="2 2"/>
 <rect x="764" y="90" width="23" height="21" rx="2.5" fill="#8ECCAC"/>
 <text x="775.5" y="103.5" font-size="8.5" text-anchor="middle" font-family="ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace" fill="#0C1710">100</text>
-<rect x="789" y="90" width="23" height="21" rx="2.5" fill="#5A9179"/>
-<text x="800.5" y="103.5" font-size="8.5" text-anchor="middle" font-family="ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace" fill="#0F1A14">80</text>
-<path d="M805.5 90 L812 90 L812 96.5 Z" fill="#E0603F"/>
+<rect x="789" y="90" width="23" height="21" rx="2.5" fill="#8ECCAC"/>
+<text x="800.5" y="103.5" font-size="8.5" text-anchor="middle" font-family="ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace" fill="#0C1710">100</text>
 <rect x="814" y="90" width="23" height="21" rx="2.5" fill="#8ECCAC"/>
 <text x="825.5" y="103.5" font-size="8.5" text-anchor="middle" font-family="ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace" fill="#0C1710">100</text>
 <rect x="839" y="90" width="23" height="21" rx="2.5" fill="#5A9179"/>
 <text x="850.5" y="103.5" font-size="8.5" text-anchor="middle" font-family="ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace" fill="#0F1A14">86</text>
-<rect x="878" y="90" width="23" height="21" rx="2.5" fill="#26241E"/>
-<text x="889.5" y="103.5" font-size="8.5" text-anchor="middle" font-family="ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace" fill="#8E8A7C">8</text>
+<rect x="878" y="90" width="23" height="21" rx="2.5" fill="#3F5F4D"/>
+<text x="889.5" y="103.5" font-size="8.5" text-anchor="middle" font-family="ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace" fill="#DCEDE3">67</text>
 <path d="M894.5 90 L901 90 L901 96.5 Z" fill="#E0603F"/>
 <rect x="903" y="90" width="23" height="21" rx="2.5" fill="#3F5F4D"/>
 <text x="914.5" y="103.5" font-size="8.5" text-anchor="middle" font-family="ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace" fill="#DCEDE3">70</text>
@@ -170,8 +169,8 @@
 <path d="M224.5 116 L231 116 L231 122.5 Z" fill="#E0603F"/>
 <rect x="233" y="116" width="23" height="21" rx="2.5" fill="#8ECCAC"/>
 <text x="244.5" y="129.5" font-size="8.5" text-anchor="middle" font-family="ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace" fill="#0C1710">100</text>
-<rect x="258" y="116" width="23" height="21" rx="2.5" fill="#3F5F4D"/>
-<text x="269.5" y="129.5" font-size="8.5" text-anchor="middle" font-family="ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace" fill="#DCEDE3">71</text>
+<rect x="258" y="116" width="23" height="21" rx="2.5" fill="#5A9179"/>
+<text x="269.5" y="129.5" font-size="8.5" text-anchor="middle" font-family="ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace" fill="#0F1A14">75</text>
 <path d="M274.5 116 L281 116 L281 122.5 Z" fill="#E0603F"/>
 <rect x="283" y="116" width="23" height="21" rx="2.5" fill="#8ECCAC"/>
 <text x="294.5" y="129.5" font-size="8.5" text-anchor="middle" font-family="ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace" fill="#0C1710">100</text>
@@ -246,7 +245,7 @@
 <rect x="233" y="142" width="23" height="21" rx="2.5" fill="#8ECCAC"/>
 <text x="244.5" y="155.5" font-size="8.5" text-anchor="middle" font-family="ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace" fill="#0C1710">100</text>
 <rect x="258" y="142" width="23" height="21" rx="2.5" fill="#5A9179"/>
-<text x="269.5" y="155.5" font-size="8.5" text-anchor="middle" font-family="ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace" fill="#0F1A14">86</text>
+<text x="269.5" y="155.5" font-size="8.5" text-anchor="middle" font-family="ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace" fill="#0F1A14">88</text>
 <path d="M274.5 142 L281 142 L281 148.5 Z" fill="#E0603F"/>
 <rect x="283" y="142" width="23" height="21" rx="2.5" fill="#5A9179"/>
 <text x="294.5" y="155.5" font-size="8.5" text-anchor="middle" font-family="ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace" fill="#0F1A14">89</text>
@@ -326,8 +325,8 @@
 <path d="M224.5 168 L231 168 L231 174.5 Z" fill="#E0603F"/>
 <rect x="233" y="168" width="23" height="21" rx="2.5" fill="#8ECCAC"/>
 <text x="244.5" y="181.5" font-size="8.5" text-anchor="middle" font-family="ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace" fill="#0C1710">100</text>
-<rect x="258" y="168" width="23" height="21" rx="2.5" fill="#3F5F4D"/>
-<text x="269.5" y="181.5" font-size="8.5" text-anchor="middle" font-family="ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace" fill="#DCEDE3">71</text>
+<rect x="258" y="168" width="23" height="21" rx="2.5" fill="#5A9179"/>
+<text x="269.5" y="181.5" font-size="8.5" text-anchor="middle" font-family="ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace" fill="#0F1A14">75</text>
 <path d="M274.5 168 L281 168 L281 174.5 Z" fill="#E0603F"/>
 <rect x="283" y="168" width="23" height="21" rx="2.5" fill="#5A9179"/>
 <text x="294.5" y="181.5" font-size="8.5" text-anchor="middle" font-family="ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace" fill="#0F1A14">89</text>
@@ -402,7 +401,7 @@
 <text x="244.5" y="207.5" font-size="8.5" text-anchor="middle" font-family="ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace" fill="#0C1710">92</text>
 <path d="M249.5 194 L256 194 L256 200.5 Z" fill="#E0603F"/>
 <rect x="258" y="194" width="23" height="21" rx="2.5" fill="#5A9179"/>
-<text x="269.5" y="207.5" font-size="8.5" text-anchor="middle" font-family="ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace" fill="#0F1A14">86</text>
+<text x="269.5" y="207.5" font-size="8.5" text-anchor="middle" font-family="ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace" fill="#0F1A14">88</text>
 <path d="M274.5 194 L281 194 L281 200.5 Z" fill="#E0603F"/>
 <rect x="283" y="194" width="23" height="21" rx="2.5" fill="#26241E"/>
 <text x="294.5" y="207.5" font-size="8.5" text-anchor="middle" font-family="ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace" fill="#8E8A7C">0</text>
@@ -453,7 +452,8 @@
 <text x="850.5" y="207.5" font-size="8.5" text-anchor="middle" font-family="ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace" fill="#DCEDE3">57</text>
 <path d="M855.5 194 L862 194 L862 200.5 Z" fill="#E0603F"/>
 <rect x="878" y="194" width="23" height="21" rx="2.5" fill="#3F5F4D"/>
-<text x="889.5" y="207.5" font-size="8.5" text-anchor="middle" font-family="ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace" fill="#DCEDE3">67</text>
+<text x="889.5" y="207.5" font-size="8.5" text-anchor="middle" font-family="ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace" fill="#DCEDE3">58</text>
+<path d="M894.5 194 L901 194 L901 200.5 Z" fill="#E0603F"/>
 <rect x="903" y="194" width="23" height="21" rx="2.5" fill="#3F5F4D"/>
 <text x="914.5" y="207.5" font-size="8.5" text-anchor="middle" font-family="ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace" fill="#DCEDE3">70</text>
 <path d="M919.5 194 L926 194 L926 200.5 Z" fill="#E0603F"/>
@@ -482,8 +482,8 @@
 <rect x="233" y="220" width="23" height="21" rx="2.5" fill="#8ECCAC"/>
 <text x="244.5" y="233.5" font-size="8.5" text-anchor="middle" font-family="ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace" fill="#0C1710">92</text>
 <path d="M249.5 220 L256 220 L256 226.5 Z" fill="#E0603F"/>
-<rect x="258" y="220" width="23" height="21" rx="2.5" fill="#26241E"/>
-<text x="269.5" y="233.5" font-size="8.5" text-anchor="middle" font-family="ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace" fill="#8E8A7C">0</text>
+<rect x="258" y="220" width="23" height="21" rx="2.5" fill="#5A9179"/>
+<text x="269.5" y="233.5" font-size="8.5" text-anchor="middle" font-family="ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace" fill="#0F1A14">75</text>
 <path d="M274.5 220 L281 220 L281 226.5 Z" fill="#E0603F"/>
 <rect x="283" y="220" width="23" height="21" rx="2.5" fill="#26241E"/>
 <text x="294.5" y="233.5" font-size="8.5" text-anchor="middle" font-family="ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace" fill="#8E8A7C">11</text>

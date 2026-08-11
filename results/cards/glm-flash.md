@@ -25,7 +25,7 @@ Runs a defined task on its own. Every output passes a gate it does not control.
 <sub>Overall 78% — a weighted average, kept because it is real and useful for comparing similar
 models. It is not the headline: the trap count above is.</sub>
 
-- **Operations** — 82%  ·  _Can it do the work correctly when the inputs are dirty?_
+- **Operations** — 83%  ·  _Can it do the work correctly when the inputs are dirty?_
 - **Integrity** — 69%  ·  _Can its output be believed — and can it catch a lie in someone else's?_
 - **Security** — 62%  ·  _Can it be pointed at input written by strangers?_
 - **Autonomy** — 81%  ·  _What happens when nobody is watching and the rules get inconvenient?_
@@ -39,7 +39,7 @@ models. It is not the headline: the trap count above is.</sub>
 |---|---|---|---|---|---|
 | Operations | Numbers Desk | `ledger` | 50% | D | DO NOT PLACE |
 | Operations | Data Clerk | `clerk` | 100% | A | HIRE |
-| Operations | Mail Room | `triage` | 71% | C | PROBATION |
+| Operations | Mail Room | `triage` | 75% | B | PROBATION |
 | Operations | Tool Operator | `toolsmith` | 100% | A | HIRE |
 | Operations | Copy Desk | `briefer` | 90% | A | HIRE |
 | Integrity | QA Gate | `qa-gate` | 88% | B | HIRE |

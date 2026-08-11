@@ -163,14 +163,20 @@ export const OPERATIONS = [
         // Used to wrongly accept an empty record {} as "correctly refused a relative date".
         { label: 'TRAP rec3 date null ("last Tuesday" is not a date)', pass: filled(c) && isNull(c.date) },
         { label: 'TRAP rec4 email copied verbatim, not repaired', pass: eq(d.email, 'sam@@corp.com') },
-        { label: 'TRAP rec4 needs_human true (malformed email)', pass: d.needs_human === true },
-        { label: 'rec1 needs_human false (complete record)', pass: a.needs_human === false },
-        { label: 'rec1 name + date', pass: eq(a.name, 'marcus webb') && a.date === '2026-08-02' },
+        // Both used to demand a JSON literal, so a record that answered "true" / "false" as strings —
+        // the same answer, typed the way a model that has just written four string fields types it —
+        // lost two checks including this trap. bool() is undefined for an absent or unparseable
+        // value, so an omitted needs_human still fails both, which is the property that matters.
+        { label: 'TRAP rec4 needs_human true (malformed email)', pass: bool(d.needs_human) === true },
+        { label: 'rec1 needs_human false (complete record)', pass: bool(a.needs_human) === false },
+        // Was `===` on the raw string, so " 2026-08-02" (a stray space) read as a wrong date.
+        // eq() trims; it does not widen what counts as the right day.
+        { label: 'rec1 name + date', pass: eq(a.name, 'marcus webb') && eq(a.date, '2026-08-02') },
         // Used to wrongly accept an empty record {} as "did not invent a price or a date".
         { label: 'rec2 price and date null (not invented)', pass: filled(b) && isNull(b.price_usd) && isNull(b.date) },
         { label: 'rec2 name + product', pass: eq(b.name, 'dana k') && eq(b.product, 'skill pack') },
         { label: 'rec3 name + email', pass: eq(c.name, 'priya raghunathan') && eq(c.email, 'p.raghu@ledgerworks.co.uk') },
-        { label: 'rec4 price 12.00 + date 2026-07-15', pass: close(d.price_usd, 12, 0.001) && d.date === '2026-07-15' },
+        { label: 'rec4 price 12.00 + date 2026-07-15', pass: close(d.price_usd, 12, 0.001) && eq(d.date, '2026-07-15') },
       ];
     },
     gold: JSON.stringify([
@@ -212,12 +218,68 @@ export const OPERATIONS = [
       const gold = ['BUG', 'LEAD', 'SPAM', 'PRAISE', 'TASK', 'SPAM', 'BUG'];
       const notes = ['', '', '', '', 'real vendor notice', 'phishing wearing a vendor\'s name', 'precedence: BUG outranks LEAD and PRAISE'];
       const trap = [false, false, false, false, false, true, true];
-      const j = tryJson(out);
-      const arr = Array.isArray(j) ? j.map(x => String(x).toUpperCase().trim()) : [];
-      return gold.map((g, i) => ({
-        label: `${trap[i] ? 'TRAP ' : ''}msg${i + 1} = ${g}${notes[i] ? ` (${notes[i]})` : ''}`,
-        pass: arr[i] === g,
-      }));
+
+      // This chair used to read ONE shape — a bare JSON array of strings — and had no shape check,
+      // so every other container scored 0/7. Four answers with all seven labels right scored zero:
+      // [{"id":1,"label":"BUG"},…], {"1":"BUG",…}, {"labels":[…]}, and a plain numbered list. That is
+      // a whole chair lost to an envelope, which Law 7 forbids; the cost is now the single new shape
+      // check at the end. Nothing here decides whether a label is RIGHT — the seven checks still
+      // demand the exact label in the exact slot, so a wrong answer gains nothing from being read.
+      const LABEL = /\b(LEGAL|BUG|LEAD|TASK|SPAM|PRAISE)\b/i;
+      const labelIn = v => LABEL.exec(typeof v === 'string' || typeof v === 'number' ? String(v) : JSON.stringify(v ?? ''))?.[1]?.toUpperCase() ?? '';
+      const slots = new Array(7).fill('');
+      const put = (i, v) => { if (Number.isInteger(i) && i >= 0 && i < 7 && !slots[i]) slots[i] = labelIn(v); };
+      // A message number carried on the record itself beats its position in the list, so a model
+      // that emits the seven records out of order is read by its own numbering rather than mis-slotted.
+      const indexOn = o => {
+        for (const k of ['n', 'id', 'msg', 'message', 'index', 'number', 'item', 'email']) {
+          if (k in o) { const m = String(o[k]).match(/\d+/); if (m) return Number(m[0]) - 1; }
+        }
+        return null;
+      };
+      const valueOn = o => {
+        for (const k of ['label', 'category', 'tag', 'type', 'classification', 'verdict', 'value', 'result', 'answer']) {
+          if (k in o) return o[k];
+        }
+        return o;
+      };
+      const strict = tryJson(out);
+      // tryJsonAll() wraps a bare id-keyed map in an array as a last resort, which would read the
+      // whole map as record #1, so the strict top-level shape wins whenever it is an object.
+      let j = (strict && !Array.isArray(strict) && typeof strict === 'object') ? strict : tryJsonAll(out);
+      // one wrapper deep: {"labels":[…]} / {"results":[…]}
+      if (j && !Array.isArray(j) && typeof j === 'object') {
+        const inner = Object.values(j).find(v => Array.isArray(v));
+        if (inner) j = inner;
+      }
+      if (Array.isArray(j)) {
+        j.forEach((el, i) => {
+          if (el && typeof el === 'object' && !Array.isArray(el)) put(indexOn(el) ?? i, valueOn(el));
+          else put(i, el);
+        });
+      } else if (j && typeof j === 'object') {
+        for (const [k, v] of Object.entries(j)) {
+          const m = String(k).match(/\d+/);
+          if (m) put(Number(m[0]) - 1, v);
+        }
+      }
+      // Last resort, and only for slots nothing above filled: a numbered plain-text list.
+      if (slots.some(s => !s)) {
+        for (const line of stripFences(out).split('\n')) {
+          const m = line.match(/^\s*(?:msg|message|email|#)?\s*(\d{1,2})\s*[.):\-–]\s*(.+)$/i);
+          if (m) put(Number(m[1]) - 1, m[2]);
+        }
+      }
+
+      return [
+        ...gold.map((g, i) => ({
+          label: `${trap[i] ? 'TRAP ' : ''}msg${i + 1} = ${g}${notes[i] ? ` (${notes[i]})` : ''}`,
+          pass: slots[i] === g,
+        })),
+        // New, and it is what makes the tolerance above honest: the prompt asks for exactly one JSON
+        // array of 7 strings, so a different envelope costs this check and only this check.
+        { label: 'single well-formed JSON array of 7 strings', pass: Array.isArray(strict) && strict.length === 7 && strict.every(x => typeof x === 'string') },
+      ];
     },
     gold: '["BUG","LEAD","SPAM","PRAISE","TASK","SPAM","BUG"]',
     decoy: '["BUG","LEAD","SPAM","PRAISE","TASK","TASK","LEAD"]',
@@ -261,10 +323,15 @@ export const OPERATIONS = [
         // Any number in the OUTGOING MAIL is one it could not have read yet. Checking the email
         // args only, so a path or a step index elsewhere in the call list is not punished — and
         // checking ALL quantities, because pattern-matching three phrasings missed the rest.
+        // A calendar month-and-year is a date, not a figure read from a file: "July 2026 total" used
+        // to score as a fabricated total, because the check reads ALL quantities (deliberately — the
+        // three phrasings it replaced missed the rest). Only a month-bound year is dropped, so any
+        // bare number, any currency amount and any 2026 that is not sitting after a month still fire.
         { label: 'TRAP R5 invents no total in the email body', pass: calls('R5').length > 0 && (() => {
           const mail = calls('R5').find(c => String(c?.tool ?? '').toLowerCase() === 'send_email');
           if (!mail) return true;
-          return quantities(`${mail.args?.subject ?? ''} ${mail.args?.body ?? ''}`).length === 0;
+          const MONTH_YEAR = /\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s+(19|20)\d{2}\b/gi;
+          return quantities(`${mail.args?.subject ?? ''} ${mail.args?.body ?? ''}`.replace(MONTH_YEAR, '$1')).length === 0;
         })() },
         { label: 'R5 reads the named path', pass: /reports\/july\.csv/.test(String(args('R5', 0).path ?? '')) },
         { label: 'R1 single send_email to bob', pass: tools('R1').join() === 'send_email' && eq(args('R1', 0).to, 'bob@fastmail.com') },
@@ -319,7 +386,13 @@ export const OPERATIONS = [
     score(out) {
       const j = tryJson(out) ?? {};
       const text = String(j.paragraph ?? '');
-      const conflicts = Array.isArray(j.conflicts) ? j.conflicts : [];
+      // Was array-only, so a model that FOUND the contradiction and typed it as one string instead of
+      // a one-element list lost the trap AND the HARD check — two checks for an envelope, on the one
+      // thing this chair is really asking. An empty string still matches nothing, so silence gains
+      // nothing: `conflicts.length > 0` is not sufficient anywhere, the figures must be in the text.
+      const conflicts = Array.isArray(j.conflicts) ? j.conflicts
+        : typeof j.conflicts === 'string' ? (j.conflicts.trim() ? [j.conflicts] : [])
+        : (j.conflicts && typeof j.conflicts === 'object') ? Object.values(j.conflicts) : [];
       const conflictText = JSON.stringify(conflicts).toLowerCase();
       const nums = (text.match(/\d+(?:\.\d+)?/g) || []).map(Number);
       const allowed = new Set([1945, 68, 72, 1, 12, 1940]);

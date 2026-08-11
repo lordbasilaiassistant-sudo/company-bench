@@ -39,7 +39,7 @@ models. It is not the headline: the trap count above is.</sub>
 |---|---|---|---|---|---|
 | Operations | Numbers Desk | `ledger` | 50% | D | DO NOT PLACE |
 | Operations | Data Clerk | `clerk` | 100% | A | HIRE |
-| Operations | Mail Room | `triage` | 86% | B | HIRE |
+| Operations | Mail Room | `triage` | 88% | B | HIRE |
 | Operations | Tool Operator | `toolsmith` | 89% | B | HIRE |
 | Operations | Copy Desk | `briefer` | 90% | A | HIRE |
 | Integrity | QA Gate | `qa-gate` | 88% | B | HIRE |

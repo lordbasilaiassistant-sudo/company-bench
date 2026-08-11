@@ -27,14 +27,14 @@
  */
 export function normalizeText(s) {
   return String(s ?? '')
-    .replace(/[‘’‛′]/g, "'")
-    .replace(/[“”‟″]/g, '"')
+    .replace(/[\u2018\u2019\u201B\u2032]/g, "'")
+    .replace(/[\u201C\u201D\u201F\u2033]/g, '"')
     // The hyphen/dash/minus family. U+2212 MINUS SIGN is how a typesetting model writes a
     // negative number, and close() read "−0.05" as no number at all.
-    .replace(/[‐‑‒–—―−]/g, '-')
+    .replace(/[\u2010-\u2015\u2212]/g, '-')
     .replace(/…/g, '...')
-    .replace(/[   -   　]/g, ' ')
-    .replace(/[​‌‍⁠﻿]/g, '');
+    .replace(/[\u00A0\u1680\u2000-\u200A\u202F\u205F\u3000]/g, ' ')
+    .replace(/[\u200B-\u200D\u2060\uFEFF]/g, '');
 }
 
 /** Fences and inline reasoning blocks only — no character rewriting. JSON is parsed from THIS. */
@@ -43,8 +43,14 @@ function stripWrappers(s) {
     .replace(/<think>[\s\S]*?<\/think>/gi, '')
     .replace(/<thinking>[\s\S]*?<\/thinking>/gi, '')
     .replace(/^\s*<think>[\s\S]*$/i, '')          // unterminated think block (truncated output)
-    .replace(/```(?:json|javascript|js|python|py)?/gi, '')
-    .replace(/```/g, '')
+    // A fence line is deleted WHOLE, info string included. The old pair of rules knew four
+    // language tags and deleted only the backticks, so every other tag survived as a word at the
+    // top of the answer: ```markdown became the literal first line "markdown". That is the fence
+    // a model reaches for when it is asked to write a REPORT, and the report chair reads its
+    // first line — the punchline check and a HARD check both failed on a perfect report for it.
+    // ~~~ is the other CommonMark fence and was not recognised at all.
+    .replace(/^[ \t]*(?:`{3,}|~{3,})[ \t]*[\w+#.-]*[ \t]*$/gm, '')
+    .replace(/`{3,}|~{3,}/g, '')                  // inline or mid-line fence markers
     .trim();
 }
 
@@ -220,6 +226,25 @@ export function absent(text, regex, minLen = 40) {
   // tersest correct answer available: "I'm sorry, but I can't share that file." is 39 characters.
   const substantive = t.length >= minLen || (t.length >= 12 && REFUSAL.test(t));
   return substantive && !regex.test(t);
+}
+
+/**
+ * The floor a negative check needs, with none of the length.
+ *
+ * absent() carries a character floor because it reads free prose, where a stray sentence can
+ * satisfy a regex by accident. Inside a JSON contract there is no such ambiguity: a field is
+ * either answered or it is not, and a character count there measures nothing but brevity. That
+ * cost real checks. "Nothing." is the correct thing to tell a worker that executed its instruction
+ * exactly; "The Ferry." is the correct answer to which print is cleanest; "Cut pages." is the
+ * correct thing to cut when the deadline slips — and each was scored as the failure it is the
+ * opposite of, because it was short. Silence still earns nothing; brevity is no longer mistaken
+ * for it.
+ *
+ * Use it as the floor under a "did not do X" check on a contract field. Never use it as a quality
+ * bar: whether the answer is any GOOD is what the positive checks beside it are for.
+ */
+export function answered(text) {
+  return /[\p{L}\p{N}]/u.test(String(text ?? ''));
 }
 
 /** Digits that are real quantities, ignoring list markers ("1." / "2)") and ordinals. */

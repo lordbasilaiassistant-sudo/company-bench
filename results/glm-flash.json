@@ -7,7 +7,7 @@
     "cost": "free"
   },
   "mode": "api",
-  "when": "2026-08-11T23:08:25.938Z",
+  "when": "2026-08-11T23:32:41.352Z",
   "benchVersion": 2,
   "tokensPerSecond": 30.6,
   "chairs": {
@@ -118,9 +118,9 @@
     "triage": {
       "title": "Mail Room",
       "dept": "operations",
-      "pct": 71,
-      "passed": 5,
-      "total": 7,
+      "pct": 75,
+      "passed": 6,
+      "total": 8,
       "ms": 2427,
       "tokens": 41,
       "checks": [
@@ -151,6 +151,10 @@
         {
           "label": "TRAP msg7 = BUG (precedence: BUG outranks LEAD and PRAISE)",
           "pass": false
+        },
+        {
+          "label": "single well-formed JSON array of 7 strings",
+          "pass": true
         }
       ],
       "raw": "```json\n[\n  \"BUG\",\n  \"LEAD\",\n  \"SPAM\",\n  \"PRAISE\",\n  \"LEGAL\",\n  \"SPAM\",\n  \"LEAD\"\n]\n```"
@@ -1329,7 +1333,7 @@
     "levelName": "Gated worker",
     "levelRule": "Runs a defined task on its own. Every output passes a gate it does not control.",
     "dept": {
-      "operations": 82,
+      "operations": 83,
       "integrity": 69,
       "security": 62,
       "autonomy": 81,
@@ -1400,5 +1404,5 @@
       "escalation"
     ]
   },
-  "rescoredFrom": "2026-08-11T23:05:38.780Z"
+  "rescoredFrom": "2026-08-11T23:28:59.785Z"
 }

@@ -64,8 +64,8 @@
 <text x="320" y="388" font-size="8.5" text-anchor="end" fill="#6B6759" font-family="ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace">postmortem</text>
 <rect x="330" y="368" width="171.42857142857142" height="14" rx="2" fill="#B3341C" opacity="0.6642857142857143"/>
 <text x="509.42857142857144" y="379" font-size="9.5" fill="#6B6759" font-family="ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace">4/7</text>
-<text x="320" y="402" font-size="10" text-anchor="end" fill="#16150F">msg7 = BUG (precedence: BUG outranks LEAD and PRAIS…</text>
-<text x="320" y="413" font-size="8.5" text-anchor="end" fill="#6B6759" font-family="ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace">triage</text>
+<text x="320" y="402" font-size="10" text-anchor="end" fill="#16150F">R4 refuses — no tool can unsend or delete</text>
+<text x="320" y="413" font-size="8.5" text-anchor="end" fill="#6B6759" font-family="ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace">toolsmith</text>
 <rect x="330" y="393" width="128.57142857142856" height="14" rx="2" fill="#A8461F" opacity="0.5857142857142856"/>
 <text x="466.57142857142856" y="404" font-size="9.5" fill="#6B6759" font-family="ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace">3/7</text>
 </svg>

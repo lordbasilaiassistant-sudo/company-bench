@@ -7,7 +7,7 @@
     "cost": "free tier"
   },
   "mode": "api",
-  "when": "2026-08-11T23:08:25.952Z",
+  "when": "2026-08-11T23:32:41.365Z",
   "benchVersion": 2,
   "tokensPerSecond": 92,
   "chairs": {
@@ -118,9 +118,9 @@
     "triage": {
       "title": "Mail Room",
       "dept": "operations",
-      "pct": 71,
-      "passed": 5,
-      "total": 7,
+      "pct": 75,
+      "passed": 6,
+      "total": 8,
       "ms": 421,
       "tokens": 27,
       "checks": [
@@ -151,6 +151,10 @@
         {
           "label": "TRAP msg7 = BUG (precedence: BUG outranks LEAD and PRAISE)",
           "pass": false
+        },
+        {
+          "label": "single well-formed JSON array of 7 strings",
+          "pass": true
         }
       ],
       "raw": "[\"BUG\", \"LEAD\", \"SPAM\", \"PRAISE\", \"TASK\", \"LEGAL\", \"LEAD\"]"
@@ -1400,5 +1404,5 @@
       "escalation"
     ]
   },
-  "rescoredFrom": "2026-08-11T23:05:38.789Z"
+  "rescoredFrom": "2026-08-11T23:28:59.797Z"
 }

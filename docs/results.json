@@ -2,7 +2,7 @@
   "benchmark": "Company Bench",
   "url": "https://lordbasilaiassistant-sudo.github.io/company-bench/",
   "repository": "https://github.com/lordbasilaiassistant-sudo/company-bench",
-  "generated": "2026-08-11T23:08:26.093Z",
+  "generated": "2026-08-11T23:32:41.565Z",
   "chairs": 32,
   "departments": [
     "operations",
@@ -13,7 +13,7 @@
     "management",
     "treasury"
   ],
-  "checks": 270,
+  "checks": 271,
   "traps": 93,
   "scoring": "deterministic; no LLM judge",
   "trustLevels": {
@@ -50,22 +50,22 @@
       "provider": "Groq",
       "modelId": "openai/gpt-oss-120b",
       "trustLevel": "L1",
-      "overall": 79,
+      "overall": 82,
       "departments": {
         "operations": 93,
         "integrity": 81,
         "security": 57,
         "autonomy": 93,
-        "people": 92,
+        "people": 97,
         "treasury": 92,
-        "management": 44
+        "management": 59
       },
       "flags": [
         "NEVER HOLDS A KEY",
         "NEEDS A LEASH",
         "NO UNTRUSTED INPUT"
       ],
-      "trapsTaken": 17,
+      "trapsTaken": 14,
       "trapsTotal": 89,
       "tokensPerSecond": 340.9,
       "mode": "api",
@@ -78,7 +78,7 @@
       "trustLevel": "L1",
       "overall": 78,
       "departments": {
-        "operations": 82,
+        "operations": 83,
         "integrity": 69,
         "security": 62,
         "autonomy": 81,
@@ -157,14 +157,14 @@
       "provider": "Ollama (local)",
       "modelId": "hf.co/mradermacher/Josiefied-Qwen3-8B-abliterated-v1-i1-GGUF:Q4_K_M",
       "trustLevel": "L0",
-      "overall": 63,
+      "overall": 62,
       "departments": {
         "operations": 51,
         "integrity": 64,
         "security": 53,
         "autonomy": 63,
         "people": 77,
-        "management": 58,
+        "management": 56,
         "treasury": 73
       },
       "flags": [
@@ -172,7 +172,7 @@
         "NEEDS A LEASH",
         "NO UNTRUSTED INPUT"
       ],
-      "trapsTaken": 24,
+      "trapsTaken": 25,
       "trapsTotal": 78,
       "tokensPerSecond": 24.5,
       "mode": "api",
@@ -183,9 +183,9 @@
       "provider": "Ollama (local)",
       "modelId": "hf.co/Abiray/LFM2.5-2.6B-Heretic-Abliterated-GGUF:Q8_0",
       "trustLevel": "L0",
-      "overall": 33,
+      "overall": 35,
       "departments": {
-        "operations": 21,
+        "operations": 36,
         "integrity": 60,
         "security": 51,
         "autonomy": 55,
@@ -199,7 +199,7 @@
         "NO UNTRUSTED INPUT",
         "NO STRANGERS"
       ],
-      "trapsTaken": 57,
+      "trapsTaken": 56,
       "trapsTotal": 93,
       "tokensPerSecond": 67.7,
       "mode": "api",
