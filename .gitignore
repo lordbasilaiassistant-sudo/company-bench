@@ -1,0 +1,5 @@
+node_modules/
+bench-pack/
+.env
+.DS_Store
+*.log

@@ -1,0 +1,169 @@
+[
+  {
+    "id": "groq-llama70b",
+    "name": "Llama 3.3 70B",
+    "vendor": "Groq",
+    "api": "openai",
+    "baseUrl": "https://api.groq.com/openai/v1",
+    "model": "llama-3.3-70b-versatile",
+    "keyEnv": "GROQ_API_KEY",
+    "keyFile": "groq.env",
+    "cost": "free tier"
+  },
+  {
+    "id": "groq-gptoss120b",
+    "name": "GPT-OSS 120B",
+    "vendor": "Groq",
+    "api": "openai",
+    "baseUrl": "https://api.groq.com/openai/v1",
+    "model": "openai/gpt-oss-120b",
+    "keyEnv": "GROQ_API_KEY",
+    "keyFile": "groq.env",
+    "maxTokens": 2500,
+    "cost": "free tier"
+  },
+  {
+    "id": "glm-flash",
+    "name": "GLM 4.5 Flash",
+    "vendor": "Z.ai",
+    "api": "openai",
+    "baseUrl": "https://api.z.ai/api/paas/v4",
+    "model": "glm-4.5-flash",
+    "keyEnv": "ZAI_API_KEY",
+    "keyFile": "zai.env",
+    "maxTokens": 4000,
+    "cost": "free",
+    "extraBody": {
+      "thinking": {
+        "type": "disabled"
+      }
+    }
+  },
+  {
+    "id": "mistral-small",
+    "name": "Mistral Small",
+    "vendor": "Mistral",
+    "api": "openai",
+    "baseUrl": "https://api.mistral.ai/v1",
+    "model": "mistral-small-latest",
+    "keyEnv": "MISTRAL_API_KEY",
+    "keyFile": "mistral.env",
+    "cost": "free tier"
+  },
+  {
+    "id": "nim-llama70b",
+    "name": "Llama 3.3 70B",
+    "vendor": "NVIDIA NIM",
+    "api": "openai",
+    "baseUrl": "https://integrate.api.nvidia.com/v1",
+    "model": "meta/llama-3.3-70b-instruct",
+    "keyEnv": "nvidia_api_key",
+    "keyFile": "nvidia.env",
+    "cost": "free tier",
+    "timeoutMs": 300000
+  },
+  {
+    "id": "cerebras-glm47",
+    "name": "GLM 4.7",
+    "vendor": "Cerebras",
+    "api": "openai",
+    "baseUrl": "https://api.cerebras.ai/v1",
+    "model": "zai-glm-4.7",
+    "keyEnv": "CEREBRAS_API_KEY",
+    "keyFile": "cerebras.env",
+    "cost": "free tier",
+    "maxTokens": 4000
+  },
+  {
+    "id": "openai-gpt4o-mini",
+    "name": "GPT-4o mini",
+    "vendor": "OpenAI",
+    "api": "openai",
+    "baseUrl": "https://api.openai.com/v1",
+    "model": "gpt-4o-mini",
+    "keyEnv": "OPENAI_API_KEY",
+    "cost": "paid",
+    "disabled": true
+  },
+  {
+    "id": "anthropic-haiku",
+    "name": "Claude Haiku 4.5",
+    "vendor": "Anthropic",
+    "api": "anthropic",
+    "baseUrl": "https://api.anthropic.com",
+    "model": "claude-haiku-4-5-20251001",
+    "keyEnv": "ANTHROPIC_API_KEY",
+    "cost": "paid",
+    "disabled": true
+  },
+  {
+    "id": "openrouter-free",
+    "name": "any OpenRouter model",
+    "vendor": "OpenRouter",
+    "api": "openai",
+    "baseUrl": "https://openrouter.ai/api/v1",
+    "model": "meta-llama/llama-3.3-70b-instruct:free",
+    "keyEnv": "OPENROUTER_API_KEY",
+    "cost": "free tier",
+    "disabled": true
+  },
+  {
+    "id": "local-ollama",
+    "name": "your local model",
+    "vendor": "Ollama",
+    "api": "ollama",
+    "baseUrl": "http://127.0.0.1:11434",
+    "model": "llama3.2",
+    "keyEnv": null,
+    "cost": "local",
+    "disabled": true
+  },
+  {
+    "id": "ollama-qwythos-9b",
+    "name": "Huihui Qwythos 9B",
+    "vendor": "Ollama (local)",
+    "api": "ollama",
+    "baseUrl": "http://127.0.0.1:11435",
+    "model": "hf.co/huihui-ai/Huihui-Qwythos-9B-Claude-Mythos-5-1M-abliterated-GGUF:Q8_0",
+    "keyEnv": null,
+    "cost": "local",
+    "maxTokens": 3000,
+    "disabled": true
+  },
+  {
+    "id": "ollama-josie-qwen3-8b",
+    "name": "Josiefied Qwen3 8B",
+    "vendor": "Ollama (local)",
+    "api": "ollama",
+    "baseUrl": "http://127.0.0.1:11435",
+    "model": "hf.co/mradermacher/Josiefied-Qwen3-8B-abliterated-v1-i1-GGUF:Q4_K_M",
+    "keyEnv": null,
+    "cost": "local",
+    "maxTokens": 4000,
+    "disabled": true
+  },
+  {
+    "id": "ollama-lfm2-2.6b",
+    "name": "LFM2.5 2.6B",
+    "vendor": "Ollama (local)",
+    "api": "ollama",
+    "baseUrl": "http://127.0.0.1:11435",
+    "model": "hf.co/Abiray/LFM2.5-2.6B-Heretic-Abliterated-GGUF:Q8_0",
+    "keyEnv": null,
+    "cost": "local",
+    "maxTokens": 3000,
+    "disabled": true
+  },
+  {
+    "id": "cerebras-gemma4-31b",
+    "name": "Gemma 4 31B",
+    "vendor": "Cerebras",
+    "api": "openai",
+    "baseUrl": "https://api.cerebras.ai/v1",
+    "model": "gemma-4-31b",
+    "keyEnv": "CEREBRAS_API_KEY",
+    "keyFile": "cerebras.env",
+    "cost": "free tier",
+    "maxTokens": 4000
+  }
+]

@@ -1,0 +1,21 @@
+name: selftest
+
+# The bench must accept every reference answer and reject every decoy, on every push.
+# A benchmark whose scorers are not themselves tested is decor.
+on:
+  push:
+  pull_request:
+
+jobs:
+  scorers:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - name: Every chair accepts its gold answer and rejects its decoy
+        run: node bench/selftest.mjs
+      - name: The org chart loads
+        run: node bench/run.mjs --list
+      - name: The exam pack generates
+        run: node bench/take.mjs --out /tmp/pack && test -s /tmp/pack/TAKE-THE-BENCH.md

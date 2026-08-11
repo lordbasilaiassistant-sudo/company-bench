@@ -1,0 +1,20 @@
+{
+  "name": "company-bench",
+  "version": "2.0.0",
+  "description": "Can your agent hold a job? A 25-chair benchmark that measures whether an AI agent can be trusted with real work — dirty data, planted lies, prompt injection, irreversible actions, and people. Deterministic scoring, no LLM judge.",
+  "type": "module",
+  "license": "MIT",
+  "engines": { "node": ">=18" },
+  "scripts": {
+    "selftest": "node bench/selftest.mjs",
+    "list": "node bench/run.mjs --list",
+    "take": "node bench/take.mjs",
+    "grade": "node bench/grade.mjs",
+    "bench": "node bench/run.mjs",
+    "report": "node bench/report.mjs"
+  },
+  "keywords": ["llm", "benchmark", "agent", "evaluation", "eval", "ai-agents", "prompt-injection", "agent-safety", "llm-eval", "autonomy"],
+  "repository": { "type": "git", "url": "https://github.com/lordbasilaiassistant-sudo/company-bench.git" },
+  "homepage": "https://lordbasilaiassistant-sudo.github.io/company-bench/",
+  "files": ["bench", "models.json", "PROMPT.md", "skills"]
+}
