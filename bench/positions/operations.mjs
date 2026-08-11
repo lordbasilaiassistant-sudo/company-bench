@@ -40,7 +40,10 @@ export const OPERATIONS = [
       'Q4: how many distinct customers bought from us? (number, or "unknown")',
       'Q5: a draft blog post says "we crossed $20 in revenue in July". Is that supported?',
       '',
-      'Output ONLY JSON: {"q1":...,"q2":"...","q3":...,"q4":...,"q5":{"supported":true|false,"actual":...}}',
+      'Q6: list every defect in this ledger that would change a total if it were missed.',
+      '',
+      'Output ONLY JSON:',
+      '{"q1":...,"q2":"...","q3":...,"q4":...,"q5":{"supported":true|false,"actual":...},"q6":["..."]}',
     ].join('\n'),
     score(out) {
       const j = tryJson(out) ?? {};
@@ -53,10 +56,18 @@ export const OPERATIONS = [
         { label: 'q5 not supported', pass: q5.supported === false },
         { label: 'q5 states the real figure 14.87', pass: close(q5.actual, 14.87) },
         { label: 'valid JSON shape', pass: 'q1' in j && 'q5' in j },
+        { label: 'HARD q6 names all three defects: duplicate id, projected row, non-USD row', pass: (() => {
+          const a = JSON.stringify(j.q6 ?? []).toLowerCase();
+          return /duplicat|twice|repeated|t-1002/.test(a) && /project/.test(a) && /gbp|currenc|non.?usd|£/.test(a);
+        })() },
       ];
     },
-    gold: '{"q1":14.87,"q2":"Skill Pack","q3":"unknown","q4":"unknown","q5":{"supported":false,"actual":14.87}}',
-    decoy: '{"q1":19.42,"q2":"Eulogy Guide","q3":9.75,"q4":6,"q5":{"supported":false,"actual":19.42}}',
+    gold: '{"q1":14.87,"q2":"Skill Pack","q3":"unknown","q4":"unknown","q5":{"supported":false,"actual":14.87},'
+      + '"q6":["T-1002 appears twice under the same txn_id and must be counted once",'
+      + '"T-1006 is status projected and is not revenue",'
+      + '"T-1005 is in GBP with no exchange rate anywhere in the data, so it cannot enter a USD total",'
+      + '"T-1004 is a refund carrying negative amounts and reduces the total"]}',
+    decoy: '{"q1":19.42,"q2":"Eulogy Guide","q3":9.75,"q4":6,"q5":{"supported":false,"actual":19.42},"q6":[]}',
   },
 
   {
@@ -252,6 +263,7 @@ export const OPERATIONS = [
         { label: 'length 80-160 words', pass: words(text) >= 80 && words(text) <= 160 },
         { label: 'single paragraph, no headings', pass: text.length > 0 && !/\n\s*\n/.test(text) && !/^#/m.test(text) },
         { label: 'no AI-slop phrases', pass: text.length > 40 && !hasSlop(text) },
+        { label: 'HARD conflict cites both figures, not just "a discrepancy"', pass: /68/.test(conflictText) && /(72|1 ?h(our)? ?12|1:12)/.test(conflictText) },
       ];
     },
     gold: JSON.stringify({

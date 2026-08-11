@@ -1,0 +1,42 @@
+name: A check scored something wrongly
+description: A scorer punished a correct answer, or passed a wrong one. Both are bugs.
+labels: [scorer-bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        These are the most valuable reports in the repository. A scorer that punishes correct work
+        makes every model's score on that chair a measurement of our bug.
+  - type: input
+    id: chair
+    attributes:
+      label: Chair id
+      placeholder: "ledger, qa-gate, escalation, ..."
+    validations: { required: true }
+  - type: dropdown
+    id: direction
+    attributes:
+      label: Which direction broke?
+      options:
+        - The scorer rejected a CORRECT answer (false negative)
+        - The scorer accepted a WRONG answer (false positive)
+    validations: { required: true }
+  - type: input
+    id: check
+    attributes:
+      label: The check label, verbatim
+      placeholder: "TRAP q1 = 14.87 (deduped, refund applied, ...)"
+    validations: { required: true }
+  - type: textarea
+    id: answer
+    attributes:
+      label: The answer that was scored
+      description: Paste it exactly as the model produced it. This is what we will replay.
+      render: text
+    validations: { required: true }
+  - type: textarea
+    id: why
+    attributes:
+      label: Why the score is wrong
+      description: For a false negative, say why the answer is defensible from the prompt alone.
+    validations: { required: true }

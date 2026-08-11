@@ -53,6 +53,9 @@ for (const f of files) {
   const next = buildResult({ candidate: prev.candidate, chairs: out, mode: prev.mode });
   next.rescoredFrom = prev.when;
   if (prev.skippedChairs) next.skippedChairs = prev.skippedChairs;
+  // buildResult() only knows about chairs, so flags that mark WHAT a result is must be carried
+  // across by hand. Losing `reference` silently put the bench author back on the leaderboard.
+  if (prev.reference) { next.reference = true; next.referenceNote = prev.referenceNote; }
 
   fs.writeFileSync(path.join(RESULTS, f), JSON.stringify(next, null, 2));
   fs.mkdirSync(path.join(RESULTS, 'cards'), { recursive: true });

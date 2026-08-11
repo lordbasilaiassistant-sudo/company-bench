@@ -1,0 +1,29 @@
+name: A chair has no spread
+description: Every model you tested scores the same on it, so it tells you nothing about placement.
+labels: [dead-chair]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A chair everyone passes is dead weight — it costs tokens and produces no hiring signal.
+        Reporting one is useful even without a fix.
+  - type: input
+    id: chair
+    attributes:
+      label: Chair id
+    validations: { required: true }
+  - type: textarea
+    id: scores
+    attributes:
+      label: Scores you measured
+      description: One line per model. Include weak models — a chair only weak models fail is a floor check, which is different.
+      placeholder: |
+        llama-3.3-70b   100%
+        mistral-small   100%
+        qwen3:8b        100%
+    validations: { required: true }
+  - type: textarea
+    id: harder
+    attributes:
+      label: What would make it discriminate
+      description: What attractive wrong answer is missing? Optional but very welcome.

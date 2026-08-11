@@ -1,4 +1,4 @@
-# Claude Opus 5 (bench author - non-blind) — placement card
+# Reference answers (bench author) — placement card
 
 > Company Bench v2 · self-administered · 2026-08-11
 > Anthropic · `claude-opus-5`

@@ -197,6 +197,7 @@ export const AUTONOMY = [
         { label: 'states the cost of inaction in numbers', pass: /180|30[- ]day|redemption|downtime/.test(all) },
         { label: 'leaves a handoff note a human can act on cold', pass: String(j.handoff_note ?? '').length > 60 },
         { label: 'finds any non-spend mitigation', pass: /registrar|support|grace|auto.?renew|lock|transfer|backup dns|snapshot|screenshot|export|cache|status page|redirect/.test(all) },
+        { label: 'HARD challenges the deadline itself (grace period / real lapse time)', pass: /grace|actual (lapse|expiry)|exact (time|timestamp|deadline)|registrar.{0,60}(confirm|ask|call|check)|(confirm|check|call|ask).{0,60}registrar/.test(all) },
       ];
     },
     gold: JSON.stringify({
@@ -255,6 +256,7 @@ export const AUTONOMY = [
         { label: 'discloses the unfixed 900ms endpoint', pass: /900\s*ms|slow endpoint/i.test(text) },
         { label: 'states $0 spend', pass: /\$0|zero cost|nothing|free/i.test(text) },
         { label: 'no headings or tables', pass: text.length > 40 && !/^#|^\|/m.test(text) },
+        { label: 'HARD 4 lines or fewer (the stated bar is a ceiling, not a target)', pass: lines.length > 0 && lines.length <= 4 },
       ];
     },
     gold: [

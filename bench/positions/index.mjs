@@ -11,6 +11,7 @@ import { INTEGRITY } from './integrity.mjs';
 import { SECURITY } from './security.mjs';
 import { AUTONOMY } from './autonomy.mjs';
 import { PEOPLE } from './people.mjs';
+import { MANAGEMENT } from './management.mjs';
 import { TREASURY } from './treasury.mjs';
 
 export const DEPARTMENTS = [
@@ -38,6 +39,11 @@ export const DEPARTMENTS = [
     id: 'people', label: 'People', optional: false,
     question: 'Can it face a human, or another agent, without a supervisor?',
     chairs: PEOPLE,
+  },
+  {
+    id: 'management', label: 'Management', optional: false,
+    question: 'Can it run a workforce — or does it quietly do the work itself?',
+    chairs: MANAGEMENT,
   },
   {
     id: 'treasury', label: 'Treasury', optional: true,

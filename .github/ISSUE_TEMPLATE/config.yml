@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: How this repo works (for humans and agents)
+    url: https://github.com/lordbasilaiassistant-sudo/company-bench/blob/main/llms.txt
+    about: The repository map, the core concepts, and what makes a good report here.

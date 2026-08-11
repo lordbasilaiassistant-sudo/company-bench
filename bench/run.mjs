@@ -94,9 +94,20 @@ for (const model of candidates) {
 
   // `ollama:hf.co/vendor/model:Q8_0` is a perfectly good model id and a terrible filename.
   const slug = model.id.replace(/[^a-z0-9._-]+/gi, '-').replace(/^-|-$/g, '').slice(0, 64);
+
+  // A partial run (--only / --skip) MERGES over the stored result. Overwriting instead silently
+  // deletes every chair you did not re-run, which looks like a model collapsing rather than like
+  // a harness bug — measured the hard way when adding a department wiped three candidates.
+  let merged = out;
+  if (only.length || skip.length) {
+    try {
+      const prev = JSON.parse(fs.readFileSync(path.join(RESULTS, `${slug}.json`), 'utf8'));
+      if (prev.chairs) merged = { ...prev.chairs, ...out };
+    } catch { /* first run for this model */ }
+  }
   const result = buildResult({
     candidate: { id: slug, name: model.name, vendor: model.vendor, model: model.model, cost: model.cost },
-    chairs: out, mode: 'api',
+    chairs: merged, mode: 'api',
   });
   printScorecard(result);
   fs.writeFileSync(path.join(RESULTS, `${slug}.json`), JSON.stringify(result, null, 2));

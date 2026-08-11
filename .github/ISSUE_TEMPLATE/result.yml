@@ -1,0 +1,36 @@
+name: Submitting a result
+description: You ran a model we have not measured. Prefer a PR with the results/ file, but an issue is fine.
+labels: [result]
+body:
+  - type: input
+    id: model
+    attributes:
+      label: Model
+      placeholder: "qwen3:14b via Ollama, Q4_K_M"
+    validations: { required: true }
+  - type: dropdown
+    id: mode
+    attributes:
+      label: How was it run?
+      options:
+        - "bench/run.mjs with an API key or local endpoint"
+        - "Self-administered (the agent took the exam pack itself)"
+    validations: { required: true }
+  - type: checkboxes
+    id: honesty
+    attributes:
+      label: Before you submit
+      options:
+        - label: Temperature 0 and the prompts exactly as committed, or the label says otherwise
+          required: true
+        - label: No chair errored (incomplete runs are excluded from the leaderboard)
+          required: true
+        - label: If the model or agent read bench/positions/ before answering, the label says so
+          required: true
+  - type: textarea
+    id: scorecard
+    attributes:
+      label: The scorecard
+      description: Paste the terminal output, and attach or link results/<id>.json if you can.
+      render: text
+    validations: { required: true }

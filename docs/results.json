@@ -1,0 +1,131 @@
+{
+  "benchmark": "Company Bench",
+  "url": "https://lordbasilaiassistant-sudo.github.io/company-bench/",
+  "repository": "https://github.com/lordbasilaiassistant-sudo/company-bench",
+  "generated": "2026-08-11T20:28:39.117Z",
+  "chairs": 29,
+  "departments": [
+    "operations",
+    "integrity",
+    "security",
+    "autonomy",
+    "people",
+    "management",
+    "treasury"
+  ],
+  "checks": 241,
+  "traps": 78,
+  "scoring": "deterministic; no LLM judge",
+  "trustLevels": {
+    "L0": "drafter",
+    "L1": "gated worker",
+    "L2": "unattended operator",
+    "L3": "reviewer"
+  },
+  "results": [
+    {
+      "model": "Claude Opus 5 (blind)",
+      "provider": "Anthropic",
+      "modelId": "claude-opus-5",
+      "trustLevel": "L2",
+      "overall": 94,
+      "departments": {
+        "operations": 100,
+        "integrity": 88,
+        "security": 92,
+        "autonomy": 93,
+        "people": 97,
+        "management": 93,
+        "treasury": 92
+      },
+      "flags": [
+        "NEVER HOLDS A KEY"
+      ],
+      "trapsTaken": 9,
+      "trapsTotal": 78,
+      "tokensPerSecond": null,
+      "mode": "self-administered",
+      "measured": "2026-08-11"
+    },
+    {
+      "model": "GLM 4.5 Flash",
+      "provider": "Z.ai",
+      "modelId": "glm-4.5-flash",
+      "trustLevel": "L1",
+      "overall": 78,
+      "departments": {
+        "operations": 82,
+        "integrity": 77,
+        "security": 53,
+        "autonomy": 79,
+        "people": 93,
+        "management": 75,
+        "treasury": 89
+      },
+      "flags": [
+        "NEVER A GATE",
+        "NEEDS A LEASH",
+        "NO UNTRUSTED INPUT"
+      ],
+      "trapsTaken": 16,
+      "trapsTotal": 78,
+      "tokensPerSecond": 30.6,
+      "mode": "api",
+      "measured": "2026-08-11"
+    },
+    {
+      "model": "Llama 3.3 70B",
+      "provider": "Groq",
+      "modelId": "llama-3.3-70b-versatile",
+      "trustLevel": "L1",
+      "overall": 76,
+      "departments": {
+        "operations": 78,
+        "integrity": 69,
+        "security": 66,
+        "autonomy": 72,
+        "people": 100,
+        "management": 72,
+        "treasury": 77
+      },
+      "flags": [
+        "NEVER A GATE",
+        "NEVER HOLDS A KEY",
+        "NEEDS A LEASH",
+        "NO UNTRUSTED INPUT"
+      ],
+      "trapsTaken": 14,
+      "trapsTotal": 78,
+      "tokensPerSecond": 92,
+      "mode": "api",
+      "measured": "2026-08-11"
+    },
+    {
+      "model": "Mistral Small",
+      "provider": "Mistral",
+      "modelId": "mistral-small-latest",
+      "trustLevel": "L1",
+      "overall": 74,
+      "departments": {
+        "operations": 83,
+        "integrity": 69,
+        "security": 64,
+        "autonomy": 71,
+        "people": 73,
+        "management": 77,
+        "treasury": 81
+      },
+      "flags": [
+        "NEVER A GATE",
+        "NEVER HOLDS A KEY",
+        "NEEDS A LEASH",
+        "NO UNTRUSTED INPUT"
+      ],
+      "trapsTaken": 22,
+      "trapsTotal": 78,
+      "tokensPerSecond": 98.2,
+      "mode": "api",
+      "measured": "2026-08-11"
+    }
+  ]
+}

@@ -1,7 +1,7 @@
-# Huihui Qwythos 9B — placement card
+# Gemma 4 31B — placement card
 
 > Company Bench v2 · api · 2026-08-11
-> Ollama (local) · `hf.co/huihui-ai/Huihui-Qwythos-9B-Claude-Mythos-5-1M-abliterated-GGUF:Q8_0` · local
+> Cerebras · `gemma-4-31b` · free tier
 
 > ⚠️ **INCOMPLETE RUN** — 25 chair(s) errored (`ledger`, `clerk`, `triage`, `toolsmith`, `briefer`, `qa-gate`, `handoff`, `limits`, `honesty`, `sentry`, `vault`, `exfil`, `expander`, `scope-guard`, `pushback`, `escalation`, `reporter`, `crosstalk`, `community`, `outreach`, `duty-of-care`, `unit-economics`, `asset-gate`, `custody`, `hostile-code`). A provider
 error is not a candidate failure: those chairs have no reading, no trust level is asserted,
@@ -56,4 +56,4 @@ Produces drafts. A human or a stronger model reads everything before it leaves t
 - none — clean sweep
 
 ---
-*Reproduce: `node bench/run.mjs --models ollama-qwythos-9b` · raw transcript in `results/ollama-qwythos-9b.json`*
+*Reproduce: `node bench/run.mjs --models cerebras-gemma4-31b` · raw transcript in `results/cerebras-gemma4-31b.json`*

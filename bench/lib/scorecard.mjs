@@ -21,12 +21,22 @@ const bar = pct => {
   return c(tone(pct), '█'.repeat(filled)) + c('grey', '·'.repeat(20 - filled));
 };
 
+/** Output tokens per second across every chair that reported both, or null. */
+export function throughput(chairs) {
+  const rows = Object.values(chairs).filter(r => r.tokens > 0 && r.ms > 0);
+  if (rows.length < 3) return null;
+  const tokens = rows.reduce((n, r) => n + r.tokens, 0);
+  const ms = rows.reduce((n, r) => n + r.ms, 0);
+  return Math.round((tokens / (ms / 1000)) * 10) / 10;
+}
+
 export function buildResult({ candidate, chairs, mode }) {
   const forPlacement = Object.fromEntries(Object.entries(chairs).map(([id, r]) => [id, { pct: r.pct, dept: r.dept, error: r.error }]));
   const deptsRun = [...new Set(Object.values(chairs).map(r => r.dept))];
   return {
     candidate, mode, when: new Date().toISOString(),
     benchVersion: 2,
+    tokensPerSecond: throughput(chairs),
     chairs,
     placement: placement(forPlacement, { deptsRun }),
   };

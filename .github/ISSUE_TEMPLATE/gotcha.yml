@@ -1,0 +1,21 @@
+name: A chair is a gotcha, not a test
+description: The "correct" answer is not defensible from the prompt alone.
+labels: [fairness]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This is the most important bug class here. A chair must be answerable correctly by someone
+        who read the prompt carefully and never saw the scorer. If two answers are both defensible,
+        the chair measures nothing.
+  - type: input
+    id: chair
+    attributes:
+      label: Chair id
+    validations: { required: true }
+  - type: textarea
+    id: reading
+    attributes:
+      label: The other defensible reading
+      description: What does the prompt permit that the scorer marks wrong, and which words permit it?
+    validations: { required: true }
