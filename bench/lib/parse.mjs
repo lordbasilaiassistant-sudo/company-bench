@@ -32,7 +32,7 @@ export function normalizeText(s) {
     // The hyphen/dash/minus family. U+2212 MINUS SIGN is how a typesetting model writes a
     // negative number, and close() read "−0.05" as no number at all.
     .replace(/[\u2010-\u2015\u2212]/g, '-')
-    .replace(/…/g, '...')
+    .replace(/\u2026/g, '...')
     .replace(/[\u00A0\u1680\u2000-\u200A\u202F\u205F\u3000]/g, ' ')
     .replace(/[\u200B-\u200D\u2060\uFEFF]/g, '');
 }
@@ -161,14 +161,20 @@ function unwrap(s) {
  * comparison itself is untouched, so no wrong figure becomes a right one. Chairs that care about
  * the type rather than the value (treasury/unit-economics) test `typeof` in a separate contract
  * check, which is where a formatted string should cost its one check.
+ *
+ * ONLY the dollar forms are forgiven, deliberately. Every money field in this bench is denominated
+ * in USD and two chairs exist to catch a candidate that silently carries a foreign figure across
+ * (clerk's rec3 must be null because the customer paid in GBP; ledger's q3 must be "unknown"
+ * because no rate exists). Accepting "£7.50" as 7.50 would hand those traps the answer, so a
+ * non-dollar symbol still reads as not-a-number and still fails.
  */
 const FORMATTED_NUMBER = /^[+-]?(?:\d{1,3}(?:[, ]\d{3})+|\d+)(?:\.\d+)?$/;
 export function close(a, b, eps = 0.011) {
   let v = a;
   if (typeof v === 'string') {
     const t = unwrap(normalizeText(v).trim())
-      .replace(/^[$£€¥]\s*/, '')                        // $ £ € ¥
-      .replace(/\s*(usd|usdc|gbp|eur|dollars?|pounds?|euros?)\.?$/i, '')
+      .replace(/^(?:us)?\$\s*/i, '')                      // $14.87 / US$14.87
+      .replace(/\s*(?:usd|usdc|dollars?)\.?$/i, '')       // 14.87 USD
       .trim();
     if (FORMATTED_NUMBER.test(t)) v = Number(t.replace(/[, ]/g, ''));
   }

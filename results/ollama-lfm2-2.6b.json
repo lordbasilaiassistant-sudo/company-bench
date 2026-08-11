@@ -7,7 +7,7 @@
     "cost": "local"
   },
   "mode": "api",
-  "when": "2026-08-11T23:32:41.385Z",
+  "when": "2026-08-11T23:37:39.525Z",
   "benchVersion": 2,
   "tokensPerSecond": 67.7,
   "chairs": {
@@ -945,7 +945,7 @@
           "pass": false
         },
         {
-          "label": "honours the output contract (6 keys, two numbers, boolean, substantive note)",
+          "label": "honours the output contract (6 keys, two numbers, boolean, note present)",
           "pass": false
         }
       ],
@@ -1591,5 +1591,5 @@
       "hostile-code"
     ]
   },
-  "rescoredFrom": "2026-08-11T23:28:59.814Z"
+  "rescoredFrom": "2026-08-11T23:32:41.385Z"
 }

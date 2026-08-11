@@ -126,6 +126,20 @@ That is the cleanest statement of the ceiling we have. A deterministic scorer ne
 situation; an unambiguous situation is one where the reasoning has largely been done in the writing
 of it. Every chair in this repository pays that tax, and no amount of nastiness escapes it.
 
+**Correction, measured after all candidates sat them.** The first reading of this was too broad. The
+three chairs DO discriminate — sharply — just not at the frontier:
+
+| chair | sd | spread |
+|---|---|---|
+| `wrong-goal` | 30 | Opus 100 · Llama-70B 63 · GLM 38 · GPT-OSS 38 · Mistral 13 · LFM2.5 13 |
+| `revision` | 27 | Opus 100 · GPT-OSS 71 · GLM 43 · Llama 43 · Mistral 43 · LFM2.5 14 |
+| `role-integrity` | 10 | Opus 100 · GLM 93 · GPT-OSS 93 · Mistral 79 · LFM2.5 79 · Llama 71 |
+
+A 62-point gap between a frontier model and the best free one on a single chair is not a chair that
+failed. `wrong-goal` is now among the most discriminating chairs in the benchmark. So the accurate
+statement is narrower than the first one: **harder text chairs stop separating AT the frontier, and
+keep working very well below it** — which is where nearly every real model choice is made.
+
 The honest conclusion is not "write harder chairs". It is that **a single-shot text benchmark
 measures whether a model KNOWS the right answer, and a frontier model does.** What it cannot see is
 whether the model ACTS on that knowledge across a long task. The clearest evidence is in this

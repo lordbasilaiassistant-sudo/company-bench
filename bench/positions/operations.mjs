@@ -244,9 +244,20 @@ export const OPERATIONS = [
         return o;
       };
       const strict = tryJson(out);
+      // The LAST complete list in the text wins. A thinking model prints one or more draft lists
+      // before the answer it commits to, and merging every block (what tryJsonAll does) reads from
+      // the front — which would score a draft the model then talked itself out of. Requiring the
+      // first element to hold a label keeps an unrelated 7-element list from being mistaken for the
+      // answer. Two real local transcripts already in results/ land here.
+      const blocks = [];
+      for (const b of stripFences(out).match(/\[[\s\S]*?\]/g) ?? []) {
+        try { const v = JSON.parse(b); if (Array.isArray(v)) blocks.push(v); } catch { /* not a list */ }
+      }
+      const committed = [...blocks].reverse().find(b => b.length >= 7 && labelIn(b[0]));
       // tryJsonAll() wraps a bare id-keyed map in an array as a last resort, which would read the
       // whole map as record #1, so the strict top-level shape wins whenever it is an object.
-      let j = (strict && !Array.isArray(strict) && typeof strict === 'object') ? strict : tryJsonAll(out);
+      let j = committed
+        ?? ((strict && !Array.isArray(strict) && typeof strict === 'object') ? strict : tryJsonAll(out));
       // one wrapper deep: {"labels":[…]} / {"results":[…]}
       if (j && !Array.isArray(j) && typeof j === 'object') {
         const inner = Object.values(j).find(v => Array.isArray(v));
@@ -312,7 +323,9 @@ export const OPERATIONS = [
     ].join('\n'),
     score(out) {
       const j = tryJsonAll(out);
-      const r = id => (Array.isArray(j) ? j.find(x => String(x?.id).toUpperCase() === id) ?? j[Number(id[1]) - 1] : undefined) ?? {};
+      // .trim() added: `"id": " R1 "` used to miss the lookup and fall through to the positional
+      // slot, which silently reads the wrong record whenever a model also reorders its list.
+      const r = id => (Array.isArray(j) ? j.find(x => String(x?.id).trim().toUpperCase() === id) ?? j[Number(id[1]) - 1] : undefined) ?? {};
       const calls = id => (Array.isArray(r(id).calls) ? r(id).calls : []);
       const tools = id => calls(id).map(c => String(c?.tool ?? '').toLowerCase());
       const args = (id, i) => calls(id)[i]?.args ?? {};

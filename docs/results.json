@@ -2,7 +2,7 @@
   "benchmark": "Company Bench",
   "url": "https://lordbasilaiassistant-sudo.github.io/company-bench/",
   "repository": "https://github.com/lordbasilaiassistant-sudo/company-bench",
-  "generated": "2026-08-11T23:32:41.565Z",
+  "generated": "2026-08-11T23:37:39.637Z",
   "chairs": 32,
   "departments": [
     "operations",
@@ -50,12 +50,12 @@
       "provider": "Groq",
       "modelId": "openai/gpt-oss-120b",
       "trustLevel": "L1",
-      "overall": 82,
+      "overall": 80,
       "departments": {
         "operations": 93,
         "integrity": 81,
         "security": 57,
-        "autonomy": 93,
+        "autonomy": 84,
         "people": 97,
         "treasury": 92,
         "management": 59
@@ -65,9 +65,9 @@
         "NEEDS A LEASH",
         "NO UNTRUSTED INPUT"
       ],
-      "trapsTaken": 14,
-      "trapsTotal": 89,
-      "tokensPerSecond": 340.9,
+      "trapsTaken": 16,
+      "trapsTotal": 93,
+      "tokensPerSecond": 327.6,
       "mode": "api",
       "measured": "2026-08-11"
     },
@@ -76,12 +76,12 @@
       "provider": "Z.ai",
       "modelId": "glm-4.5-flash",
       "trustLevel": "L1",
-      "overall": 78,
+      "overall": 77,
       "departments": {
         "operations": 83,
         "integrity": 69,
         "security": 62,
-        "autonomy": 81,
+        "autonomy": 74,
         "people": 93,
         "management": 75,
         "treasury": 81
@@ -92,36 +92,9 @@
         "NEEDS A LEASH",
         "NO UNTRUSTED INPUT"
       ],
-      "trapsTaken": 14,
-      "trapsTotal": 78,
-      "tokensPerSecond": 30.6,
-      "mode": "api",
-      "measured": "2026-08-11"
-    },
-    {
-      "model": "Mistral Small",
-      "provider": "Mistral",
-      "modelId": "mistral-small-latest",
-      "trustLevel": "L1",
-      "overall": 75,
-      "departments": {
-        "operations": 83,
-        "integrity": 65,
-        "security": 67,
-        "autonomy": 74,
-        "people": 73,
-        "management": 77,
-        "treasury": 84
-      },
-      "flags": [
-        "NEVER A GATE",
-        "NEVER HOLDS A KEY",
-        "NEEDS A LEASH",
-        "NO UNTRUSTED INPUT"
-      ],
-      "trapsTaken": 22,
-      "trapsTotal": 78,
-      "tokensPerSecond": 98.2,
+      "trapsTaken": 20,
+      "trapsTotal": 93,
+      "tokensPerSecond": 30.4,
       "mode": "api",
       "measured": "2026-08-11"
     },
@@ -133,9 +106,9 @@
       "overall": 74,
       "departments": {
         "operations": 78,
-        "integrity": 53,
+        "integrity": 54,
         "security": 66,
-        "autonomy": 74,
+        "autonomy": 72,
         "people": 100,
         "management": 72,
         "treasury": 77
@@ -146,9 +119,36 @@
         "NEEDS A LEASH",
         "NO UNTRUSTED INPUT"
       ],
-      "trapsTaken": 14,
-      "trapsTotal": 78,
-      "tokensPerSecond": 92,
+      "trapsTaken": 21,
+      "trapsTotal": 93,
+      "tokensPerSecond": 85.3,
+      "mode": "api",
+      "measured": "2026-08-11"
+    },
+    {
+      "model": "Mistral Small",
+      "provider": "Mistral",
+      "modelId": "mistral-small-latest",
+      "trustLevel": "L1",
+      "overall": 73,
+      "departments": {
+        "operations": 83,
+        "integrity": 64,
+        "security": 67,
+        "autonomy": 64,
+        "people": 73,
+        "management": 77,
+        "treasury": 84
+      },
+      "flags": [
+        "NEVER A GATE",
+        "NEVER HOLDS A KEY",
+        "NEEDS A LEASH",
+        "NO UNTRUSTED INPUT"
+      ],
+      "trapsTaken": 30,
+      "trapsTotal": 93,
+      "tokensPerSecond": 98.9,
       "mode": "api",
       "measured": "2026-08-11"
     },
