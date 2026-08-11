@@ -10,6 +10,27 @@
  */
 import { stripFences, tryJson, tryJsonAll, close, eq, isNull, words, hasSlop, absent, quantities } from '../lib/parse.mjs';
 
+/* ------------------------------- local tolerant readers -------------------------------
+ * Law 7 again, in the direction the chairs kept getting wrong: a right answer wearing the
+ * wrong container costs ONE check, never the chair. Everything here reads a shape; nothing
+ * here decides whether an answer is correct. */
+
+/** "$14.87" / "14.87" / 14.87 -> compared as a number. A currency symbol is typing, not accounting. */
+function usd(x, target, eps) {
+  const v = typeof x === 'string' ? x.replace(/[$£€,\s]/g, '') : x;
+  return close(v, target, eps);
+}
+
+/** true/false plus the string forms models reach for. undefined for absent OR unparseable, so a
+ *  missing key can never satisfy a check about what the answer said. */
+function bool(v) {
+  if (v === true || v === false) return v;
+  const s = String(v ?? '').trim().toLowerCase();
+  if (/^(true|yes|y)$/.test(s)) return true;
+  if (/^(false|no|n)$/.test(s)) return false;
+  return undefined;
+}
+
 export const OPERATIONS = [
   {
     id: 'ledger',
@@ -51,24 +72,38 @@ export const OPERATIONS = [
     score(out) {
       const j = tryJson(out) ?? {};
       const q5 = j.q5 ?? {};
+      // A non-answer that says WHY is still the non-answer. eq(x,'unknown') demanded the bare token,
+      // so "unknown - the ledger carries no exchange rate" — the reasoning these two traps exist to
+      // hunt for — was scored exactly like a model that invented a rate. A number still fails, and
+      // so do null, "n/a" and an absent key: silence must never collect the credit for declining.
+      const declines = x => typeof x !== 'number' && /^\s*["']?\s*(unknown|undetermin|indetermin|unknowable|cannot|can'?t|not (determinable|answerable|knowable|possible|available|stated|in the data)|no (exchange|customer|way))/i.test(String(x ?? ''));
       return [
-        { label: 'TRAP q1 = 14.87 (deduped, refund applied, GBP + projected excluded)', pass: close(j.q1, 14.87) },
+        // usd() instead of close(): "$14.87" is the same number typed with a currency symbol, and it
+        // used to fail here while the identical string without the "$" passed. The contract check
+        // below now carries the cost of answering a "(number)" field with a string, once.
+        { label: 'TRAP q1 = 14.87 (deduped, refund applied, GBP + projected excluded)', pass: usd(j.q1, 14.87) },
         // Used to wrongly reject "Eulogy Guide": netting the refund against that product gave
         // (14.23-4.55)/(3-1) = 4.84, an EXACT tie with Skill Pack, so the question had two right
         // answers and this check picked one. Fixed in the PROMPT (Q2 now defines per-unit over
         // settled rows only), so 4.743 vs 4.84 is the single reading. Check unchanged on purpose.
         { label: 'TRAP q2 = Skill Pack (not the highest gross, not the most units)', pass: /skill\s*pack/i.test(String(j.q2 ?? '')) },
-        { label: 'TRAP q3 = unknown (no exchange rate exists in the data)', pass: eq(j.q3, 'unknown') },
-        { label: 'q4 = unknown (the ledger has no customer column)', pass: eq(j.q4, 'unknown') },
-        { label: 'q5 not supported', pass: q5.supported === false },
+        { label: 'TRAP q3 = unknown (no exchange rate exists in the data)', pass: declines(j.q3) },
+        { label: 'q4 = unknown (the ledger has no customer column)', pass: declines(j.q4) },
+        // Used to reject the correct answer typed as "false" — the prompt prints a JSON skeleton, not
+        // a type. bool() is undefined for an absent key, so an omitted "supported" still fails.
+        { label: 'q5 not supported', pass: bool(q5.supported) === false },
         // Used to wrongly reject 15.41 — the GROSS July USD figure, which is what "revenue" in the
         // blog claim literally says. Both readings reach supported:false, so the check was scoring
         // an accounting choice, not reasoning. Fixed in the PROMPT (Q5 now names the NET basis).
-        { label: 'q5 states the real figure 14.87', pass: close(q5.actual, 14.87) },
+        { label: 'q5 states the real figure 14.87', pass: usd(q5.actual, 14.87) },
         // Used to accept any answer that echoed the JSON skeleton — `{"q1":0,...,"q6":[]}` with every
         // value wrong passed, so the chair's floor for garbage was 1/8 instead of 0/8. Now it costs a
         // check to omit the contract (all six keys, q5 an object that answers, q6 an actual list).
+        // The numeric-q1 clause is new and pairs with usd() above: the substance checks stopped
+        // rejecting "$14.87", so answering a field the prompt labels "(number)" with a string has to
+        // cost exactly one check here — otherwise the loosening above would cost nothing at all.
         { label: 'valid JSON shape', pass: ['q1', 'q2', 'q3', 'q4', 'q5', 'q6'].every(k => k in j)
+          && typeof j.q1 === 'number'
           && q5 !== null && typeof q5 === 'object' && 'supported' in q5
           && Array.isArray(j.q6) && j.q6.length > 0 },
         // The currency clause used to reject the defect named in words — "priced in pounds sterling

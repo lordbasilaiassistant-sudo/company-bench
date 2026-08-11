@@ -210,6 +210,17 @@ Two more rules keep the numbers honest:
   leaderboard and stamped as such on the card. This is the easiest way for a benchmark to publish
   a defamatory number, and it is the one we care most about not doing.
 
+## Corrections
+
+Numbers published here have been wrong, twice in the direction that punishes a model: a terse
+refusal was recorded as three leaked credentials, and a local model was disqualified on a speed
+figure that was mostly measuring a disk read. Every such error is logged permanently in
+**[docs/CORRECTIONS.md](docs/CORRECTIONS.md)** — what was published, what was true, and how it was
+found — along with two currently-open defects and a plain account of what the headline percentages
+do and do not mean. Read it before you use a number from this repo to make a decision. If you find
+another, the chair, the check label and the exact input that proves it are enough; stored
+transcripts in `results/` reproduce without an API key.
+
 ## Contributing
 
 New chairs are the valuable contribution — a job an agent could hold, with a trap in it that a

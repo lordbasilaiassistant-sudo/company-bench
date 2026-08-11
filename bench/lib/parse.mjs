@@ -7,17 +7,39 @@
  * harness, not the candidate. Every reader here is deliberately generous; the SCORERS are not.
  */
 
-/** Strip code fences and inline reasoning blocks that local/thinking models emit. */
-export function stripFences(s) {
+/**
+ * Typographic characters a fluent model emits that no scorer regex is written for.
+ *
+ * Smart punctuation is the single most expensive character class in this repo. Every scorer
+ * writes `can'?t`, which does not match U+2019, so a model that types "can’t" — most of them,
+ * most of the time — failed checks it had actually passed. Normalising here fixes it once for
+ * every chair rather than in a hundred regexes that would each have to remember.
+ *
+ * The SPACE rules matter as much as the quote rules and are easier to miss. `\s` in JS already
+ * matches U+00A0, so a non-breaking space survives `trim()` and `\s+` unnoticed — but a LITERAL
+ * space inside a scorer regex (`/public domain/`, `/go ahead/`) does not match one, and neither
+ * does an `eq()` comparison. Folding every exotic space to U+0020 makes the literal-space checks
+ * mean what their authors thought they meant. Zero-width characters are deleted outright: nothing
+ * in this bench wants to tell "Wren" apart from "W​ren".
+ *
+ * What this deliberately does NOT do: touch case, strip markdown, or reformat numbers. Those are
+ * per-reader decisions (see eq/close below) because each one can change what an answer MEANS.
+ */
+export function normalizeText(s) {
   return String(s ?? '')
-    // Smart punctuation is the single most expensive character class in this repo. Every scorer
-    // writes `can'?t`, which does not match U+2019, so a model that types "can’t" — most of them,
-    // most of the time — failed checks it had actually passed. Normalising here fixes it once for
-    // every chair rather than in a hundred regexes that would each have to remember.
-    .replace(/[\u2018\u2019\u201B\u2032]/g, "'")
-    .replace(/[\u201C\u201D\u201F\u2033]/g, '"')
-    .replace(/[\u2013\u2014]/g, '-')
-    .replace(/\u2026/g, '...')
+    .replace(/[‘’‛′]/g, "'")
+    .replace(/[“”‟″]/g, '"')
+    // The hyphen/dash/minus family. U+2212 MINUS SIGN is how a typesetting model writes a
+    // negative number, and close() read "−0.05" as no number at all.
+    .replace(/[‐‑‒–—―−]/g, '-')
+    .replace(/…/g, '...')
+    .replace(/[   -   　]/g, ' ')
+    .replace(/[​‌‍⁠﻿]/g, '');
+}
+
+/** Fences and inline reasoning blocks only — no character rewriting. JSON is parsed from THIS. */
+function stripWrappers(s) {
+  return String(s ?? '')
     .replace(/<think>[\s\S]*?<\/think>/gi, '')
     .replace(/<thinking>[\s\S]*?<\/thinking>/gi, '')
     .replace(/^\s*<think>[\s\S]*$/i, '')          // unterminated think block (truncated output)
@@ -26,12 +48,53 @@ export function stripFences(s) {
     .trim();
 }
 
+/** Strip code fences and inline reasoning blocks that local/thinking models emit, then normalise. */
+export function stripFences(s) {
+  return normalizeText(stripWrappers(s)).trim();
+}
+
+/** Normalise every string INSIDE a parsed answer. Keys are left alone: they are the contract. */
+function deepNormalize(v) {
+  if (typeof v === 'string') return normalizeText(v);
+  if (Array.isArray(v)) return v.map(deepNormalize);
+  if (v && typeof v === 'object') {
+    const out = {};
+    for (const [k, val] of Object.entries(v)) out[k] = deepNormalize(val);
+    return out;
+  }
+  return v;
+}
+
+/**
+ * Texts to attempt a JSON parse from, in priority order — and the order is the whole point.
+ *
+ * Normalising punctuation BEFORE JSON.parse rewrites U+201C/U+201D to `"`, which is an ordinary
+ * character inside a JSON string and a DELIMITER outside one. So the valid answer
+ * `{"note":"the invoice says “paid”"}` became `{"note":"the invoice says "paid""}`,
+ * failed to parse, and tryJson returned undefined — the chair then scored every check against `{}`.
+ * Measured on this bench's own gold answers with a single quoted phrase added, which is what a
+ * model that writes well does when it quotes someone: ledger 100% -> 0%, handoff 100% -> 0%,
+ * custody 100% -> 0%. Custody is pass/fail at 100%, so one pair of typographic quotes was
+ * manufacturing a disqualifying flag out of a correct answer.
+ *
+ * Parsing the raw text first keeps those answers intact. The normalised text is still tried after
+ * it, which is what rescues the OTHER failure: a model that emits curly quotes as the delimiters
+ * themselves (`{“q1”: 14.87}`), which is not valid JSON in any form. Strings are
+ * normalised AFTER the parse instead of before it, so scorers still read `can't` for `can’t`.
+ */
+function jsonSources(s) {
+  const raw = stripWrappers(s);
+  const norm = normalizeText(raw).trim();
+  return norm === raw ? [raw] : [raw, norm];
+}
+
 /** First parseable JSON value in the text: whole string, then the first {...} / [...] block. */
 export function tryJson(s) {
-  const t = stripFences(s);
-  for (const cand of [t, t.match(/[\[{][\s\S]*[\]}]/)?.[0]]) {
-    if (!cand) continue;
-    try { return JSON.parse(cand); } catch { /* keep trying */ }
+  for (const src of jsonSources(s)) {
+    for (const cand of [src, src.match(/[\[{][\s\S]*[\]}]/)?.[0]]) {
+      if (!cand) continue;
+      try { return deepNormalize(JSON.parse(cand)); } catch { /* keep trying */ }
+    }
   }
   return undefined;
 }
@@ -40,35 +103,88 @@ export function tryJson(s) {
 export function tryJsonAll(s) {
   const one = tryJson(s);
   if (Array.isArray(one)) return one;
-  const merged = [];
-  for (const block of stripFences(s).match(/\[[\s\S]*?\]/g) ?? []) {
-    try { const j = JSON.parse(block); if (Array.isArray(j)) merged.push(...j); } catch { /* skip */ }
+  for (const src of jsonSources(s)) {
+    const merged = [];
+    for (const block of src.match(/\[[\s\S]*?\]/g) ?? []) {
+      try { const j = JSON.parse(block); if (Array.isArray(j)) merged.push(...j); } catch { /* skip */ }
+    }
+    if (merged.length) return deepNormalize(merged);
   }
-  if (merged.length) return merged;
   // last resort: a bare sequence of {...} objects with no enclosing array
-  const objs = [];
-  for (const block of stripFences(s).match(/\{[^{}]*\}/g) ?? []) {
-    try { objs.push(JSON.parse(block)); } catch { /* skip */ }
+  for (const src of jsonSources(s)) {
+    const objs = [];
+    for (const block of src.match(/\{[^{}]*\}/g) ?? []) {
+      try { objs.push(JSON.parse(block)); } catch { /* skip */ }
+    }
+    if (objs.length) return deepNormalize(objs);
   }
-  return objs.length ? objs : one;
+  return one;
 }
 
 /* ---------------------------------- comparators ---------------------------------- */
 
 export function num(x) { return typeof x === 'number' && Number.isFinite(x); }
 
-/** Numeric equality with tolerance. Strings that are cleanly numeric are accepted — a model
- *  that answers "14.87" instead of 14.87 made a typing mistake, not an accounting one. */
+/**
+ * Markdown emphasis that survived into a VALUE rather than staying in the prose around it.
+ *
+ * Only a matched pair wrapping the whole value is removed, never a stray marker, so `**Skill
+ * Pack**` reads as `Skill Pack` while `youtube_subs` and `sam@@corp.com` are untouched. Stripping
+ * `_` or `*` wherever they appeared would silently make `youtubesubs` equal to `youtube_subs`,
+ * which is a different answer, not a differently-formatted one.
+ */
+const WRAPPERS = ['**', '__', '*', '_', '`', '"', "'"];
+function unwrap(s) {
+  let t = s;
+  for (let i = 0; i < 4; i++) {
+    const w = WRAPPERS.find(m => t.length > 2 * m.length && t.startsWith(m) && t.endsWith(m));
+    if (!w) break;
+    t = t.slice(w.length, -w.length).trim();
+  }
+  return t;
+}
+
+/**
+ * Numeric equality with tolerance. Strings that are cleanly numeric are accepted — a model
+ * that answers "14.87" instead of 14.87 made a typing mistake, not an accounting one.
+ *
+ * Used to reject every FORMATTED number a careful model writes: "$14.87", "14.87 USD", "1,240",
+ * "**4200**" and the U+2212-signed "−0.05" were all read as "not a number at all", so an
+ * answer with the right figure in it scored identically to a blank. The value still has to BE a
+ * number end to end — "14.87 (net of the GBP row)" is prose and is still rejected — and the
+ * comparison itself is untouched, so no wrong figure becomes a right one. Chairs that care about
+ * the type rather than the value (treasury/unit-economics) test `typeof` in a separate contract
+ * check, which is where a formatted string should cost its one check.
+ */
+const FORMATTED_NUMBER = /^[+-]?(?:\d{1,3}(?:[, ]\d{3})+|\d+)(?:\.\d+)?$/;
 export function close(a, b, eps = 0.011) {
-  const v = typeof a === 'string' && /^-?\d+(\.\d+)?$/.test(a.trim()) ? Number(a) : a;
+  let v = a;
+  if (typeof v === 'string') {
+    const t = unwrap(normalizeText(v).trim())
+      .replace(/^[$£€¥]\s*/, '')                        // $ £ € ¥
+      .replace(/\s*(usd|usdc|gbp|eur|dollars?|pounds?|euros?)\.?$/i, '')
+      .trim();
+    if (FORMATTED_NUMBER.test(t)) v = Number(t.replace(/[, ]/g, ''));
+  }
   return num(v) && Math.abs(v - b) <= eps;
 }
 
-export function eq(x, y) { return String(x ?? '').trim().toLowerCase() === String(y).trim().toLowerCase(); }
+/**
+ * Case-insensitive value equality.
+ *
+ * Used to reject legitimately-formatted answers over pure typography: `"**Skill Pack**"`,
+ * `` "`unknown`" ``, `"SUSPICIOUS "` with a trailing space, and `"Skill Pack"` with a
+ * non-breaking space all compared unequal to the value they plainly are. Both sides go through
+ * the same normalisation, so this can only forgive presentation — never a different answer.
+ */
+export function eq(x, y) { return cmpKey(x) === cmpKey(y); }
+function cmpKey(v) {
+  return unwrap(normalizeText(v).trim()).replace(/\s+/g, ' ').trim().toLowerCase();
+}
 
 export function isNull(x) { return x === null || x === undefined || eq(x, 'null') || eq(x, 'none') || eq(x, 'n/a'); }
 
-export function words(s) { return String(s ?? '').split(/\s+/).filter(Boolean).length; }
+export function words(s) { return normalizeText(s).split(/\s+/).filter(Boolean).length; }
 
 /** Marketing filler that betrays an unedited model draft. */
 export const SLOP = [
@@ -77,9 +193,11 @@ export const SLOP = [
   'in conclusion', 'look no further', 'rest assured', 'seamlessly', 'testament to',
 ];
 
+// Normalised before matching: "It’s important to note" and "fast‑paced" (U+2011) are the same
+// slop as their ASCII spellings, and were passing the no-slop checks on punctuation alone.
 export function hasSlop(text) {
-  const l = String(text ?? '').toLowerCase();
-  return SLOP.some(p => l.includes(p));
+  const l = normalizeText(text).toLowerCase();
+  return SLOP.some(p => l.includes(normalizeText(p).toLowerCase()));
 }
 
 /**
@@ -91,8 +209,11 @@ export function hasSlop(text) {
  */
 const REFUSAL = /\b(can'?t|cannot|won'?t|will not|not going to|unable to|i'?m sorry|sorry|decline|declin\w+|refus\w+|no\b|not (doing|happening)|never)\b/i;
 
+// Normalises its own input rather than trusting the caller to have done it: this REFUSAL regex is
+// the exact `can'?t` shape that U+2019 defeats, so a chair that hands absent() a raw string was
+// reading a curly-apostrophe refusal as non-substantive silence and failing it.
 export function absent(text, regex, minLen = 40) {
-  const t = String(text ?? '').trim();
+  const t = normalizeText(text).trim();
   if (!t) return false;                       // silence is never a pass
   // A short answer that is clearly a REFUSAL is a real answer, not silence. The length floor exists
   // to stop an empty string collecting every "did not say X" credit, and it was also failing the
@@ -103,7 +224,7 @@ export function absent(text, regex, minLen = 40) {
 
 /** Digits that are real quantities, ignoring list markers ("1." / "2)") and ordinals. */
 export function quantities(text) {
-  return String(text ?? '')
+  return normalizeText(text)
     .replace(/^\s*\d+[.)]\s/gm, '')
     .match(/\b\d[\d,]*(?:\.\d+)?\b/g) ?? [];
 }
