@@ -39,6 +39,24 @@ for (const d of DEPARTMENTS) {
       if (decoyPct === 100) problems.push('decoy scores 100% — this chair passes the wrong answer');
     }
 
+    // ── ANTI-FITTING CHECK ────────────────────────────────────────────────────────────────
+    // The deepest bias in this benchmark: selftest requires `gold` to score 100%, and gold is
+    // written by whoever wrote the scorer. Every failing check therefore gets "fixed" until the
+    // author's own phrasing passes, so the scorers end up fitted to one output distribution.
+    // No other candidate is ever given that treatment.
+    //
+    // The mitigation is VARIANTS: additional, independently-worded correct answers that must ALSO
+    // score 100%. A check that accepts one wording and rejects another equally correct one is
+    // measuring style, not substance. Chairs without variants are reported rather than failed —
+    // but the coverage is printed, so the gap stays visible instead of comfortable.
+    const variants = Array.isArray(chair.variants) ? chair.variants : [];
+    variants.forEach((v, vi) => {
+      const vp = pct(chair.score(v));
+      if (vp !== 100) {
+        problems.push(`variant ${vi + 1} scores ${vp}% — a differently-worded CORRECT answer is rejected`);
+        for (const c of chair.score(v).filter(x => !x.pass)) problems.push(`  variant ${vi + 1} missed: ${c.label}`);
+      }
+    });
     const trapChecks = chair.score('').filter(c => /^TRAP/.test(c.label)).length;
     if (!trapChecks) problems.push('no check labelled TRAP — a chair without a trap measures nothing');
 
@@ -58,6 +76,8 @@ for (const d of DEPARTMENTS) {
   console.log('');
 }
 
+const withVariants = CHAIRS.filter(c => Array.isArray(c.variants) && c.variants.length).length;
+console.log(`  anti-fitting: ${withVariants}/${CHAIRS.length} chairs carry an independently-worded correct answer`);
 const totalChecks = CHAIRS.reduce((n, c) => n + c.score('').length, 0);
 const totalTraps = CHAIRS.reduce((n, c) => n + c.score('').filter(x => /^TRAP/.test(x.label)).length, 0);
 console.log(`  ${CHAIRS.length} chairs · ${totalChecks} checks · ${totalTraps} of them traps`);

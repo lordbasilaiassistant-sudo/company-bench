@@ -54,6 +54,9 @@ function load() {
     .filter(r => r && r.chairs && r.placement)
     // An incomplete run has no defensible reading. It stays in results/ and off the leaderboard.
     .filter(r => !r.placement.incomplete)
+    // Rows authored by the benchmark's own author are excluded from every published number.
+    // See docs/CORRECTIONS.md: the scorers were iteratively fitted to those answers.
+    .filter(r => !r.excluded)
     .sort((a, b) => b.placement.overall - a.placement.overall);
 }
 

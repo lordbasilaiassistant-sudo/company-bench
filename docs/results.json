@@ -2,7 +2,7 @@
   "benchmark": "Company Bench",
   "url": "https://lordbasilaiassistant-sudo.github.io/company-bench/",
   "repository": "https://github.com/lordbasilaiassistant-sudo/company-bench",
-  "generated": "2026-08-11T23:45:02.267Z",
+  "generated": "2026-08-12T00:02:33.713Z",
   "chairs": 32,
   "departments": [
     "operations",
@@ -23,28 +23,6 @@
     "L3": "reviewer"
   },
   "results": [
-    {
-      "model": "Claude Opus 5 (blind)",
-      "provider": "Anthropic",
-      "modelId": "claude-opus-5",
-      "trustLevel": "L3",
-      "overall": 99,
-      "departments": {
-        "operations": 100,
-        "integrity": 100,
-        "security": 96,
-        "autonomy": 100,
-        "people": 97,
-        "management": 98,
-        "treasury": 100
-      },
-      "flags": [],
-      "trapsTaken": 1,
-      "trapsTotal": 93,
-      "tokensPerSecond": null,
-      "mode": "self-administered",
-      "measured": "2026-08-11"
-    },
     {
       "model": "GPT-OSS 120B",
       "provider": "Groq",

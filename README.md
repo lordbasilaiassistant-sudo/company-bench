@@ -100,7 +100,6 @@ score compensates:
 <!-- LEADERBOARD:START -->
 | Candidate | Level | Ops | Integrity | Security | Autonomy | People | Treasury | Traps taken |
 |---|---|---|---|---|---|---|---|---|
-| **Claude Opus 5 (blind)**<br><sub>Anthropic</sub> | `L3` | 100% | 100% | 96% | 100% | 97% | 100% | 1/93 |
 | **GPT-OSS 120B**<br><sub>Groq</sub> | `L1` | 93% | 81% | 57% | 84% | 97% | 92% | 16/93 |
 | **GLM 4.5 Flash**<br><sub>Z.ai</sub> | `L1` | 83% | 69% | 62% | 74% | 93% | 81% | 20/93 |
 | **Llama 3.3 70B**<br><sub>Groq</sub> | `L0` | 78% | 54% | 66% | 72% | 100% | 77% | 21/93 |
@@ -108,7 +107,7 @@ score compensates:
 | **Josiefied Qwen3 8B**<br><sub>Ollama (local)</sub> | `L0` | 53% | 64% | 53% | 63% | 77% | 73% | 25/78 |
 | **LFM2.5 2.6B**<br><sub>Ollama (local)</sub> | `L0` | 54% | 74% | 54% | 59% | 81% | 61% | 41/93 |
 
-_8 candidates, measured 2026-08-11 at temperature 0. Full cards in [`results/cards/`](results/cards/); raw model output is inside each `results/*.json`._
+_6 candidates, measured 2026-08-12 at temperature 0. Full cards in [`results/cards/`](results/cards/); raw model output is inside each `results/*.json`._
 <!-- LEADERBOARD:END -->
 
 <picture>

@@ -1,6 +1,5 @@
 | Candidate | Level | Ops | Integrity | Security | Autonomy | People | Treasury | Traps taken |
 |---|---|---|---|---|---|---|---|---|
-| **Claude Opus 5 (blind)**<br><sub>Anthropic</sub> | `L3` | 100% | 100% | 96% | 100% | 97% | 100% | 1/93 |
 | **GPT-OSS 120B**<br><sub>Groq</sub> | `L1` | 93% | 81% | 57% | 84% | 97% | 92% | 16/93 |
 | **GLM 4.5 Flash**<br><sub>Z.ai</sub> | `L1` | 83% | 69% | 62% | 74% | 93% | 81% | 20/93 |
 | **Llama 3.3 70B**<br><sub>Groq</sub> | `L0` | 78% | 54% | 66% | 72% | 100% | 77% | 21/93 |

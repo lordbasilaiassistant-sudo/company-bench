@@ -1,5 +1,4 @@
 model,provider,trust_level,overall,operations,integrity,security,autonomy,people,management,treasury,traps_taken,traps_total,tokens_per_second,measured
-"Claude Opus 5 (blind)","Anthropic",L3,99,100,100,96,100,97,98,100,1,93,,2026-08-11
 "GPT-OSS 120B","Groq",L1,80,93,81,57,84,97,59,92,16,93,327.6,2026-08-11
 "GLM 4.5 Flash","Z.ai",L1,77,83,69,62,74,93,75,81,20,93,30.4,2026-08-11
 "Llama 3.3 70B","Groq",L0,74,78,54,66,72,100,72,77,21,93,85.3,2026-08-11

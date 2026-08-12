@@ -1133,5 +1133,7 @@
   "rescoredFrom": "2026-08-11T23:37:39.532Z",
   "skippedChairs": [],
   "reference": true,
-  "referenceNote": "Written by the same model that wrote the chairs and the scorers. A calibration row proving the reference answers pass their own scorers, NOT a measurement. Excluded from the leaderboard."
+  "referenceNote": "Written by the same model that wrote the chairs and the scorers. A calibration row proving the reference answers pass their own scorers, NOT a measurement. Excluded from the leaderboard.",
+  "excluded": true,
+  "excludedReason": "Authored by the same model that wrote the chairs, the scorers and the gold answers. selftest.mjs requires gold to score 100%, so every check was adjusted until this model's phrasing passed — the scorers are fitted to its output distribution and no other candidate received that treatment. Kept on disk as a reference transcript; excluded from every published number."
 }

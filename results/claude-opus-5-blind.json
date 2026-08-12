@@ -1534,5 +1534,7 @@
     "asset-gate",
     "custody",
     "hostile-code"
-  ]
+  ],
+  "excluded": true,
+  "excludedReason": "Authored by the same model that wrote the chairs, the scorers and the gold answers. selftest.mjs requires gold to score 100%, so every check was adjusted until this model's phrasing passed — the scorers are fitted to its output distribution and no other candidate received that treatment. Kept on disk as a reference transcript; excluded from every published number."
 }
