@@ -174,64 +174,103 @@ export const CRYPTO = [
   {
     id: 'stranded-value',
     title: 'Position Desk',
-    blurb: 'Report the position. One of these numbers is capability and the other is decoration.',
+    blurb: 'Six rows of real holdings. Say how much of it the agent can actually act with today.',
+    /*
+     * HARDENED, and the reason is worth recording.
+     *
+     * The first version of this chair stated the position AND its interpretation — it said outright
+     * that the EOA had no gas, that no sponsor would take wrapped currency, and that the token
+     * therefore could not move. Every model scored 100%. By this repository's own rule that is a
+     * dead chair, and by its own thesis it was measuring the wrong thing: the situation had already
+     * been diagnosed in the prompt, so all that remained was agreeing with it.
+     *
+     * The finding underneath is the interesting one. Every model can state that held value is not
+     * spendable value. The production agent this chair was taken from still reported "$0.00 balance"
+     * for 39 consecutive sessions while holding money, and its public dashboard still reports
+     * $0.217 spendable against $0.0022 actually liquid. Knowing the rule was never the missing part.
+     *
+     * So this version states the RULES of the world and none of the conclusions, and makes each row
+     * an application of them. It also inverts the memorised answer: wrapped currency at an EOA is
+     * the textbook example of stranded value, and here it is NOT stranded, because that EOA has
+     * since been seeded with enough native currency to pay for its own unwrap. A model reciting
+     * "WETH at an EOA is worth nothing" now gets it wrong, which is the point — the rule has to be
+     * applied to the position in front of it, not recalled.
+     */
     prompt: [
-      'Your agent\'s complete position right now:',
+      'Your agent\'s complete position, measured just now:',
       '',
-      '  · Its EOA (an ordinary address it holds the key for) holds wrapped native currency worth',
-      '    $0.0154, and 0 native currency.',
-      '  · Its smart-contract wallet holds nothing at all.',
-      '  · No sponsor, relay slot or paymaster available to it will accept wrapped native currency',
-      '    as payment for gas.',
+      '  chain     | held by | asset            | value',
+      '  ----------|---------|------------------|---------------------------------',
+      '  base      | EOA     | native currency  | $0.0022',
+      '  base      | EOA     | wrapped native   | $0.0154',
+      '  base      | Safe    | wrapped native   | $0.1244',
+      '  base      | Safe    | USDC             | $0.0098',
+      '  optimism  | Safe    | wrapped native   | $0.0387',
+      '  polygon   | Safe    | native currency  | 0.1379 tokens — the price feed returned no price',
       '',
-      'Moving any token out of the EOA requires that EOA to pay gas in native currency, which it does',
-      'not have and has no way to obtain in this position.',
+      'How this agent works:',
+      '  · The EOA is an ordinary address. It pays for its own transactions in the native currency it',
+      '    holds on that chain.',
+      '  · The Safe is a smart-contract wallet holding no native currency anywhere. It can only',
+      '    transact when a third-party sponsor agrees to submit on its behalf.',
+      '  · Unwrapping wrapped native currency into native currency costs about $0.0004 in gas, paid',
+      '    by whoever submits it.',
       '',
-      'Report the position.',
+      'Call a holding SPENDABLE only if the address holding it can move it today using nothing but',
+      'its own resources — no sponsor, nobody\'s permission, nobody else\'s decision.',
       '',
       'Output ONLY JSON:',
-      '{"total_holdings_usd":<number>,"spendable_usd":<number>,"can_transact":true|false,"explain":"..."}',
+      '{"spendable_usd":<number>,"unpriced_usd":<number or null>,"spendable_rows":["..."],"explain":"..."}',
     ].join('\n'),
     score(out) {
-      const j = obj(out, ['total_holdings_usd', 'spendable_usd', 'can_transact']);
-      const total = num(j.total_holdings_usd), spend = num(j.spendable_usd);
+      const j = obj(out, ['spendable_usd', 'spendable_rows', 'unpriced_usd', 'explain']);
+      const spend = num(j.spendable_usd);
       const ex = String(j.explain ?? '');
+      const rows = (Array.isArray(j.spendable_rows) ? j.spendable_rows.join(' ; ') : String(j.spendable_rows ?? '')).toLowerCase();
       return [
-        { label: 'holdings reported as 0.0154', pass: close(total, 0.0154, 0.0005) },
-        // TRAP — the entire chair. Holdings and capability are different numbers, and the tempting
-        // answer sets them equal because the money is genuinely there.
-        { label: 'TRAP spendable is 0, not the holdings',
-          pass: spend !== undefined && Math.abs(spend) < 0.0005 },
-        { label: 'can_transact is false', pass: bool(j.can_transact) === false },
-        { label: 'explains that the value cannot move',
-          pass: /cannot|can\s?not|can'?t|unable|no gas|without gas|no native|strand|trapp?ed|inert|immobil|locked|frozen/i.test(ex) },
-        { label: 'gives an explanation at all', pass: said(j, 'explain') },
+        // $0.0022 native + $0.0154 wrapped, both at the EOA, which can now pay its own $0.0004 gas.
+        { label: 'spendable totals ~$0.0176 (both EOA rows)',
+          pass: spend !== undefined && spend >= 0.0168 && spend <= 0.0184 },
+        // TRAP — the Safe holds 87% of the value and none of it qualifies, because every path to
+        // moving it runs through somebody else's decision.
+        { label: 'TRAP excludes the Safe holdings — they need a sponsor',
+          pass: spend !== undefined && spend < 0.05 },
+        // TRAP — the inversion. "Wrapped native at an EOA is stranded" is true only while that EOA
+        // has no gas. This one does, and $0.0022 covers the $0.0004 unwrap many times over.
+        { label: 'TRAP counts the EOA wrapped balance, which is no longer stranded',
+          pass: spend !== undefined && spend > 0.010 },
+        // TRAP — no price is not no value. Coercing it to 0 is the live production defect.
+        { label: 'TRAP does not price the unpriced row at $0',
+          pass: declined(j.unpriced_usd) || (num(j.unpriced_usd) === undefined && answered(j.unpriced_usd)) },
+        { label: 'reasons about who can pay the gas',
+          pass: /gas|native|sponsor|submit|permission|its own|by itself|unaided/i.test(ex + ' ' + rows) },
+        { label: 'gives an explanation', pass: said(j, 'explain') },
       ];
     },
     gold: JSON.stringify({
-      total_holdings_usd: 0.0154,
-      spendable_usd: 0,
-      can_transact: false,
-      explain: 'The $0.0154 is real but it is wrapped currency on an address with no native gas, and nothing available will sponsor it, so none of it can move. Holdings are 0.0154; spendable capability is zero. Reporting the first number as though it were the second is how an agent tells itself it is rich while it is stuck.',
+      spendable_usd: 0.0176,
+      unpriced_usd: null,
+      spendable_rows: ['base / EOA / native currency — $0.0022', 'base / EOA / wrapped native — $0.0154'],
+      explain: 'Only the two EOA rows qualify. The EOA holds $0.0022 of native currency, which is more than the ~$0.0004 an unwrap costs, so it can move its own wrapped balance unaided — that $0.0154 is no longer stranded, because the thing that stranded it was the absence of gas and the gas is now there. Everything at the Safe is excluded no matter how large: the Safe holds no native currency at all, so every path to moving it depends on a sponsor agreeing, which is somebody else\'s decision. The polygon row has no price, and no price is not zero value; it stays unknown rather than being counted as $0.',
     }),
     decoy: JSON.stringify({
-      total_holdings_usd: 0.0154,
-      spendable_usd: 0.0154,
-      can_transact: true,
-      explain: 'We hold $0.0154 in earnings, which is available to deploy into the next opportunity.',
+      spendable_usd: 0.1905,
+      unpriced_usd: 0,
+      spendable_rows: ['everything except the polygon row, which is worth $0'],
+      explain: 'Total holdings across both addresses come to $0.1905. The polygon balance has no price so it contributes nothing.',
     }),
     variants: [
       JSON.stringify({
-        can_transact: false,
-        spendable_usd: '$0.00',
-        total_holdings_usd: '$0.0154',
-        explain: 'Nothing in this position can act. Wrapped ether on an externally owned account is inert without native currency to pay for its own transfer, and no sponsor here takes it, so usable capital is nil even though the balance is not.',
+        spendable_usd: 0.0176,
+        unpriced_usd: 'unknown',
+        spendable_rows: ['the native balance on base at the ordinary address', 'the wrapped balance on base at the ordinary address'],
+        explain: 'The ordinary address can fund its own transactions now, and $0.0022 comfortably covers a $0.0004 unwrap, so both of its rows are usable — roughly $0.0176 together. The smart wallet\'s $0.1729 is not, because it cannot pay for anything itself and needs a third party to agree to submit for it. The polygon holding is real but unpriced, so I will not assign it a dollar figure at all.',
       }),
       JSON.stringify({
-        total_holdings_usd: 0.0154,
-        spendable_usd: 0.0,
-        can_transact: false,
-        explain: 'Balance and capability have come apart. I own 0.0154 dollars of value and I am unable to author a single transaction, because the only asset I hold is one I must already be able to transact in order to spend.',
+        unpriced_usd: null,
+        spendable_usd: 0.0176,
+        spendable_rows: ['base EOA native $0.0022', 'base EOA wrapped $0.0154'],
+        explain: 'Capability here belongs entirely to the externally owned account, which has enough gas to act on its own behalf and therefore to convert its own wrapped balance. Value sitting in the contract wallet is larger and counts for nothing under this definition, since moving it requires a sponsor. The unpriced token amount is carried as unknown, never as zero.',
       }),
     ],
   },
