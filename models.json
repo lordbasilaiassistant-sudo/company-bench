@@ -119,42 +119,41 @@
     "cost": "local",
     "disabled": true,
     "numCtx": 16384,
-    "numCtxNote": "BENCHMARK SETTING ONLY. Capped so the bench measures the MODEL, not an eager KV allocation: Ollama reserves the whole KV cache at load, linear in num_ctx, so context is paid for in offloaded layers. Measured on one 8 GB card from ollama's own server.log: Qwen3-Coder-30B at -c 8192 put 49/49 layers on the GPU with a 768 MiB KV; the same model at -c 262144 put 9/49 on the GPU with a 24576 MiB KV, and graph splits went 104 -> 582. For daily use run the model at the largest context you actually need and buy it back with OLLAMA_KV_CACHE_TYPE=q8_0, which halves KV bytes. Do NOT touch OLLAMA_FLASH_ATTENTION: current Ollama already passes --flash-attn auto so setting it to 1 is a no-op, and setting it to 0 additionally drops num_batch 512 -> 256 on CUDA devices with <= 8 GiB, making it a pessimisation on exactly the cards that need help."
+    "numCtxNote": "BENCHMARK SETTING ONLY, held fixed so scores stay comparable across runs. Ollama reserves the ENTIRE KV cache at load, linear in num_ctx, so context is paid for in offloaded layers. Measured on one 8 GB card (RTX 4060 Laptop) from ollama's own server.log: Qwen3-Coder-30B at -c 8192 put 49/49 layers on the GPU with a 768 MiB KV; the same model at -c 262144 put 9/49 on the GPU with a 24576 MiB KV, and graph splits went 104 -> 582. Measured end to end on Qwythos 9B, same prompt back to back: a server at ctx 262144 held the model at 16.0 GB, 65% CPU / 35% GPU, and answered in 32.0 s; the same model on a server at ctx 32768 with q8_0 KV held 6.9 GB, 19% CPU / 81% GPU, and answered in 13.4 s. For daily use: set OLLAMA_KV_CACHE_TYPE=q8_0 (server-level, halves KV bytes) and choose context per request rather than globally. Do NOT touch OLLAMA_FLASH_ATTENTION: current Ollama already passes --flash-attn auto, so =1 is a no-op, and =0 additionally drops num_batch 512 -> 256 on CUDA devices with <= 8 GiB, making it a pessimisation on exactly the cards it is usually recommended to."
   },
   {
     "id": "ollama-qwythos-9b",
     "name": "Huihui Qwythos 9B",
     "vendor": "Ollama (local)",
     "api": "ollama",
-    "baseUrl": "http://127.0.0.1:11435",
     "model": "hf.co/huihui-ai/Huihui-Qwythos-9B-Claude-Mythos-5-1M-abliterated-GGUF:Q8_0",
     "keyEnv": null,
     "cost": "local",
     "maxTokens": 3000,
     "disabled": true,
     "numCtx": 16384,
-    "numCtxNote": "BENCHMARK SETTING ONLY. Capped so the bench measures the MODEL, not an eager KV allocation: at its declared 262144 context Qwen3-Coder occupied 43 GB and ran 86% on CPU. For daily use run the model at its maximum context and buy it back with OLLAMA_FLASH_ATTENTION=1 and OLLAMA_KV_CACHE_TYPE=q8_0 — context is what makes a model useful and starving it is not a speedup."
+    "numCtxNote": "BENCHMARK SETTING ONLY, held fixed so scores stay comparable across runs. Ollama reserves the ENTIRE KV cache at load, linear in num_ctx, so context is paid for in offloaded layers. Measured on one 8 GB card (RTX 4060 Laptop) from ollama's own server.log: Qwen3-Coder-30B at -c 8192 put 49/49 layers on the GPU with a 768 MiB KV; the same model at -c 262144 put 9/49 on the GPU with a 24576 MiB KV, and graph splits went 104 -> 582. Measured end to end on Qwythos 9B, same prompt back to back: a server at ctx 262144 held the model at 16.0 GB, 65% CPU / 35% GPU, and answered in 32.0 s; the same model on a server at ctx 32768 with q8_0 KV held 6.9 GB, 19% CPU / 81% GPU, and answered in 13.4 s. For daily use: set OLLAMA_KV_CACHE_TYPE=q8_0 (server-level, halves KV bytes) and choose context per request rather than globally. Do NOT touch OLLAMA_FLASH_ATTENTION: current Ollama already passes --flash-attn auto, so =1 is a no-op, and =0 additionally drops num_batch 512 -> 256 on CUDA devices with <= 8 GiB, making it a pessimisation on exactly the cards it is usually recommended to.",
+    "baseUrlNote": "Omitted on purpose: with no baseUrl the runner follows OLLAMA_HOST (or OLLAMA_HOST_URL), which is the variable Ollama itself uses. Pin one here only if your server is somewhere those do not point."
   },
   {
     "id": "ollama-josie-qwen3-8b",
     "name": "Josiefied Qwen3 8B",
     "vendor": "Ollama (local)",
     "api": "ollama",
-    "baseUrl": "http://127.0.0.1:11435",
     "model": "hf.co/mradermacher/Josiefied-Qwen3-8B-abliterated-v1-i1-GGUF:Q4_K_M",
     "keyEnv": null,
     "cost": "local",
     "maxTokens": 4000,
     "disabled": true,
     "numCtx": 16384,
-    "numCtxNote": "BENCHMARK SETTING ONLY. Capped so the bench measures the MODEL, not an eager KV allocation: at its declared 262144 context Qwen3-Coder occupied 43 GB and ran 86% on CPU. For daily use run the model at its maximum context and buy it back with OLLAMA_FLASH_ATTENTION=1 and OLLAMA_KV_CACHE_TYPE=q8_0 — context is what makes a model useful and starving it is not a speedup."
+    "numCtxNote": "BENCHMARK SETTING ONLY, held fixed so scores stay comparable across runs. Ollama reserves the ENTIRE KV cache at load, linear in num_ctx, so context is paid for in offloaded layers. Measured on one 8 GB card (RTX 4060 Laptop) from ollama's own server.log: Qwen3-Coder-30B at -c 8192 put 49/49 layers on the GPU with a 768 MiB KV; the same model at -c 262144 put 9/49 on the GPU with a 24576 MiB KV, and graph splits went 104 -> 582. Measured end to end on Qwythos 9B, same prompt back to back: a server at ctx 262144 held the model at 16.0 GB, 65% CPU / 35% GPU, and answered in 32.0 s; the same model on a server at ctx 32768 with q8_0 KV held 6.9 GB, 19% CPU / 81% GPU, and answered in 13.4 s. For daily use: set OLLAMA_KV_CACHE_TYPE=q8_0 (server-level, halves KV bytes) and choose context per request rather than globally. Do NOT touch OLLAMA_FLASH_ATTENTION: current Ollama already passes --flash-attn auto, so =1 is a no-op, and =0 additionally drops num_batch 512 -> 256 on CUDA devices with <= 8 GiB, making it a pessimisation on exactly the cards it is usually recommended to.",
+    "baseUrlNote": "Omitted on purpose: with no baseUrl the runner follows OLLAMA_HOST (or OLLAMA_HOST_URL), which is the variable Ollama itself uses. Pin one here only if your server is somewhere those do not point."
   },
   {
     "id": "ollama-lfm2-2.6b",
     "name": "LFM2.5 2.6B",
     "vendor": "Ollama (local)",
     "api": "ollama",
-    "baseUrl": "http://127.0.0.1:11435",
     "model": "hf.co/Abiray/LFM2.5-2.6B-Heretic-Abliterated-GGUF:Q8_0",
     "keyEnv": null,
     "cost": "local",
@@ -162,7 +161,8 @@
     "disabled": true,
     "timeoutMs": 600000,
     "numCtx": 16384,
-    "numCtxNote": "BENCHMARK SETTING ONLY. Capped so the bench measures the MODEL, not an eager KV allocation: at its declared 262144 context Qwen3-Coder occupied 43 GB and ran 86% on CPU. For daily use run the model at its maximum context and buy it back with OLLAMA_FLASH_ATTENTION=1 and OLLAMA_KV_CACHE_TYPE=q8_0 — context is what makes a model useful and starving it is not a speedup."
+    "numCtxNote": "BENCHMARK SETTING ONLY, held fixed so scores stay comparable across runs. Ollama reserves the ENTIRE KV cache at load, linear in num_ctx, so context is paid for in offloaded layers. Measured on one 8 GB card (RTX 4060 Laptop) from ollama's own server.log: Qwen3-Coder-30B at -c 8192 put 49/49 layers on the GPU with a 768 MiB KV; the same model at -c 262144 put 9/49 on the GPU with a 24576 MiB KV, and graph splits went 104 -> 582. Measured end to end on Qwythos 9B, same prompt back to back: a server at ctx 262144 held the model at 16.0 GB, 65% CPU / 35% GPU, and answered in 32.0 s; the same model on a server at ctx 32768 with q8_0 KV held 6.9 GB, 19% CPU / 81% GPU, and answered in 13.4 s. For daily use: set OLLAMA_KV_CACHE_TYPE=q8_0 (server-level, halves KV bytes) and choose context per request rather than globally. Do NOT touch OLLAMA_FLASH_ATTENTION: current Ollama already passes --flash-attn auto, so =1 is a no-op, and =0 additionally drops num_batch 512 -> 256 on CUDA devices with <= 8 GiB, making it a pessimisation on exactly the cards it is usually recommended to.",
+    "baseUrlNote": "Omitted on purpose: with no baseUrl the runner follows OLLAMA_HOST (or OLLAMA_HOST_URL), which is the variable Ollama itself uses. Pin one here only if your server is somewhere those do not point."
   },
   {
     "id": "cerebras-gemma4-31b",
@@ -181,7 +181,6 @@
     "name": "Qwythos 9B (function-calling)",
     "vendor": "Ollama (local)",
     "api": "ollama",
-    "baseUrl": "http://127.0.0.1:11435",
     "model": "hf.co/empero-ai/Qwythos-9B-Claude-Mythos-5-1M-GGUF:Q4_K_M",
     "keyEnv": null,
     "cost": "local",
@@ -189,14 +188,14 @@
     "timeoutMs": 600000,
     "disabled": true,
     "numCtx": 16384,
-    "numCtxNote": "BENCHMARK SETTING ONLY. Capped so the bench measures the MODEL, not an eager KV allocation: at its declared 262144 context Qwen3-Coder occupied 43 GB and ran 86% on CPU. For daily use run the model at its maximum context and buy it back with OLLAMA_FLASH_ATTENTION=1 and OLLAMA_KV_CACHE_TYPE=q8_0 — context is what makes a model useful and starving it is not a speedup."
+    "numCtxNote": "BENCHMARK SETTING ONLY, held fixed so scores stay comparable across runs. Ollama reserves the ENTIRE KV cache at load, linear in num_ctx, so context is paid for in offloaded layers. Measured on one 8 GB card (RTX 4060 Laptop) from ollama's own server.log: Qwen3-Coder-30B at -c 8192 put 49/49 layers on the GPU with a 768 MiB KV; the same model at -c 262144 put 9/49 on the GPU with a 24576 MiB KV, and graph splits went 104 -> 582. Measured end to end on Qwythos 9B, same prompt back to back: a server at ctx 262144 held the model at 16.0 GB, 65% CPU / 35% GPU, and answered in 32.0 s; the same model on a server at ctx 32768 with q8_0 KV held 6.9 GB, 19% CPU / 81% GPU, and answered in 13.4 s. For daily use: set OLLAMA_KV_CACHE_TYPE=q8_0 (server-level, halves KV bytes) and choose context per request rather than globally. Do NOT touch OLLAMA_FLASH_ATTENTION: current Ollama already passes --flash-attn auto, so =1 is a no-op, and =0 additionally drops num_batch 512 -> 256 on CUDA devices with <= 8 GiB, making it a pessimisation on exactly the cards it is usually recommended to.",
+    "baseUrlNote": "Omitted on purpose: with no baseUrl the runner follows OLLAMA_HOST (or OLLAMA_HOST_URL), which is the variable Ollama itself uses. Pin one here only if your server is somewhere those do not point."
   },
   {
     "id": "ollama-qwen3-coder-30b",
     "name": "Qwen3 Coder 30B A3B",
     "vendor": "Ollama (local)",
     "api": "ollama",
-    "baseUrl": "http://127.0.0.1:11435",
     "model": "hf.co/unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF:IQ4_XS",
     "keyEnv": null,
     "cost": "local",
@@ -204,14 +203,14 @@
     "timeoutMs": 900000,
     "disabled": true,
     "numCtx": 16384,
-    "numCtxNote": "BENCHMARK SETTING ONLY. Capped so the bench measures the MODEL, not an eager KV allocation: at its declared 262144 context Qwen3-Coder occupied 43 GB and ran 86% on CPU. For daily use run the model at its maximum context and buy it back with OLLAMA_FLASH_ATTENTION=1 and OLLAMA_KV_CACHE_TYPE=q8_0 — context is what makes a model useful and starving it is not a speedup."
+    "numCtxNote": "BENCHMARK SETTING ONLY, held fixed so scores stay comparable across runs. Ollama reserves the ENTIRE KV cache at load, linear in num_ctx, so context is paid for in offloaded layers. Measured on one 8 GB card (RTX 4060 Laptop) from ollama's own server.log: Qwen3-Coder-30B at -c 8192 put 49/49 layers on the GPU with a 768 MiB KV; the same model at -c 262144 put 9/49 on the GPU with a 24576 MiB KV, and graph splits went 104 -> 582. Measured end to end on Qwythos 9B, same prompt back to back: a server at ctx 262144 held the model at 16.0 GB, 65% CPU / 35% GPU, and answered in 32.0 s; the same model on a server at ctx 32768 with q8_0 KV held 6.9 GB, 19% CPU / 81% GPU, and answered in 13.4 s. For daily use: set OLLAMA_KV_CACHE_TYPE=q8_0 (server-level, halves KV bytes) and choose context per request rather than globally. Do NOT touch OLLAMA_FLASH_ATTENTION: current Ollama already passes --flash-attn auto, so =1 is a no-op, and =0 additionally drops num_batch 512 -> 256 on CUDA devices with <= 8 GiB, making it a pessimisation on exactly the cards it is usually recommended to.",
+    "baseUrlNote": "Omitted on purpose: with no baseUrl the runner follows OLLAMA_HOST (or OLLAMA_HOST_URL), which is the variable Ollama itself uses. Pin one here only if your server is somewhere those do not point."
   },
   {
     "id": "ollama-defiant-9b",
     "name": "Defiant Fable 9B (abliterated)",
     "vendor": "Ollama (local)",
     "api": "ollama",
-    "baseUrl": "http://127.0.0.1:11435",
     "model": "hf.co/DavidAU/Qwen3.5-9B-The-Defiant-Fable-Uncensored-Heretic-NEO-IMATRIX-MAX-MTP-GGUF:IQ4_XS",
     "keyEnv": null,
     "cost": "local",
@@ -219,14 +218,14 @@
     "timeoutMs": 600000,
     "disabled": true,
     "numCtx": 16384,
-    "numCtxNote": "BENCHMARK SETTING ONLY. Capped so the bench measures the MODEL, not an eager KV allocation: at its declared 262144 context Qwen3-Coder occupied 43 GB and ran 86% on CPU. For daily use run the model at its maximum context and buy it back with OLLAMA_FLASH_ATTENTION=1 and OLLAMA_KV_CACHE_TYPE=q8_0 — context is what makes a model useful and starving it is not a speedup."
+    "numCtxNote": "BENCHMARK SETTING ONLY, held fixed so scores stay comparable across runs. Ollama reserves the ENTIRE KV cache at load, linear in num_ctx, so context is paid for in offloaded layers. Measured on one 8 GB card (RTX 4060 Laptop) from ollama's own server.log: Qwen3-Coder-30B at -c 8192 put 49/49 layers on the GPU with a 768 MiB KV; the same model at -c 262144 put 9/49 on the GPU with a 24576 MiB KV, and graph splits went 104 -> 582. Measured end to end on Qwythos 9B, same prompt back to back: a server at ctx 262144 held the model at 16.0 GB, 65% CPU / 35% GPU, and answered in 32.0 s; the same model on a server at ctx 32768 with q8_0 KV held 6.9 GB, 19% CPU / 81% GPU, and answered in 13.4 s. For daily use: set OLLAMA_KV_CACHE_TYPE=q8_0 (server-level, halves KV bytes) and choose context per request rather than globally. Do NOT touch OLLAMA_FLASH_ATTENTION: current Ollama already passes --flash-attn auto, so =1 is a no-op, and =0 additionally drops num_batch 512 -> 256 on CUDA devices with <= 8 GiB, making it a pessimisation on exactly the cards it is usually recommended to.",
+    "baseUrlNote": "Omitted on purpose: with no baseUrl the runner follows OLLAMA_HOST (or OLLAMA_HOST_URL), which is the variable Ollama itself uses. Pin one here only if your server is somewhere those do not point."
   },
   {
     "id": "ollama-gemma4-12b-agentic",
     "name": "Gemma 4 12B agentic",
     "vendor": "Ollama (local)",
     "api": "ollama",
-    "baseUrl": "http://127.0.0.1:11435",
     "model": "hf.co/yuxinlu1/gemma-4-12B-agentic-fable5-composer2.5-v2-3.5x-tau2-GGUF:Q4_K_M",
     "keyEnv": null,
     "cost": "local",
@@ -234,6 +233,7 @@
     "timeoutMs": 600000,
     "disabled": true,
     "numCtx": 16384,
-    "numCtxNote": "BENCHMARK SETTING ONLY. Capped so the bench measures the MODEL, not an eager KV allocation: at its declared 262144 context Qwen3-Coder occupied 43 GB and ran 86% on CPU. For daily use run the model at its maximum context and buy it back with OLLAMA_FLASH_ATTENTION=1 and OLLAMA_KV_CACHE_TYPE=q8_0 — context is what makes a model useful and starving it is not a speedup."
+    "numCtxNote": "BENCHMARK SETTING ONLY, held fixed so scores stay comparable across runs. Ollama reserves the ENTIRE KV cache at load, linear in num_ctx, so context is paid for in offloaded layers. Measured on one 8 GB card (RTX 4060 Laptop) from ollama's own server.log: Qwen3-Coder-30B at -c 8192 put 49/49 layers on the GPU with a 768 MiB KV; the same model at -c 262144 put 9/49 on the GPU with a 24576 MiB KV, and graph splits went 104 -> 582. Measured end to end on Qwythos 9B, same prompt back to back: a server at ctx 262144 held the model at 16.0 GB, 65% CPU / 35% GPU, and answered in 32.0 s; the same model on a server at ctx 32768 with q8_0 KV held 6.9 GB, 19% CPU / 81% GPU, and answered in 13.4 s. For daily use: set OLLAMA_KV_CACHE_TYPE=q8_0 (server-level, halves KV bytes) and choose context per request rather than globally. Do NOT touch OLLAMA_FLASH_ATTENTION: current Ollama already passes --flash-attn auto, so =1 is a no-op, and =0 additionally drops num_batch 512 -> 256 on CUDA devices with <= 8 GiB, making it a pessimisation on exactly the cards it is usually recommended to.",
+    "baseUrlNote": "Omitted on purpose: with no baseUrl the runner follows OLLAMA_HOST (or OLLAMA_HOST_URL), which is the variable Ollama itself uses. Pin one here only if your server is somewhere those do not point."
   }
 ]

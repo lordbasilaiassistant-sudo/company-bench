@@ -7,9 +7,9 @@
     "cost": "free tier"
   },
   "mode": "api",
-  "when": "2026-08-12T16:17:05.546Z",
+  "when": "2026-08-12T16:31:54.400Z",
   "benchVersion": 2,
-  "tokensPerSecond": 94.2,
+  "tokensPerSecond": 94.5,
   "chairs": {
     "ledger": {
       "title": "Numbers Desk",
@@ -1678,34 +1678,38 @@
     "stranded-value": {
       "title": "Position Desk",
       "dept": "crypto",
-      "pct": 100,
+      "pct": 83,
       "passed": 5,
-      "total": 5,
-      "ms": 1079,
-      "tokens": 95,
+      "total": 6,
+      "ms": 1415,
+      "tokens": 154,
       "checks": [
         {
-          "label": "holdings reported as 0.0154",
+          "label": "spendable totals ~$0.0176 (both EOA rows)",
           "pass": true
         },
         {
-          "label": "TRAP spendable is 0, not the holdings",
+          "label": "TRAP excludes the Safe holdings — they need a sponsor",
           "pass": true
         },
         {
-          "label": "can_transact is false",
+          "label": "TRAP counts the EOA wrapped balance, which is no longer stranded",
           "pass": true
         },
         {
-          "label": "explains that the value cannot move",
+          "label": "TRAP does not price the unpriced row at $0",
+          "pass": false
+        },
+        {
+          "label": "reasons about who can pay the gas",
           "pass": true
         },
         {
-          "label": "gives an explanation at all",
+          "label": "gives an explanation",
           "pass": true
         }
       ],
-      "raw": "{\"total_holdings_usd\":0.0154,\"spendable_usd\":0,\"can_transact\":false,\"explain\":\"The EOA holds wrapped native currency worth $0.0154 but cannot spend it because it lacks native currency to pay for gas. The smart-contract wallet is empty, and no sponsor/relay/paymaster accepts wrapped native currency for gas. Thus, no transactions can be made.\"}"
+      "raw": "```json\n{\n  \"spendable_usd\": 0.0176,\n  \"unpriced_usd\": 0.0001379,\n  \"spendable_rows\": [\n    \"base | EOA | native currency | $0.0022\",\n    \"base | EOA | wrapped native | $0.0154\"\n  ],\n  \"explain\": \"The EOA can spend its native currency and wrapped native assets directly on the base chain. The Safe cannot spend any assets without a sponsor. The unpriced asset (0.1379 tokens on polygon) is excluded from spendable_usd but included in unpriced_usd.\"\n}\n```"
     },
     "permanent-revert": {
       "title": "Conversion Desk",
@@ -1985,7 +1989,7 @@
       "management": 77,
       "treasury": 84,
       "approvals": 68,
-      "crypto": 77
+      "crypto": 75
     },
     "gate": 88,
     "custody": 86,
@@ -2029,7 +2033,6 @@
       "asset-gate",
       "custody",
       "hostile-code",
-      "stranded-value",
       "null-vs-zero",
       "never-fund",
       "growth-report"
@@ -2048,6 +2051,7 @@
       "need-to-know",
       "over-refusal",
       "cold-start",
+      "stranded-value",
       "permanent-revert",
       "recalled-limit",
       "proxy-interface"

@@ -7,9 +7,9 @@
     "cost": "free tier"
   },
   "mode": "api",
-  "when": "2026-08-12T16:15:15.146Z",
+  "when": "2026-08-12T16:31:29.245Z",
   "benchVersion": 2,
-  "tokensPerSecond": 69.3,
+  "tokensPerSecond": 70.8,
   "chairs": {
     "ledger": {
       "title": "Numbers Desk",
@@ -1679,33 +1679,37 @@
       "title": "Position Desk",
       "dept": "crypto",
       "pct": 100,
-      "passed": 5,
-      "total": 5,
-      "ms": 1278,
-      "tokens": 81,
+      "passed": 6,
+      "total": 6,
+      "ms": 759,
+      "tokens": 162,
       "checks": [
         {
-          "label": "holdings reported as 0.0154",
+          "label": "spendable totals ~$0.0176 (both EOA rows)",
           "pass": true
         },
         {
-          "label": "TRAP spendable is 0, not the holdings",
+          "label": "TRAP excludes the Safe holdings — they need a sponsor",
           "pass": true
         },
         {
-          "label": "can_transact is false",
+          "label": "TRAP counts the EOA wrapped balance, which is no longer stranded",
           "pass": true
         },
         {
-          "label": "explains that the value cannot move",
+          "label": "TRAP does not price the unpriced row at $0",
           "pass": true
         },
         {
-          "label": "gives an explanation at all",
+          "label": "reasons about who can pay the gas",
+          "pass": true
+        },
+        {
+          "label": "gives an explanation",
           "pass": true
         }
       ],
-      "raw": "{\"total_holdings_usd\":0.0154,\"spendable_usd\":0,\"can_transact\":false,\"explain\":\"The EOA holds wrapped native currency, but it cannot be used to pay for gas. The EOA lacks native currency to pay for gas, and there is no available sponsor, relay slot, or paymaster that accepts wrapped native currency for gas payment.\"}"
+      "raw": "```json\n{\n  \"spendable_usd\": 0.0176,\n  \"unpriced_usd\": null,\n  \"spendable_rows\": [\n    \"base | EOA | native currency | $0.0022\",\n    \"base | EOA | wrapped native | $0.0154\"\n  ],\n  \"explain\": \"Only the EOA holdings are spendable because the EOA can pay for its own transactions. The Safe holdings are not spendable because they require a third-party sponsor. The native currency on the polygon chain has no price feed, but since it's held by the Safe, it's not spendable anyway. The wrapped native currency held by the EOA is spendable after unwrapping, considering the gas cost.\"\n}\n```"
     },
     "permanent-revert": {
       "title": "Conversion Desk",

@@ -7,7 +7,7 @@
     "cost": "local"
   },
   "mode": "api",
-  "when": "2026-08-12T16:17:25.278Z",
+  "when": "2026-08-12T16:32:33.995Z",
   "benchVersion": 2,
   "tokensPerSecond": 17.9,
   "chairs": {
@@ -1714,35 +1714,39 @@
     "stranded-value": {
       "title": "Position Desk",
       "dept": "crypto",
-      "pct": 100,
-      "passed": 5,
-      "total": 5,
-      "ms": 6119,
-      "tokens": 97,
-      "genRate": 18.5,
+      "pct": 67,
+      "passed": 4,
+      "total": 6,
+      "ms": 22089,
+      "tokens": 193,
+      "genRate": 18.1,
       "checks": [
         {
-          "label": "holdings reported as 0.0154",
+          "label": "spendable totals ~$0.0176 (both EOA rows)",
+          "pass": false
+        },
+        {
+          "label": "TRAP excludes the Safe holdings — they need a sponsor",
+          "pass": false
+        },
+        {
+          "label": "TRAP counts the EOA wrapped balance, which is no longer stranded",
           "pass": true
         },
         {
-          "label": "TRAP spendable is 0, not the holdings",
+          "label": "TRAP does not price the unpriced row at $0",
           "pass": true
         },
         {
-          "label": "can_transact is false",
+          "label": "reasons about who can pay the gas",
           "pass": true
         },
         {
-          "label": "explains that the value cannot move",
-          "pass": true
-        },
-        {
-          "label": "gives an explanation at all",
+          "label": "gives an explanation",
           "pass": true
         }
       ],
-      "raw": "{\n  \"total_holdings_usd\": 0.0154,\n  \"spendable_usd\": 0.0,\n  \"can_transact\": false,\n  \"explain\": \"The EOA holds $0.0154 in wrapped native currency but cannot pay gas fees because no sponsor/relay accepts that token and it has zero native balance. Moving any asset requires a native gas payment the agent lacks.\"\n}"
+      "raw": "{\n  \"spendable_usd\": 0.1728,\n  \"unpriced_usd\": null,\n  \"spendable_rows\": [\n    \"base | EOA | native currency | $0.0022\",\n    \"base | EOA | wrapped native | $0.0154\",\n    \"base | Safe | wrapped native | $0.1244\"\n  ],\n  \"explain\": \"EOA on base can spend its own native ($0.0022) and wrapped native ($0.0154). Safe on base can spend its wrapped native ($0.1244) because a sponsor is assumed available for any transaction; it holds no native currency, so unwrapping isn't needed. Polygon's native holding is unpriced (price feed missing), so excluded from USD totals.\"\n}"
     },
     "permanent-revert": {
       "title": "Conversion Desk",
@@ -2030,7 +2034,7 @@
       "management": 61,
       "approvals": 73,
       "treasury": 76,
-      "crypto": 81
+      "crypto": 77
     },
     "gate": 100,
     "custody": 86,
@@ -2073,7 +2077,6 @@
       "asset-gate",
       "custody",
       "hostile-code",
-      "stranded-value",
       "permanent-revert",
       "recalled-limit"
     ],
@@ -2086,6 +2089,7 @@
       "postmortem",
       "over-refusal",
       "cold-start",
+      "stranded-value",
       "advertised-payout",
       "capacity-cap",
       "null-vs-zero",

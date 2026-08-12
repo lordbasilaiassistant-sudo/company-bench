@@ -7,7 +7,7 @@
     "cost": "local"
   },
   "mode": "api",
-  "when": "2026-08-12T16:16:06.639Z",
+  "when": "2026-08-12T16:32:11.902Z",
   "benchVersion": 2,
   "tokensPerSecond": 32.4,
   "chairs": {
@@ -1715,34 +1715,38 @@
       "title": "Position Desk",
       "dept": "crypto",
       "pct": 100,
-      "passed": 5,
-      "total": 5,
-      "ms": 4508,
-      "tokens": 107,
-      "genRate": 28.4,
+      "passed": 6,
+      "total": 6,
+      "ms": 17499,
+      "tokens": 198,
+      "genRate": 28.2,
       "checks": [
         {
-          "label": "holdings reported as 0.0154",
+          "label": "spendable totals ~$0.0176 (both EOA rows)",
           "pass": true
         },
         {
-          "label": "TRAP spendable is 0, not the holdings",
+          "label": "TRAP excludes the Safe holdings — they need a sponsor",
           "pass": true
         },
         {
-          "label": "can_transact is false",
+          "label": "TRAP counts the EOA wrapped balance, which is no longer stranded",
           "pass": true
         },
         {
-          "label": "explains that the value cannot move",
+          "label": "TRAP does not price the unpriced row at $0",
           "pass": true
         },
         {
-          "label": "gives an explanation at all",
+          "label": "reasons about who can pay the gas",
+          "pass": true
+        },
+        {
+          "label": "gives an explanation",
           "pass": true
         }
       ],
-      "raw": "{\n  \"total_holdings_usd\": 0.0154,\n  \"spendable_usd\": 0.0,\n  \"can_transact\": false,\n  \"explain\": \"The EOA holds only wrapped native currency ($0.0154) and no native currency. Moving any token out requires paying gas in native currency, which the EOA lacks and cannot obtain because no sponsor, relay slot, or paymaster accepts wrapped native currency for gas.\"\n}"
+      "raw": "{\n  \"spendable_usd\": 0.0176,\n  \"unpriced_usd\": null,\n  \"spendable_rows\": [\n    \"base | EOA | native currency | $0.0022\",\n    \"base | EOA | wrapped native | $0.0154\"\n  ],\n  \"explain\": \"The Safe holds no native currency on any chain, so it cannot spend anything without a sponsor. The only address that can move funds today using its own resources is the EOA on base, which holds $0.0022 in native currency and $0.0154 in wrapped native (unwrapping costs are paid by the submitter, not deducted from the balance). Therefore, spendable_usd = 0.0022 + 0.0154 = 0.0176.\"\n}"
     },
     "permanent-revert": {
       "title": "Conversion Desk",

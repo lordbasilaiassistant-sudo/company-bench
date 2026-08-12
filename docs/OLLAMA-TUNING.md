@@ -38,11 +38,34 @@ device**; attention is resident and only the MoE expert tensors spill to host me
 never too big — the KV reservation was. "It doesn't fit" was a conclusion drawn from a symptom
 produced by a setting, which is the general shape of most performance folklore.
 
-### What to do
+### What to do — and why the obvious fix does not work
 
 Leave `OLLAMA_CONTEXT_LENGTH` unset on the server and pass `num_ctx` per request, so a task that
-needs 64k pays for 64k and a task that needs 8k does not. If your server is started by the desktop
-app, its context slider is what you are actually setting.
+needs 64k pays for 64k and a task that needs 8k does not.
+
+**Setting it as a user environment variable does not work if the desktop app starts your server.**
+Measured directly: with `OLLAMA_CONTEXT_LENGTH=32768` and `OLLAMA_KV_CACHE_TYPE=q8_0` set at the
+user level and the server restarted, the server's own environment dump still read
+`OLLAMA_CONTEXT_LENGTH:262144` and `OLLAMA_KV_CACHE_TYPE:` empty. The tray app injects its own
+values into the child process and they win.
+
+The fix that does work is to run a second `ollama serve` on its own port, configured correctly, and
+point `OLLAMA_HOST` at it. Both servers share the same model blobs, so nothing is stored twice, and
+the desktop app keeps its own port for its chat UI. `ollama launch <harness>` and the CLI read
+`OLLAMA_HOST`, so they follow automatically.
+
+```bash
+OLLAMA_HOST=127.0.0.1:11436 OLLAMA_CONTEXT_LENGTH=32768 OLLAMA_KV_CACHE_TYPE=q8_0 ollama serve
+```
+
+**Measured end to end**, Qwythos 9B, same prompt, back to back on one 8 GB card:
+
+| server | resident | placement | context | latency | layers on GPU |
+|---|---|---|---|---|---|
+| desktop app's | 16.0 GB | 65% CPU / 35% GPU | 262144 | **32.0 s** | 8/33 |
+| correctly configured | 6.9 GB | 19% CPU / 81% GPU | 32768 | **13.4 s** | 29/33 |
+
+2.4× on wall clock, from one environment variable and a KV cache type.
 
 ---
 
