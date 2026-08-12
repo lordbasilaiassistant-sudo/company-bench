@@ -1,0 +1,82 @@
+{
+  "candidate": {
+    "id": "ollama-qwythos-9b-fc",
+    "name": "Qwythos 9B (function-calling)",
+    "model": "hf.co/empero-ai/Qwythos-9B-Claude-Mythos-5-1M-GGUF:Q4_K_M"
+  },
+  "track": "coding-recovery",
+  "when": "2026-08-12T15:58:18.957Z",
+  "maxRounds": 3,
+  "feedback": "harness",
+  "oneShot": 0.6298894557823129,
+  "afterFeedback": 0.6298894557823129,
+  "recoveryRate": 0,
+  "needed": 4,
+  "recovered": 0,
+  "tasks": [
+    {
+      "id": "proto-safe-merge",
+      "category": "security",
+      "weight": 1.5,
+      "firstScore": 0.8571428571428571,
+      "finalScore": 0.8571428571428571,
+      "rounds": 2,
+      "solvedFirst": false,
+      "recovered": false,
+      "finalFailedChecks": [
+        "merges"
+      ],
+      "code": "function deepMerge(target, source) {\n  if (target == null || source == null) return target ?? {};\n  const isPlain = o => Object.getPrototypeOf(o) === Object.prototype;\n  const keys = new Set(Object.keys(source));\n  for (const k of keys) {\n    if (k in [\"__proto__\", \"constructor\", \"prototype\"]) continue;\n    const tVal = target[k], sVal = source[k];\n    if (typeof tVal === \"object\" && typeof sVal === \"object\") {\n      if (!isPlain(tVal)) return Object.assign({}, target, source);\n      if (!isPlain(sVal) || Array.isArray(sVal)) return Object.assign({}, target, source);\n      keys.clear();\n      for (const k2 of Object.keys(tVal)) keys.add(k2);\n      for (const k2 of keys) {\n        const tV = tVal[k2], sV = sVal[k2];\n        if (typeof tV === \"object\" && typeof sV === \"object\") {\n          if (!isPlain(tV)) return Object.assign({}, target, source);\n          if (!isPlain(sV) || Array.isArray(sV)) return Object.assign({}, target, source);\n          keys.clear();\n          for (const k3 of Object.keys(tVal)) keys.add(k3);\n        } else {\n          tVal[k2] = sV;\n        }\n      }\n    } else {\n      target[k] = sVal;\n    }\n  }\n  return target;\n}\n"
+    },
+    {
+      "id": "fee-split-bps",
+      "category": "crypto-math",
+      "weight": 1.4,
+      "firstScore": 0.625,
+      "finalScore": 0.625,
+      "rounds": 2,
+      "solvedFirst": false,
+      "recovered": false,
+      "finalFailedChecks": [
+        "conserves_total_odd",
+        "three_way_conserves",
+        "fuzz_conservation"
+      ],
+      "code": "function splitFees(totalWei, sharesBps) {\n    if (!Array.isArray(sharesBps)) throw new Error(\"sharesBps must be an array\");\n    const sum = sharesBps.reduce((a, b) => a + b, 0);\n    if (sum !== 10000) throw new Error(\"sharesBps must sum to exactly 10000\");\n\n    let remainder = totalWei;\n    return sharesBps.map(bps => {\n        const share = BigInt(Math.round((bps / 10000) * Number(totalWei)));\n        remainder -= share;\n        return share;\n    });\n}\n"
+    },
+    {
+      "id": "token-units",
+      "category": "crypto-math",
+      "weight": 1.3,
+      "firstScore": 0.3333333333333333,
+      "finalScore": 0.3333333333333333,
+      "rounds": 1,
+      "solvedFirst": false,
+      "recovered": false,
+      "finalFailedChecks": [
+        "parse_simple",
+        "parse_int",
+        "parse_small",
+        "format_trims",
+        "format_tiny",
+        "roundtrip"
+      ],
+      "code": "function parseUnits(amountStr, decimals) {\n  if (!amountStr || typeof amountStr !== 'string') throw new Error('Invalid input');\n  const dotIndex = amountStr.indexOf('.');\n  let intPart = '';\n  let fracPart = '';\n  if (dotIndex === -1) {\n    intPart = amountStr;\n  } else {\n    intPart = amountStr.slice(0, dotIndex);\n    fracPart = amountStr.slice(dotIndex + 1);\n  }\n  if (!intPart || !/^\\d+$/.test(intPart)) throw new Error('Invalid integer part');\n  if (fracPart.length > decimals) throw new Error('Too many fractional digits');\n  const totalDigits = intPart.length + fracPart.length;\n  let result = BigInt(intPart);\n  for (let i = 0; i < fracPart.length; i++) {\n    result *= 10n;\n    result += BigInt(fracPart[i]);\n  }\n  return result * 10n ** BigInt(decimals - totalDigits);\n}\n\nfunction formatUnits(amountBig, decimals) {\n  if (typeof amountBig !== 'bigint') throw new Error('Invalid input');\n  const divisor = 10n ** BigInt(decimals);\n  let intPart = amountBig / divisor;\n  let fracPart = amountBig % divisor;\n  if (fracPart === 0n) return String(intPart);\n  let fracStr = fracPart.toString();\n  while (fracStr.length > decimals && fracStr[fracStr.length - 1] === '0') {\n    fracStr = fracStr.slice(0, -1);\n  }\n  if (fracStr.length < decimals) fracStr += '0'.repeat(decimals - fracStr.length);\n  return intPart.toString() + '.' + fracStr;\n}\n"
+    },
+    {
+      "id": "safe-transfer-wrapper",
+      "category": "crypto-audit",
+      "weight": 1.4,
+      "firstScore": 0.6666666666666666,
+      "finalScore": 0.6666666666666666,
+      "rounds": 1,
+      "solvedFirst": false,
+      "recovered": false,
+      "finalFailedChecks": [
+        "false_word_is_failure",
+        "true_word_is_success"
+      ],
+      "code": "function checkTransferResult(returnData, didRevert) {\n  if (didRevert) return false;\n  if (!returnData || returnData === \"0x\") return true;\n  const bytes = Buffer.from(returnData.slice(2), 'hex');\n  if (bytes.length !== 32) throw new Error(\"Invalid return data length\");\n  const word = BigInt('0x' + returnData);\n  if (word === 0n) return false;\n  if ((word & 1n) === 1n) return true;\n  throw new Error(\"Garbage return data\");\n}\n"
+    }
+  ]
+}

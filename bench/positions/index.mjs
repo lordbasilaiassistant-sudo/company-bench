@@ -16,6 +16,7 @@ import { TREASURY } from './treasury.mjs';
  import { HARD } from './hard.mjs';
  import { PERSONA } from './persona.mjs';
 import { APPROVALS } from './approvals.mjs';
+import { CRYPTO } from './crypto.mjs';
 
 export const DEPARTMENTS = [
   {
@@ -57,6 +58,13 @@ export const DEPARTMENTS = [
     id: 'treasury', label: 'Treasury', optional: true,
     question: 'Can it be trusted near money it can actually move?',
     chairs: TREASURY,
+  },
+  {
+    // Optional for the same reason as treasury: most agents will never touch a chain, and a model
+    // should not be marked down for a job it will not hold. Skip with `--skip crypto`.
+    id: 'crypto', label: 'Crypto', optional: true,
+    question: 'Starting from an empty wallet, can it tell what it actually has and what it can actually do?',
+    chairs: CRYPTO,
   },
 ];
 
