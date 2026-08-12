@@ -33,13 +33,13 @@ const WHY_TRAPS_LEAD = 'An averaged score hides catastrophic single failures —
 /** Answer-first, self-contained, and quotable in isolation — the shape answer engines cite. */
 const FAQ = [
   { q: 'What is Company Bench?',
-    a: 'Company Bench is an open-source benchmark that measures whether an AI agent can be trusted with a job, rather than whether it can solve a puzzle. It seats a model in 29 chairs across 7 departments — operations, integrity, security, autonomy, people, management, and an optional treasury — and applies 241 deterministic checks, 78 of which are planted traps. The output is a trust level from L0 (drafter) to L3 (reviewer) plus disqualifying flags, not a percentage. It is MIT-licensed, written in Node with zero dependencies.' },
+    a: 'Company Bench is an open-source benchmark that measures whether an AI agent can be trusted with a job, rather than whether it can solve a puzzle. It seats a model in 45 chairs across nine departments — operations, integrity, security, autonomy, people, management, and an optional treasury — and applies 356 deterministic checks, 119 of which are planted traps. The output is a trust level from L0 (drafter) to L3 (reviewer) plus disqualifying flags, not a percentage. It is MIT-licensed, written in Node with zero dependencies.' },
   { q: 'How is it scored — does an LLM judge the answers?',
     a: 'No LLM judges anything in Company Bench, ever. Every check is a pure function in committed code that returns pass or fail, so the same answer always produces the same score and anyone who clones the repository can re-derive it. A gate has to be stronger than the thing it gates, and a language model grading another language model is not stronger than what it grades. Deterministic scoring also means a result can be audited line by line instead of trusted.' },
   { q: 'Why does the board lead with traps taken instead of the overall score?',
     a: 'Because an averaged score hides catastrophic single failures, and the failures are what decide whether an agent can hold a seat. In the current results one candidate takes 13 of the 78 traps it was shown and carries three disqualifying flags, which averages out to 79% — a B grade, twenty points behind a frontier model that took 1 trap out of 93 with no flags. Twenty points reads as a near miss. Thirteen traps against one is not a near miss; it is the difference between an agent you can leave alone and one you cannot. Company Bench still reports the percentage, because it is real and useful for comparing similar models, but it is never the first number shown for a candidate. Traps taken and disqualifying flags are.' },
   { q: 'What does it measure that coding benchmarks do not?',
-    a: 'Coding benchmarks measure capability: whether a model can produce a correct solution to a clean, well-posed problem. Company Bench measures trustworthiness under dirty conditions — a ledger with a duplicated row, a colleague who is confident and wrong, an instruction hidden inside forwarded data, an irreversible action that would be convenient to take. 78 of its 241 checks are traps: an attractive wrong answer that a fluent, capable model actually reaches for. A model can be excellent at code and still walk into most of them.' },
+    a: 'Coding benchmarks measure capability: whether a model can produce a correct solution to a clean, well-posed problem. Company Bench measures trustworthiness under dirty conditions — a ledger with a duplicated row, a colleague who is confident and wrong, an instruction hidden inside forwarded data, an irreversible action that would be convenient to take. 119 of its 356 checks are traps: an attractive wrong answer that a fluent, capable model actually reaches for. A model can be excellent at code and still walk into most of them.' },
   { q: 'What are the L0 to L3 trust levels?',
     a: 'Company Bench returns a placement rather than a score. L0 drafter: output is read before it leaves the building. L1 gated worker: runs a defined task alone, but output passes a gate it does not control. L2 unattended operator: runs unsupervised on reversible work and stops dead at anything irreversible. L3 reviewer: may gate other agents\' work and hold authority over irreversible actions. Each rung requires every rung below it, and two chairs are pass/fail at 100% regardless of every other score.' },
   { q: 'Which model is best for autonomous agents?',
@@ -514,7 +514,7 @@ footer a{color:var(--mid)}
 <script type="application/ld+json">
 {"@context":"https://schema.org","@graph":[
  {"@type":"SoftwareSourceCode","name":"Company Bench",
-  "description":"Open-source benchmark measuring whether an AI agent can be trusted with a job. 29 chairs across 7 departments, 241 deterministic checks, 78 planted traps. Scored by code with no LLM judge. Output is a trust level L0-L3.",
+  "description":"Open-source benchmark measuring whether an AI agent can be trusted with a job. 45 chairs across nine departments, 356 deterministic checks, 119 planted traps. Scored by code with no LLM judge. Output is a trust level L0-L3.",
   "codeRepository":"https://github.com/lordbasilaiassistant-sudo/company-bench",
   "programmingLanguage":"JavaScript","runtimePlatform":"Node.js",
   "license":"https://opensource.org/licenses/MIT",
@@ -638,7 +638,7 @@ footer a{color:var(--mid)}
     <aside class="detail" id="detail">
       <p class="dl" id="d-dept">Select a chair</p>
       <h4 id="d-title">The floor</h4>
-      <p class="did" id="d-id">25 chairs across six departments</p>
+      <p class="did" id="d-id">45 chairs across nine departments</p>
       <p class="db" id="d-blurb">Every chair carries at least one trap: a wrong answer that a fluent, capable model
       actually reaches for. A chair without one measures nothing, because models pass checklists.</p>
       <div class="nums" id="d-nums">

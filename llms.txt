@@ -1,7 +1,7 @@
 # Company Bench
 
 > A benchmark that measures whether an AI agent can be **trusted with a job**, not whether it can
-> solve a puzzle. 29 chairs across seven departments, 241 deterministic checks, 78 of them traps.
+> solve a puzzle. 45 chairs across nine departments, 356 deterministic checks, 119 of them traps.
 > Output is a placement (trust level L0–L3) plus disqualifying flags — never a single percentage.
 > Node ≥18, zero dependencies, no build step, MIT.
 
@@ -26,14 +26,18 @@ least one **trap**: an attractive wrong answer that a fluent, capable model actu
 
 | Path | What it is |
 |---|---|
-| `bench/positions/index.mjs` | The org chart: seven departments, 29 chairs. Start here to understand structure. |
+| `bench/positions/index.mjs` | The org chart: nine departments, 45 chairs. Start here to understand structure. |
 | `bench/positions/operations.mjs` | Ledger, data extraction, triage, tool calls, fact-locked writing. |
 | `bench/positions/integrity.mjs` | Catching a planted lie, a wrong handoff note, unverifiable claims. |
 | `bench/positions/security.mjs` | Prompt injection, secret hygiene, exfiltration pressure. |
 | `bench/positions/autonomy.mjs` | Acting without asking, stopping at irreversible actions, lawful refusal. |
 | `bench/positions/people.mjs` | Other agents, public replies, cold outreach, a human in distress. |
 | `bench/positions/management.mjs` | Running a workforce: delegation, capacity, an incident, a postmortem. |
+| `bench/positions/approvals.mjs` | What to refuse in a company with no human to escalate to. |
+| `bench/positions/persona.mjs` | Holding a role and a stated identity under pressure to break either. |
+| `bench/positions/hard.mjs` | The deliberately harder chairs, folded into the departments they belong to. |
 | `bench/positions/treasury.mjs` | Optional: unit economics, safety gates, custody, hostile-code review. |
+| `bench/positions/crypto.mjs` | Optional: the Zero Agent chairs — an empty wallet, and what it can actually do. |
 | `bench/lib/parse.mjs` | Tolerant readers. Format sloppiness costs one check, never a chair. |
 | `bench/lib/placement.mjs` | Scores → trust level + flags. The pass/fail rules live here. |
 | `bench/lib/transport.mjs` | One function for OpenAI-compatible, Anthropic, and Ollama endpoints. |
@@ -220,6 +224,21 @@ Spread is the product.
   the work itself — and then hand-coded the next two hours of work while its own workforce sat
   idle. A high management score means the model knows the right answer. It does not mean it acts
   on it. Closing this needs an action-trace harness that scores what an agent actually did.
+  A second measurement of the same gap, from the crypto department, is sharper because the
+  production failure is still live. The `stranded-value` chair asks whether held value is spendable
+  value. Every one of the seven models tested scored **100%**. The autonomous agent those chairs
+  were taken from — the one whose entire mission is escaping zero — reported `"$0.00 balance"` for
+  **39 consecutive sessions while holding money**, and its public dashboard today reports **$0.217
+  spendable against $0.0022 actually liquid**, because value sitting where it cannot move is being
+  counted as capital. Knowing the rule was never the missing part. The chair has been hardened so it
+  no longer states its own diagnosis, but the original result stands as the finding: **a 100% score
+  on a stated-behaviour chair is compatible with failing that exact behaviour in production, every
+  session, for weeks.**
+- **Whether a model can make money.** The crypto department is named for an agent that earned from
+  an empty wallet, and it still does not measure profitability — nothing single-shot can. Trading
+  skill, timing, market read and execution are all outside a graded text answer. What it measures is
+  the layer underneath, where the real failures were: held vs spendable value, an advertised number
+  vs a settled one, a vendor's cap vs a law of physics, a missing price vs a zero balance.
 - **Multi-turn drift.** One user message per chair, no history, no system prompt. Whether a
   behaviour survives to turn 20 is architecturally out of reach today.
 - **Live tool use, latency under load, and cost at scale**, beyond the recorded tokens/second.

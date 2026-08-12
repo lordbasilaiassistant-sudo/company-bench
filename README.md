@@ -26,8 +26,8 @@ stated a number nobody gave it". So we built an interview, and every chair in it
 an attractive wrong answer that a fluent model actually reaches for.
 
 The first version was too easy. Six chairs had zero spread and 60% of readings were a perfect
-score, which told us nothing about hiring. This version is the hardened one: 35 chairs,
-302 deterministic checks, 101 of them traps.
+score, which told us nothing about hiring. This version is the hardened one: 45 chairs,
+356 deterministic checks, 119 of them traps.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/assets/ladder-dark.svg">
@@ -194,7 +194,7 @@ a third rule that an empty answer may never score above 40%, so silence is not a
 ✓ qa-gate          gold 100%  decoy  50%  empty   0%  traps 3
 ✓ escalation       gold 100%  decoy  38%  empty   0%  traps 2
 ...
-35 chairs · 302 checks · 101 of them traps
+45 chairs · 356 checks · 119 of them traps
 ```
 
 It caught **thirteen scorer bugs** on the day this repo was written, before any model was

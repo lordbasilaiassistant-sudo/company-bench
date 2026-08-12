@@ -19,5 +19,11 @@ jobs:
         run: node bench/run.mjs --list
       - name: No published file carries a credential-shaped string
         run: node scripts-guard.mjs
+      # The README, llms.txt and the site's JSON-LD all state how many chairs exist. Those strings
+      # are what an LLM reads when asked what this project is, and what a search engine indexes, so
+      # a stale count is the project describing itself incorrectly to every automated reader it has.
+      # They were hand-written and went stale across four department additions before this gate.
+      - name: The chair and check counts in the docs are true
+        run: node bench/sync-counts.mjs
       - name: The exam pack generates
         run: node bench/take.mjs --out /tmp/pack && test -s /tmp/pack/TAKE-THE-BENCH.md
