@@ -26,8 +26,8 @@ stated a number nobody gave it". So we built an interview, and every chair in it
 an attractive wrong answer that a fluent model actually reaches for.
 
 The first version was too easy. Six chairs had zero spread and 60% of readings were a perfect
-score, which told us nothing about hiring. This version is the hardened one: 29 chairs,
-241 deterministic checks, 78 of them traps.
+score, which told us nothing about hiring. This version is the hardened one: 35 chairs,
+302 deterministic checks, 101 of them traps.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/assets/ladder-dark.svg">
@@ -44,7 +44,7 @@ cd company-bench
 node bench/take.mjs
 ```
 
-That writes `bench-pack/TAKE-THE-BENCH.md` (29 tasks) and an empty `bench-pack/answers.json`.
+That writes `bench-pack/TAKE-THE-BENCH.md` (35 tasks) and an empty `bench-pack/answers.json`.
 Your agent answers each task, then:
 
 ```bash
@@ -133,7 +133,7 @@ your agent is most likely to commit in production:
 
 ## The org chart
 
-Seven departments. `node bench/run.mjs --list` prints all of it with descriptions.
+Eight departments. `node bench/run.mjs --list` prints all of it with descriptions.
 
 | Department | The question it answers | Chairs |
 |---|---|---|
@@ -143,6 +143,7 @@ Seven departments. `node bench/run.mjs --list` prints all of it with description
 | **Autonomy** | What happens when nobody is watching and the rules get inconvenient? | `expander` `scope-guard` `pushback` `escalation` `reporter` |
 | **People** | Can it face a human, or another agent, without a supervisor? | `crosstalk` `community` `outreach` `duty-of-care` |
 | **Management** | Can it run a workforce — or does it quietly do the work itself? | `delegator` `escalation-manager` `capacity-planner` `postmortem` |
+| **Approvals** | What does it refuse, in a company with no human to escalate to? | `need-to-know` `no-human` `over-refusal` |
 | **Treasury** _(optional)_ | Can it be trusted near money it can actually move? | `unit-economics` `asset-gate` `custody` `hostile-code` |
 
 A sample of what a trap looks like, so you can judge the instrument before you trust it:
@@ -193,7 +194,7 @@ a third rule that an empty answer may never score above 40%, so silence is not a
 ✓ qa-gate          gold 100%  decoy  50%  empty   0%  traps 3
 ✓ escalation       gold 100%  decoy  38%  empty   0%  traps 2
 ...
-29 chairs · 241 checks · 78 of them traps
+35 chairs · 302 checks · 101 of them traps
 ```
 
 It caught **thirteen scorer bugs** on the day this repo was written, before any model was

@@ -32,6 +32,8 @@ A chair is one job, one prompt, and a scorer made of code. It lives in
   },
   gold:  '{"total":41.20,"unpayable":["INV-7"]}',
   decoy: '{"total":52.90,"unpayable":[]}',
+  // A correct answer worded as differently from the gold as you can manage. Must score 100%.
+  variants: ['{"unpayable":["INV-7"],"total":"$41.20"}'],
 }
 ```
 
