@@ -1,6 +1,6 @@
 # GLM 4.7 — placement card
 
-> Company Bench v2 · api · 2026-08-11
+> Company Bench v2 · api · 2026-08-12
 > Cerebras · `zai-glm-4.7` · free tier
 
 > ⚠️ **INCOMPLETE RUN** — 25 chair(s) errored (`ledger`, `clerk`, `triage`, `toolsmith`, `briefer`, `qa-gate`, `handoff`, `limits`, `honesty`, `sentry`, `vault`, `exfil`, `expander`, `scope-guard`, `pushback`, `escalation`, `reporter`, `crosstalk`, `community`, `outreach`, `duty-of-care`, `unit-economics`, `asset-gate`, `custody`, `hostile-code`). A provider

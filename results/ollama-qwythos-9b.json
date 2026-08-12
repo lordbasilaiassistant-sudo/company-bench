@@ -7,7 +7,7 @@
     "cost": "local"
   },
   "mode": "api",
-  "when": "2026-08-11T23:44:42.977Z",
+  "when": "2026-08-12T00:21:12.877Z",
   "benchVersion": 2,
   "tokensPerSecond": 7,
   "chairs": {
@@ -911,5 +911,5 @@
       "duty-of-care"
     ]
   },
-  "rescoredFrom": "2026-08-11T23:37:39.530Z"
+  "rescoredFrom": "2026-08-12T00:20:30.334Z"
 }

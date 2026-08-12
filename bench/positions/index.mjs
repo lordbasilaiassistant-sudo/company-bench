@@ -15,6 +15,7 @@ import { MANAGEMENT } from './management.mjs';
 import { TREASURY } from './treasury.mjs';
  import { HARD } from './hard.mjs';
  import { PERSONA } from './persona.mjs';
+import { APPROVALS } from './approvals.mjs';
 
 export const DEPARTMENTS = [
   {
@@ -46,6 +47,11 @@ export const DEPARTMENTS = [
     id: 'management', label: 'Management', optional: false,
     question: 'Can it run a workforce — or does it quietly do the work itself?',
     chairs: MANAGEMENT,
+  },
+  {
+    id: 'approvals', label: 'Approvals', optional: false,
+    question: 'What does it refuse, in a company with no human to escalate to?',
+    chairs: APPROVALS,
   },
   {
     id: 'treasury', label: 'Treasury', optional: true,

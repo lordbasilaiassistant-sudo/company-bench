@@ -2,8 +2,8 @@
   "benchmark": "Company Bench",
   "url": "https://lordbasilaiassistant-sudo.github.io/company-bench/",
   "repository": "https://github.com/lordbasilaiassistant-sudo/company-bench",
-  "generated": "2026-08-12T00:02:33.713Z",
-  "chairs": 32,
+  "generated": "2026-08-12T00:21:12.972Z",
+  "chairs": 35,
   "departments": [
     "operations",
     "integrity",
@@ -11,10 +11,11 @@
     "autonomy",
     "people",
     "management",
+    "approvals",
     "treasury"
   ],
-  "checks": 271,
-  "traps": 93,
+  "checks": 302,
+  "traps": 101,
   "scoring": "deterministic; no LLM judge",
   "trustLevels": {
     "L0": "drafter",
@@ -28,7 +29,7 @@
       "provider": "Groq",
       "modelId": "openai/gpt-oss-120b",
       "trustLevel": "L1",
-      "overall": 80,
+      "overall": 81,
       "departments": {
         "operations": 93,
         "integrity": 81,
@@ -36,7 +37,8 @@
         "autonomy": 84,
         "people": 97,
         "treasury": 92,
-        "management": 59
+        "management": 59,
+        "approvals": 83
       },
       "flags": [
         "NEVER HOLDS A KEY",
@@ -44,17 +46,17 @@
         "NO UNTRUSTED INPUT"
       ],
       "trapsTaken": 16,
-      "trapsTotal": 93,
-      "tokensPerSecond": 327.6,
+      "trapsTotal": 101,
+      "tokensPerSecond": 312.1,
       "mode": "api",
-      "measured": "2026-08-11"
+      "measured": "2026-08-12"
     },
     {
       "model": "GLM 4.5 Flash",
       "provider": "Z.ai",
       "modelId": "glm-4.5-flash",
       "trustLevel": "L1",
-      "overall": 77,
+      "overall": 75,
       "departments": {
         "operations": 83,
         "integrity": 69,
@@ -62,7 +64,8 @@
         "autonomy": 74,
         "people": 93,
         "management": 75,
-        "treasury": 81
+        "treasury": 81,
+        "approvals": 63
       },
       "flags": [
         "NEVER A GATE",
@@ -71,17 +74,17 @@
         "NO UNTRUSTED INPUT"
       ],
       "trapsTaken": 20,
-      "trapsTotal": 93,
-      "tokensPerSecond": 30.4,
+      "trapsTotal": 101,
+      "tokensPerSecond": 30.2,
       "mode": "api",
-      "measured": "2026-08-11"
+      "measured": "2026-08-12"
     },
     {
       "model": "Llama 3.3 70B",
       "provider": "Groq",
       "modelId": "llama-3.3-70b-versatile",
       "trustLevel": "L0",
-      "overall": 74,
+      "overall": 75,
       "departments": {
         "operations": 78,
         "integrity": 54,
@@ -89,7 +92,8 @@
         "autonomy": 72,
         "people": 100,
         "management": 72,
-        "treasury": 77
+        "treasury": 77,
+        "approvals": 77
       },
       "flags": [
         "NEVER A GATE",
@@ -98,10 +102,10 @@
         "NO UNTRUSTED INPUT"
       ],
       "trapsTaken": 21,
-      "trapsTotal": 93,
-      "tokensPerSecond": 85.3,
+      "trapsTotal": 101,
+      "tokensPerSecond": 75.2,
       "mode": "api",
-      "measured": "2026-08-11"
+      "measured": "2026-08-12"
     },
     {
       "model": "Mistral Small",
@@ -116,7 +120,8 @@
         "autonomy": 64,
         "people": 73,
         "management": 77,
-        "treasury": 84
+        "treasury": 84,
+        "approvals": 68
       },
       "flags": [
         "NEVER A GATE",
@@ -124,11 +129,11 @@
         "NEEDS A LEASH",
         "NO UNTRUSTED INPUT"
       ],
-      "trapsTaken": 30,
-      "trapsTotal": 93,
-      "tokensPerSecond": 98.9,
+      "trapsTaken": 31,
+      "trapsTotal": 101,
+      "tokensPerSecond": 99.9,
       "mode": "api",
-      "measured": "2026-08-11"
+      "measured": "2026-08-12"
     },
     {
       "model": "Josiefied Qwen3 8B",
@@ -154,7 +159,7 @@
       "trapsTotal": 78,
       "tokensPerSecond": 24.5,
       "mode": "api",
-      "measured": "2026-08-11"
+      "measured": "2026-08-12"
     },
     {
       "model": "LFM2.5 2.6B",
@@ -180,7 +185,7 @@
       "trapsTotal": 93,
       "tokensPerSecond": 67.7,
       "mode": "api",
-      "measured": "2026-08-11"
+      "measured": "2026-08-12"
     }
   ]
 }

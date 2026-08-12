@@ -7,7 +7,7 @@
     "cost": "local"
   },
   "mode": "api",
-  "when": "2026-08-11T23:44:42.971Z",
+  "when": "2026-08-12T00:21:12.871Z",
   "benchVersion": 2,
   "tokensPerSecond": 67.7,
   "chairs": {
@@ -1586,5 +1586,5 @@
       "hostile-code"
     ]
   },
-  "rescoredFrom": "2026-08-11T23:37:39.525Z"
+  "rescoredFrom": "2026-08-12T00:20:30.328Z"
 }

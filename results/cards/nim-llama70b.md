@@ -1,6 +1,6 @@
 # Llama 3.3 70B — placement card
 
-> Company Bench v2 · api · 2026-08-11
+> Company Bench v2 · api · 2026-08-12
 > NVIDIA NIM · `meta/llama-3.3-70b-instruct` · free tier · median latency 168358ms
 
 > ⚠️ **INCOMPLETE RUN** — 1 chair(s) errored (`clerk`). A provider

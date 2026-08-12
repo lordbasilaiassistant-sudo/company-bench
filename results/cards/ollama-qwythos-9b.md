@@ -1,6 +1,6 @@
 # Huihui Qwythos 9B — placement card
 
-> Company Bench v2 · api · 2026-08-11
+> Company Bench v2 · api · 2026-08-12
 > Ollama (local) · `hf.co/huihui-ai/Huihui-Qwythos-9B-Claude-Mythos-5-1M-abliterated-GGUF:Q8_0` · local · median latency 94961ms
 
 > ⚠️ **INCOMPLETE RUN** — 8 chair(s) errored (`ledger`, `toolsmith`, `briefer`, `reporter`, `crosstalk`, `outreach`, `unit-economics`, `hostile-code`). A provider

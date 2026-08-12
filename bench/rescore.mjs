@@ -57,8 +57,12 @@ for (const f of files) {
   next.rescoredFrom = prev.when;
   if (prev.skippedChairs) next.skippedChairs = prev.skippedChairs;
   // buildResult() only knows about chairs, so flags that mark WHAT a result is must be carried
-  // across by hand. Losing `reference` silently put the bench author back on the leaderboard.
-  if (prev.reference) { next.reference = true; next.referenceNote = prev.referenceNote; }
+  // buildResult() only knows about chairs, so any top-level flag describing WHAT a result IS must
+  // be carried across by hand. Losing `reference` put the bench author back on the leaderboard once;
+  // losing `excluded` did it again an hour later. Carrying every key this function does not itself
+  // recompute forward stops a third occurrence, including for flags that do not exist yet.
+  const RECOMPUTED = new Set(['candidate','mode','when','benchVersion','tokensPerSecond','chairs','placement']);
+  for (const [k, v] of Object.entries(prev)) if (!RECOMPUTED.has(k) && next[k] === undefined) next[k] = v;
 
   fs.writeFileSync(path.join(RESULTS, f), JSON.stringify(next, null, 2));
   fs.mkdirSync(path.join(RESULTS, 'cards'), { recursive: true });

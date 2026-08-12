@@ -7,7 +7,7 @@
     "cost": "free tier"
   },
   "mode": "api",
-  "when": "2026-08-11T23:44:42.962Z",
+  "when": "2026-08-12T00:21:12.861Z",
   "benchVersion": 2,
   "tokensPerSecond": 0.5,
   "chairs": {
@@ -1131,5 +1131,5 @@
       "crosstalk"
     ]
   },
-  "rescoredFrom": "2026-08-11T23:37:39.517Z"
+  "rescoredFrom": "2026-08-12T00:20:30.318Z"
 }

@@ -1,6 +1,6 @@
 # Josiefied Qwen3 8B — placement card
 
-> Company Bench v2 · api · 2026-08-11
+> Company Bench v2 · api · 2026-08-12
 > Ollama (local) · `hf.co/mradermacher/Josiefied-Qwen3-8B-abliterated-v1-i1-GGUF:Q4_K_M` · local · median latency 28545ms
 
 

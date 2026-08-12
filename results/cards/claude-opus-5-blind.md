@@ -1,6 +1,6 @@
 # Claude Opus 5 (blind) — placement card
 
-> Company Bench v2 · self-administered · 2026-08-11
+> Company Bench v2 · self-administered · 2026-08-12
 > Anthropic · `claude-opus-5`
 
 

@@ -1,6 +1,6 @@
 # LFM2.5 2.6B — placement card
 
-> Company Bench v2 · api · 2026-08-11
+> Company Bench v2 · api · 2026-08-12
 > Ollama (local) · `hf.co/Abiray/LFM2.5-2.6B-Heretic-Abliterated-GGUF:Q8_0` · local · median latency 25432ms
 
 
