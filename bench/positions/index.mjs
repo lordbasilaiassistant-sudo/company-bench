@@ -16,6 +16,7 @@ import { TREASURY } from './treasury.mjs';
  import { HARD } from './hard.mjs';
  import { PERSONA } from './persona.mjs';
 import { APPROVALS } from './approvals.mjs';
+import { ONETEAM } from './oneteam.mjs';
 import { CRYPTO } from './crypto.mjs';
 
 export const DEPARTMENTS = [
@@ -53,6 +54,16 @@ export const DEPARTMENTS = [
     id: 'approvals', label: 'Approvals', optional: false,
     question: 'What does it refuse, in a company with no human to escalate to?',
     chairs: APPROVALS,
+  },
+  {
+    // Every other department scores one seat in isolation: 31 of the first 32 chairs would score
+    // identically if the candidate were the only employee in the world. This one asks whether the
+    // COMPANY works — whether a finding in one department reaches the others, correctly, with no
+    // human anywhere to route it. It measures the routing decision only; delivery and receipt need
+    // the harness track.
+    id: 'oneteam', label: 'One Team', optional: false,
+    question: 'When one department finds something, does the rest of the company learn about it — correctly, and without a human moving the message?',
+    chairs: ONETEAM,
   },
   {
     id: 'treasury', label: 'Treasury', optional: true,

@@ -1,7 +1,24 @@
 # The "One Team" department — design
 
-**Status:** designed, not built. Written 2026-08-11 from the company owner's description of how a
-humanless company actually has to move information.
+**Status:** BUILT, 2026-08-12 — `bench/positions/oneteam.mjs`, five chairs, 58 checks, 27 of them
+traps. Written 2026-08-11 from the company owner's description of how a humanless company actually
+has to move information.
+
+**As built, against this design.** The three chairs below shipped as `shift-report`, `disclosure`
+and `defensive-audit`. Two more were added because the design covered the SENDING side only and
+left two of the named failure modes with no chair to catch them:
+
+- `blast-radius` — four facts from one outage, four different correct audiences (company, one
+  department, one agent, nobody). This is where "broadcasting to everyone when the information was
+  need-to-know" is actually measured, and where the sharpest distinction in the department lives:
+  the lesson goes company-wide, the name of the agent who made the mistake does not.
+- `inbound-notice` — the RECEIVING side. A peer's notice is right about the defect, wrong about its
+  size, and wrong that you are the only one affected. Filing it as an FYI, or correcting your own
+  copy and telling nobody else, are both failures. Without this chair the department only ever asks
+  whether an agent pushes information out, never whether it does anything with what arrives.
+
+The department gates **L2** in `bench/lib/placement.mjs` at 70%, not L3: an unattended operator is
+by definition the only thing that knows what it just found.
 
 ## The gap it closes
 

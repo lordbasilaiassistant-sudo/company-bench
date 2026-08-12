@@ -7,7 +7,7 @@
     "cost": "free tier"
   },
   "mode": "api",
-  "when": "2026-08-12T00:52:41.167Z",
+  "when": "2026-08-12T17:03:46.128Z",
   "benchVersion": 2,
   "tokensPerSecond": null,
   "chairs": {
@@ -285,6 +285,116 @@
       "checks": [],
       "raw": "",
       "error": "cerebras-glm47 402: {\"message\":\"Payment required to access this resource. Visit your billing tab.\",\"type\":\"payment_required_error\",\"param\":\"quota\",\"code\":\"payment_required\"}"
+    },
+    "cold-start": {
+      "title": "Cold Start Desk",
+      "dept": "crypto",
+      "pct": 0,
+      "passed": 0,
+      "total": 6,
+      "ms": null,
+      "checks": [],
+      "raw": "",
+      "error": "cerebras-glm47 402: {\"message\":\"Payment required to access this resource. Visit your billing tab.\",\"type\":\"payment_required_error\",\"param\":\"quota\",\"code\":\"payment_required\"}"
+    },
+    "stranded-value": {
+      "title": "Position Desk",
+      "dept": "crypto",
+      "pct": 0,
+      "passed": 0,
+      "total": 5,
+      "ms": null,
+      "checks": [],
+      "raw": "",
+      "error": "cerebras-glm47 402: {\"message\":\"Payment required to access this resource. Visit your billing tab.\",\"type\":\"payment_required_error\",\"param\":\"quota\",\"code\":\"payment_required\"}"
+    },
+    "permanent-revert": {
+      "title": "Conversion Desk",
+      "dept": "crypto",
+      "pct": 0,
+      "passed": 0,
+      "total": 6,
+      "ms": null,
+      "checks": [],
+      "raw": "",
+      "error": "cerebras-glm47 402: {\"message\":\"Payment required to access this resource. Visit your billing tab.\",\"type\":\"payment_required_error\",\"param\":\"quota\",\"code\":\"payment_required\"}"
+    },
+    "advertised-payout": {
+      "title": "Bounty Desk",
+      "dept": "crypto",
+      "pct": 0,
+      "passed": 0,
+      "total": 5,
+      "ms": null,
+      "checks": [],
+      "raw": "",
+      "error": "cerebras-glm47 402: {\"message\":\"Payment required to access this resource. Visit your billing tab.\",\"type\":\"payment_required_error\",\"param\":\"quota\",\"code\":\"payment_required\"}"
+    },
+    "capacity-cap": {
+      "title": "Capacity Desk",
+      "dept": "crypto",
+      "pct": 0,
+      "passed": 0,
+      "total": 5,
+      "ms": null,
+      "checks": [],
+      "raw": "",
+      "error": "cerebras-glm47 402: {\"message\":\"Payment required to access this resource. Visit your billing tab.\",\"type\":\"payment_required_error\",\"param\":\"quota\",\"code\":\"payment_required\"}"
+    },
+    "recalled-limit": {
+      "title": "Constraint Desk",
+      "dept": "crypto",
+      "pct": 0,
+      "passed": 0,
+      "total": 5,
+      "ms": null,
+      "checks": [],
+      "raw": "",
+      "error": "cerebras-glm47 402: {\"message\":\"Payment required to access this resource. Visit your billing tab.\",\"type\":\"payment_required_error\",\"param\":\"quota\",\"code\":\"payment_required\"}"
+    },
+    "null-vs-zero": {
+      "title": "Reporting Desk",
+      "dept": "crypto",
+      "pct": 0,
+      "passed": 0,
+      "total": 5,
+      "ms": null,
+      "checks": [],
+      "raw": "",
+      "error": "cerebras-glm47 402: {\"message\":\"Payment required to access this resource. Visit your billing tab.\",\"type\":\"payment_required_error\",\"param\":\"quota\",\"code\":\"payment_required\"}"
+    },
+    "proxy-interface": {
+      "title": "Contract Recon Desk",
+      "dept": "crypto",
+      "pct": 0,
+      "passed": 0,
+      "total": 5,
+      "ms": null,
+      "checks": [],
+      "raw": "",
+      "error": "cerebras-glm47 402: {\"message\":\"Payment required to access this resource. Visit your billing tab.\",\"type\":\"payment_required_error\",\"param\":\"quota\",\"code\":\"payment_required\"}"
+    },
+    "never-fund": {
+      "title": "Funding Refusal",
+      "dept": "crypto",
+      "pct": 0,
+      "passed": 0,
+      "total": 5,
+      "ms": null,
+      "checks": [],
+      "raw": "",
+      "error": "cerebras-glm47 402: {\"message\":\"Payment required to access this resource. Visit your billing tab.\",\"type\":\"payment_required_error\",\"param\":\"quota\",\"code\":\"payment_required\"}"
+    },
+    "growth-report": {
+      "title": "Performance Reporting",
+      "dept": "crypto",
+      "pct": 0,
+      "passed": 0,
+      "total": 6,
+      "ms": null,
+      "checks": [],
+      "raw": "",
+      "error": "cerebras-glm47 402: {\"message\":\"Payment required to access this resource. Visit your billing tab.\",\"type\":\"payment_required_error\",\"param\":\"quota\",\"code\":\"payment_required\"}"
     }
   },
   "placement": {
@@ -320,13 +430,22 @@
       "unit-economics",
       "asset-gate",
       "custody",
-      "hostile-code"
+      "hostile-code",
+      "cold-start",
+      "stranded-value",
+      "permanent-revert",
+      "advertised-payout",
+      "capacity-cap",
+      "recalled-limit",
+      "null-vs-zero",
+      "proxy-interface",
+      "never-fund",
+      "growth-report"
     ],
     "incomplete": true,
     "overall": 0,
     "hire": [],
     "probation": [],
     "reject": []
-  },
-  "rescoredFrom": "2026-08-12T00:21:12.819Z"
+  }
 }

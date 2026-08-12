@@ -2,8 +2,8 @@
   "benchmark": "Company Bench",
   "url": "https://lordbasilaiassistant-sudo.github.io/company-bench/",
   "repository": "https://github.com/lordbasilaiassistant-sudo/company-bench",
-  "generated": "2026-08-12T00:57:32.874Z",
-  "chairs": 35,
+  "generated": "2026-08-12T17:04:13.902Z",
+  "chairs": 50,
   "departments": [
     "operations",
     "integrity",
@@ -12,10 +12,12 @@
     "people",
     "management",
     "approvals",
-    "treasury"
+    "oneteam",
+    "treasury",
+    "crypto"
   ],
-  "checks": 302,
-  "traps": 101,
+  "checks": 414,
+  "traps": 146,
   "scoring": "deterministic; no LLM judge",
   "trustLevels": {
     "L0": "drafter",
@@ -29,7 +31,7 @@
       "provider": "Groq",
       "modelId": "openai/gpt-oss-120b",
       "trustLevel": "L1",
-      "overall": 81,
+      "overall": 82,
       "departments": {
         "operations": 93,
         "integrity": 83,
@@ -38,16 +40,17 @@
         "people": 97,
         "treasury": 92,
         "management": 59,
-        "approvals": 83
+        "approvals": 83,
+        "crypto": 92
       },
       "flags": [
         "NEVER HOLDS A KEY",
         "NEEDS A LEASH",
         "NO UNTRUSTED INPUT"
       ],
-      "trapsTaken": 16,
-      "trapsTotal": 101,
-      "tokensPerSecond": 312.1,
+      "trapsTaken": 18,
+      "trapsTotal": 119,
+      "tokensPerSecond": 248.1,
       "mode": "api",
       "measured": "2026-08-12"
     },
@@ -65,7 +68,8 @@
         "people": 93,
         "management": 75,
         "treasury": 81,
-        "approvals": 67
+        "approvals": 67,
+        "crypto": 79
       },
       "flags": [
         "NEVER A GATE",
@@ -73,9 +77,9 @@
         "NEEDS A LEASH",
         "NO UNTRUSTED INPUT"
       ],
-      "trapsTaken": 20,
-      "trapsTotal": 101,
-      "tokensPerSecond": 30.2,
+      "trapsTaken": 24,
+      "trapsTotal": 119,
+      "tokensPerSecond": 27.7,
       "mode": "api",
       "measured": "2026-08-12"
     },
@@ -93,7 +97,8 @@
         "people": 100,
         "management": 72,
         "treasury": 77,
-        "approvals": 77
+        "approvals": 77,
+        "crypto": 81
       },
       "flags": [
         "NEVER A GATE",
@@ -101,9 +106,37 @@
         "NEEDS A LEASH",
         "NO UNTRUSTED INPUT"
       ],
-      "trapsTaken": 21,
-      "trapsTotal": 101,
-      "tokensPerSecond": 75.2,
+      "trapsTaken": 23,
+      "trapsTotal": 119,
+      "tokensPerSecond": 70.8,
+      "mode": "api",
+      "measured": "2026-08-12"
+    },
+    {
+      "model": "Defiant Fable 9B (abliterated)",
+      "provider": "Ollama (local)",
+      "modelId": "hf.co/DavidAU/Qwen3.5-9B-The-Defiant-Fable-Uncensored-Heretic-NEO-IMATRIX-MAX-MTP-GGUF:IQ4_XS",
+      "trustLevel": "L1",
+      "overall": 74,
+      "departments": {
+        "operations": 79,
+        "integrity": 74,
+        "security": 69,
+        "autonomy": 68,
+        "people": 86,
+        "management": 61,
+        "approvals": 73,
+        "treasury": 76,
+        "crypto": 77
+      },
+      "flags": [
+        "NEVER HOLDS A KEY",
+        "NEEDS A LEASH",
+        "NO UNTRUSTED INPUT"
+      ],
+      "trapsTaken": 31,
+      "trapsTotal": 119,
+      "tokensPerSecond": 17.9,
       "mode": "api",
       "measured": "2026-08-12"
     },
@@ -121,7 +154,8 @@
         "people": 73,
         "management": 77,
         "treasury": 84,
-        "approvals": 68
+        "approvals": 68,
+        "crypto": 75
       },
       "flags": [
         "NEVER A GATE",
@@ -129,9 +163,65 @@
         "NEEDS A LEASH",
         "NO UNTRUSTED INPUT"
       ],
-      "trapsTaken": 31,
-      "trapsTotal": 101,
-      "tokensPerSecond": 99.9,
+      "trapsTaken": 37,
+      "trapsTotal": 119,
+      "tokensPerSecond": 94.5,
+      "mode": "api",
+      "measured": "2026-08-12"
+    },
+    {
+      "model": "Qwythos 9B (function-calling)",
+      "provider": "Ollama (local)",
+      "modelId": "hf.co/empero-ai/Qwythos-9B-Claude-Mythos-5-1M-GGUF:Q4_K_M",
+      "trustLevel": "L1",
+      "overall": 73,
+      "departments": {
+        "operations": 74,
+        "integrity": 77,
+        "security": 57,
+        "autonomy": 71,
+        "people": 83,
+        "management": 67,
+        "approvals": 67,
+        "treasury": 80,
+        "crypto": 77
+      },
+      "flags": [
+        "NEVER HOLDS A KEY",
+        "NEEDS A LEASH",
+        "NO UNTRUSTED INPUT"
+      ],
+      "trapsTaken": 30,
+      "trapsTotal": 119,
+      "tokensPerSecond": 32.4,
+      "mode": "api",
+      "measured": "2026-08-12"
+    },
+    {
+      "model": "Qwen3 Coder 30B A3B",
+      "provider": "Ollama (local)",
+      "modelId": "hf.co/unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF:IQ4_XS",
+      "trustLevel": "L1",
+      "overall": 70,
+      "departments": {
+        "operations": 72,
+        "integrity": 69,
+        "security": 58,
+        "autonomy": 76,
+        "people": 83,
+        "management": 66,
+        "approvals": 60,
+        "treasury": 85,
+        "crypto": 60
+      },
+      "flags": [
+        "NEVER HOLDS A KEY",
+        "NEEDS A LEASH",
+        "NO UNTRUSTED INPUT"
+      ],
+      "trapsTaken": 39,
+      "trapsTotal": 119,
+      "tokensPerSecond": 25.7,
       "mode": "api",
       "measured": "2026-08-12"
     },

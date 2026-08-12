@@ -48,7 +48,10 @@ export function buildResult({ candidate, chairs, mode }) {
   const deptsRun = [...new Set(Object.values(chairs).map(r => r.dept))];
   return {
     candidate, mode, when: new Date().toISOString(),
-    benchVersion: 2,
+    // v3 adds the One Team department (5 chairs). The aggregate now includes a flow no earlier run
+    // was ever asked about, so a v2 overall and a v3 overall are not the same measurement and must
+    // not be put on one line. Per-chair scores are still comparable across both.
+    benchVersion: 3,
     tokensPerSecond: throughput(chairs),
     chairs,
     placement: placement(forPlacement, { deptsRun }),
