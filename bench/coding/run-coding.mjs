@@ -29,8 +29,29 @@ const flag = n => { const i = argv.indexOf(`--${n}`); return i >= 0 ? argv[i + 1
 const has = n => argv.includes(`--${n}`);
 const listOf = n => (flag(n) ?? '').split(',').map(s => s.trim()).filter(Boolean);
 
+// A mistyped flag must fail loudly, not quietly mean something else. `--model` (singular) is the
+// obvious typo for `--models`, and it used to be ignored — which fell through to "run EVERY keyed
+// model in the registry". Launched in a loop, that ran the whole track against seven free-tier API
+// providers for two hours, burning quota, hanging on rate-limit backoff, and never writing a file.
+// Unknown flags now stop the run before a single call is made.
+const KNOWN_FLAGS = new Set(['models', 'tasks', 'answers', 'label', 'id', 'out', 'take', 'list', 'all']);
+const ALIASES = { model: 'models', task: 'tasks', 'answer': 'answers' };
+for (const a of argv) {
+  if (!a.startsWith('--')) continue;
+  const name = a.slice(2);
+  if (KNOWN_FLAGS.has(name)) continue;
+  const hint = ALIASES[name] ? `  Did you mean --${ALIASES[name]}?` : '';
+  console.error(`\n  unknown flag --${name}.${hint}`);
+  console.error(`  known flags: ${[...KNOWN_FLAGS].map(f => `--${f}`).join(' ')}\n`);
+  process.exit(2);
+}
+
 const only = listOf('tasks');
 const tasks = only.length ? TASKS.filter(t => only.includes(t.id)) : TASKS;
+if (only.length) {
+  const unknown = only.filter(id => !TASKS.some(t => t.id === id));
+  if (unknown.length) { console.error(`\n  unknown task id(s): ${unknown.join(', ')}\n`); process.exit(2); }
+}
 
 if (has('list')) {
   console.log(`\n  EXECUTED CODING TRACK — ${TASKS.length} tasks\n`);
@@ -148,10 +169,23 @@ if (answersFile) {
 } else {
   const registry = loadRegistry(path.join(ROOT, 'models.json'));
   const wanted = listOf('models');
-  const models = wanted.length
-    ? wanted.map(s => resolveModel(s, registry)).filter(Boolean)
-    : registry.filter(m => !m.disabled && m.apiKey);
-  if (!models.length) { console.error('\n  no model selected. --models <id> or --answers <file>\n'); process.exit(2); }
+  // Running "everything keyed in the registry" is a real thing to want, but it must be asked for.
+  // As a silent default it turned one mistyped flag into a seven-provider run.
+  const allKeyed = registry.filter(m => !m.disabled && m.apiKey && m.apiKey !== 'none');
+  let models;
+  if (wanted.length) {
+    models = wanted.map(s => resolveModel(s, registry)).filter(Boolean);
+    const missing = wanted.filter(s => !resolveModel(s, registry));
+    if (missing.length) { console.error(`\n  unknown model(s): ${missing.join(', ')}\n`); process.exit(2); }
+  } else if (has('all')) {
+    models = allKeyed;
+    console.log(`\n  --all: ${models.length} keyed model(s): ${models.map(m => m.id).join(', ')}`);
+  } else {
+    console.error('\n  no model selected. Use --models <id>[,<id>] or --answers <file>.');
+    console.error(`  --all would run these ${allKeyed.length}: ${allKeyed.map(m => m.id).join(', ')}\n`);
+    process.exit(2);
+  }
+  if (!models.length) { console.error('\n  no model selected.\n'); process.exit(2); }
   for (const m of models) {
     console.log(`\n  EXECUTED CODING TRACK — ${m.name}${m.vendor ? ` · ${m.vendor}` : ''}\n`);
     graded = {}; callFailures = [];

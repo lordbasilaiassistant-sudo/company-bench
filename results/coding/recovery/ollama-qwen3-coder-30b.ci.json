@@ -1,0 +1,65 @@
+{
+  "candidate": {
+    "id": "ollama-qwen3-coder-30b",
+    "name": "Qwen3 Coder 30B A3B",
+    "model": "hf.co/unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF:IQ4_XS"
+  },
+  "track": "coding-recovery",
+  "when": "2026-08-12T15:52:51.297Z",
+  "maxRounds": 3,
+  "oneShot": 1,
+  "afterFeedback": 1,
+  "recoveryRate": null,
+  "needed": 0,
+  "recovered": 0,
+  "tasks": [
+    {
+      "id": "proto-safe-merge",
+      "category": "security",
+      "weight": 1.5,
+      "firstScore": 1,
+      "finalScore": 1,
+      "rounds": 0,
+      "solvedFirst": true,
+      "recovered": false,
+      "finalFailedChecks": [],
+      "code": "function deepMerge(target, source) {\n  if (target === null || typeof target !== 'object') target = {};\n  if (source === null || typeof source !== 'object') source = {};\n  \n  const result = { ...target };\n  \n  for (const key in source) {\n    if (key === '__proto__' || key === 'constructor' || key === 'prototype') {\n      continue;\n    }\n    \n    if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {\n      result[key] = deepMerge(result[key], source[key]);\n    } else {\n      result[key] = source[key];\n    }\n  }\n  \n  return result;\n}\n"
+    },
+    {
+      "id": "fee-split-bps",
+      "category": "crypto-math",
+      "weight": 1.4,
+      "firstScore": 1,
+      "finalScore": 1,
+      "rounds": 0,
+      "solvedFirst": true,
+      "recovered": false,
+      "finalFailedChecks": [],
+      "code": "function splitFees(totalWei, sharesBps) {\n  if (sharesBps.reduce((sum, bps) => sum + bps, 0) !== 10000) {\n    throw new Error(\"Shares must sum to exactly 10000\");\n  }\n  \n  const payouts = [];\n  let remainingWei = totalWei;\n  let totalBps = 0;\n  \n  for (let i = 0; i < sharesBps.length; i++) {\n    const bps = sharesBps[i];\n    totalBps += bps;\n    \n    if (i === sharesBps.length - 1) {\n      // Last recipient gets all remaining wei\n      payouts.push(remainingWei);\n    } else {\n      // Calculate payout for this recipient\n      const weiForThisRecipient = (totalWei * BigInt(bps)) / 10000n;\n      payouts.push(weiForThisRecipient);\n      remainingWei -= weiForThisRecipient;\n    }\n  }\n  \n  return payouts;\n}\n"
+    },
+    {
+      "id": "token-units",
+      "category": "crypto-math",
+      "weight": 1.3,
+      "firstScore": 1,
+      "finalScore": 1,
+      "rounds": 0,
+      "solvedFirst": true,
+      "recovered": false,
+      "finalFailedChecks": [],
+      "code": "function parseUnits(amountStr, decimals) {\n  if (typeof amountStr !== 'string' || !/^\\d+(\\.\\d+)?$/.test(amountStr)) {\n    throw new Error('Invalid amount string');\n  }\n  \n  const [integerPart, fractionalPart = ''] = amountStr.split('.');\n  \n  if (fractionalPart.length > decimals) {\n    throw new Error('Too many fractional digits');\n  }\n  \n  const paddedFractional = fractionalPart.padEnd(decimals, '0');\n  const fullString = integerPart + paddedFractional;\n  \n  return BigInt(fullString);\n}\n\nfunction formatUnits(amountBig, decimals) {\n  if (typeof amountBig !== 'bigint') {\n    throw new Error('Amount must be a BigInt');\n  }\n  \n  const amountStr = amountBig.toString();\n  const leadingZeros = '0'.repeat(Math.max(0, decimals - amountStr.length));\n  const paddedStr = leadingZeros + amountStr;\n  \n  const integerPart = paddedStr.slice(0, -decimals) || '0';\n  const fractionalPart = paddedStr.slice(-decimals);\n  \n  if (fractionalPart === '0'.repeat(decimals)) {\n    return integerPart;\n  }\n  \n  const trimmedFractional = fractionalPart.replace(/0+$/, '');\n  return `${integerPart}.${trimmedFractional}`;\n}\n"
+    },
+    {
+      "id": "safe-transfer-wrapper",
+      "category": "crypto-audit",
+      "weight": 1.4,
+      "firstScore": 1,
+      "finalScore": 1,
+      "rounds": 0,
+      "solvedFirst": true,
+      "recovered": false,
+      "finalFailedChecks": [],
+      "code": "function checkTransferResult(returnData, didRevert) {\n    if (didRevert) return false;\n    if (!returnData || returnData === \"0x\") return true;\n    \n    // Check if returnData is a valid 32-byte word\n    if (typeof returnData !== 'string' || !/^(0x)?[0-9a-fA-F]{64}$/.test(returnData)) {\n        throw new Error(\"Invalid return data\");\n    }\n    \n    const bytes = returnData.startsWith('0x') ? returnData.slice(2) : returnData;\n    const lastByte = bytes.slice(-2);\n    \n    if (lastByte === '00') return false;\n    if (lastByte === '01') return true;\n    \n    throw new Error(\"Invalid return data\");\n}\n"
+    }
+  ]
+}

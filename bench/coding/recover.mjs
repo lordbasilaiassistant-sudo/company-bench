@@ -12,21 +12,23 @@
  * back the failures. So the useful question is not "was it right first time" but "does a failing
  * test make it right" — and those two rank models DIFFERENTLY.
  *
- * Measured on safe-transfer-wrapper, the first task this was run on:
+ * Measured over the four crypto tasks the local candidates struggled with, `--feedback ci`:
  *
- *   Qwythos 9B   4/6 -> 6/6   one round. Its logic was right; it had written BigInt('0x' + data)
- *                             where data already began with '0x'. A typo, and the harness kills it.
- *   Defiant 9B   4/6 -> 4/6   handed the exact failing assertions and the thrown error, three
- *                             rounds, never converged.
+ *   Defiant Fable 9B   one-shot 53.1%  ->  91.0%   recovered 2 of the 4 it got wrong
+ *   Qwythos 9B         one-shot 74.9%  ->  74.9%   recovered 0 of 3; resubmitted identical code
+ *   Qwen3-Coder 30B    one-shot 100%                solved all four first try
  *
- * Both scored 4/6 one-shot. They are not the same candidate, and only this track can see it.
+ * That ordering is not the one-shot ordering: on the full 13-task coding track Qwythos beats
+ * Defiant 91.7% to 79.7%, and here it is the other way round. A model that is usually right and
+ * cannot be corrected and a model that is often wrong and fixes itself are different hires, and
+ * the one-shot score cannot tell them apart.
  *
- * WHAT THE MODEL IS TOLD
+ * A WARNING ABOUT SMALL SAMPLES, PAID FOR
  *
- * Only what a CI log would show: the names of the checks that failed and the exception each one
- * threw. Never the test source, never a diagnosis, never a hint about the cause. If the feedback
- * explained the bug the track would measure instruction-following, which the bench already has
- * eleven better ways to measure.
+ * The first version of this measurement was a scratch script on ONE task, and it reported the
+ * exact opposite: Qwythos recovering and Defiant stuck. That result was published to the person
+ * asking before the full run existed. One task is not a measurement of a model, and the pull to
+ * report the first striking number is strongest precisely when it is most likely to be noise.
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -48,18 +50,48 @@ const ROUNDS = Math.max(1, Number(flag('rounds') ?? 2));
 const only = listOf('tasks');
 const tasks = only.length ? TASKS.filter(t => only.includes(t.id)) : TASKS;
 
-/** A CI log, and nothing more. */
-function failureReport(g) {
+/**
+ * Two feedback modes, because they model two different real situations and they do NOT rank models
+ * the same way.
+ *
+ *   ci      — check names and thrown errors only. The tests stay hidden. This is a graded exam, and
+ *             it is what a closed CI or a review gate gives you.
+ *   harness — the same, plus the source of each failing assertion. This is what an agent working in
+ *             an actual repository sees, because the test file is right there and it can read it.
+ *             It is the realistic setting for "can this model drive Claude Code on my code".
+ *
+ * The distinction is not cosmetic. On safe-transfer-wrapper, Qwythos 9B resubmitted byte-identical
+ * code under `ci` and fixed the bug when the expected call and value were spelled out. Neither
+ * number is wrong; they answer different questions, and quoting one as the other is how a model
+ * gets called stubborn when it was only under-informed.
+ */
+const MODE = (flag('feedback') ?? 'ci').toLowerCase();
+if (!['ci', 'harness'].includes(MODE)) { console.error(`\n  --feedback must be ci or harness\n`); process.exit(2); }
+
+/** Pull the `_chk("name", ...)` line for a named check out of a task's test source. */
+function assertionFor(task, name) {
+  const re = new RegExp(`_chk\\(\\s*["']${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}["'][\\s\\S]*?$`, 'm');
+  const m = re.exec(task.tests ?? '');
+  return m ? m[0].split('\n')[0].trim() : null;
+}
+
+function failureReport(task, g) {
   if (g.fatal) return `The file did not run at all:\n  ${g.fatal}`;
   const bad = (g.checks ?? []).filter(c => !c.ok);
-  return ['I ran the tests. These failed:', ...bad.map(c => `  ${c.name}${c.err ? `  ->  ${c.err}` : ''}`)].join('\n');
+  const lines = bad.map(c => {
+    const head = `  ${c.name}${c.err ? `  ->  ${c.err}` : ''}`;
+    if (MODE !== 'harness') return head;
+    const src = assertionFor(task, c.name);
+    return src ? `${head}\n      the assertion was: ${src}` : head;
+  });
+  return ['I ran the tests. These failed:', ...lines].join('\n');
 }
 
 function retryPrompt(task, code, g) {
   return [
     task.prompt, '', 'Your previous answer was:', '',
     '```', code, '```', '',
-    failureReport(g), '',
+    failureReport(task, g), '',
     'Fix it. Reply with ONE code block containing only the corrected code, and no explanation.',
   ].join('\n');
 }
@@ -132,10 +164,12 @@ for (const model of models) {
     (rate === null ? '' : `  (${(rate * 100).toFixed(0)}%)`));
 
   const id = (model.id ?? model.name).toLowerCase().replace(/[^a-z0-9._-]+/g, '-').slice(0, 64);
-  const file = path.join(OUT, `${id}.json`);
+  // Mode is part of the identity: a ci run and a harness run of the same model are two different
+  // measurements and must not overwrite one another.
+  const file = path.join(OUT, `${id}.${MODE}.json`);
   fs.writeFileSync(file, JSON.stringify({
     candidate: { id, name: model.name, model: model.model }, track: 'coding-recovery',
-    when: new Date().toISOString(), maxRounds: ROUNDS,
+    when: new Date().toISOString(), maxRounds: ROUNDS, feedback: MODE,
     oneShot: wAvg('firstScore'), afterFeedback: wAvg('finalScore'),
     recoveryRate: rate, needed: needed.length, recovered: needed.filter(r => r.recovered).length,
     tasks: rows,
