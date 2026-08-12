@@ -96,10 +96,18 @@ async function answersFromModel(model) {
       answers[t.id] = text;
       process.stdout.write(`${(ms / 1000).toFixed(1)}s  `);
     } catch (e) {
-      answers[t.id] = '';
-      process.stdout.write(`call failed: ${String(e.message).slice(0, 50)}  `);
+      // A transport failure is NOT a coding failure. Grading '' here scored the model 1/8 on a task
+      // it was never asked, and merged that over a real 8/8 — two dead sockets took a 91.7% result
+      // to 80.4%. CONTRIBUTING.md already says an incomplete run must be excluded rather than
+      // published as a score; leaving `graded[t.id]` unset is what enforces it, because the merge
+      // and the weighted average both skip tasks with no grade.
+      console.log(`⚠  call failed, NOT scored: ${String(e.message).slice(0, 60)}`);
+      callFailures.push(t.id);
+      continue;
     }
-    const g = await gradeTask(t, extractCode(answers[t.id] ?? '', t.lang));
+    const code = extractCode(answers[t.id] ?? '', t.lang);
+    const g = await gradeTask(t, code);
+    g.code = code;                       // the exact source that was executed — see note at persist time
     reportLine(t, g);
     graded[t.id] = g;
   }
@@ -107,6 +115,7 @@ async function answersFromModel(model) {
 }
 
 let graded = {};
+let callFailures = [];
 function reportLine(t, g) {
   const score = g.total ? g.passed / g.total : 0;
   const bar = '█'.repeat(Math.round(score * 10)).padEnd(10, '·');
@@ -129,7 +138,9 @@ if (answersFile) {
     process.stdout.write(`  ${t.id.padEnd(24)} `);
     const answer = raw[t.id];
     if (!answer || !String(answer).trim()) { console.log('—  not attempted'); continue; }
-    const g = await gradeTask(t, extractCode(String(answer), t.lang));
+    const code = extractCode(String(answer), t.lang);
+    const g = await gradeTask(t, code);
+    g.code = code;
     reportLine(t, g);
     graded[t.id] = g;
   }
@@ -143,45 +154,76 @@ if (answersFile) {
   if (!models.length) { console.error('\n  no model selected. --models <id> or --answers <file>\n'); process.exit(2); }
   for (const m of models) {
     console.log(`\n  EXECUTED CODING TRACK — ${m.name}${m.vendor ? ` · ${m.vendor}` : ''}\n`);
-    graded = {};
+    graded = {}; callFailures = [];
     await answersFromModel(m);
     const slug = m.id.replace(/[^a-z0-9._-]+/gi, '-').replace(/^-|-$/g, '').slice(0, 64);
-    candidates.push({ id: slug, name: m.name, vendor: m.vendor, model: m.model, mode: 'api', graded: { ...graded } });
+    candidates.push({ id: slug, name: m.name, vendor: m.vendor, model: m.model, mode: 'api',
+      graded: { ...graded }, callFailures: [...callFailures] });
   }
 }
 
 fs.mkdirSync(OUT, { recursive: true });
 for (const c of candidates) {
-  const scored = tasks.filter(t => c.graded[t.id] && !c.graded[t.id].skipped);
+  const file = path.join(OUT, `${c.id}.json`);
+
+  // MERGE, never clobber. `--tasks x,y` re-runs two tasks; without this the file is rewritten with
+  // only those two and eleven real results are gone. The identical bug in bench/run.mjs (`--only`)
+  // silently deleted three models' scorecards and cost a full re-run to notice, so the fix lands
+  // here too rather than waiting for it to happen a second time.
+  const prior = fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, 'utf8')) : null;
+  const rows = new Map((prior?.tasks ?? []).map(t => [t.id, t]));
+
+  for (const t of tasks) {
+    const g = c.graded[t.id];
+    if (!g) continue;                                   // not attempted this run — keep any prior row
+    rows.set(t.id, { id: t.id, category: t.category, lang: t.lang, weight: t.weight,
+      attempted: true, skipped: g.skipped ?? false,
+      score: g.total ? g.passed / g.total : 0, passed: g.passed ?? 0, total: g.total ?? 0,
+      fatal: g.fatal ?? null, failedChecks: (g.checks ?? []).filter(x => !x.ok).map(x => x.name),
+      // The source that was actually executed. CONTRIBUTING.md: "a score nobody can audit is a
+      // rumour" — the text track has always stored raw output, and this track shipped without it,
+      // so for three local models there was no way to tell a real blind spot from a scorer bug.
+      // Two of them failed the SAME two checks on safe-transfer-wrapper and the only way to rule
+      // out my own scorer was to run a third model. Store the code; don't repeat that.
+      code: g.code ?? null });
+  }
+
+  // Recompute over the MERGED set, in canonical task order, so a partial re-run yields the same
+  // number a full run would have.
+  const ordered = TASKS.map(t => rows.get(t.id)).filter(Boolean);
+  const scored = ordered.filter(r => r.attempted && !r.skipped);
   let wSum = 0, wScore = 0;
   const byCat = {};
-  for (const t of scored) {
-    const g = c.graded[t.id];
-    const s = g.total ? g.passed / g.total : 0;
-    wSum += t.weight; wScore += s * t.weight;
-    (byCat[t.category] ||= { s: 0, w: 0 });
-    byCat[t.category].s += s * t.weight; byCat[t.category].w += t.weight;
+  for (const r of scored) {
+    wSum += r.weight; wScore += r.score * r.weight;
+    (byCat[r.category] ||= { s: 0, w: 0 });
+    byCat[r.category].s += r.score * r.weight; byCat[r.category].w += r.weight;
   }
   const final = wSum ? wScore / wSum : 0;
-  const solved = scored.filter(t => c.graded[t.id].passed === c.graded[t.id].total && c.graded[t.id].total > 0).length;
+  const solved = scored.filter(r => r.total > 0 && r.passed === r.total).length;
+
+  // Nothing graded means every call died. Writing that as a result would publish a network outage
+  // as a 0%, and — worse, with merging — overwrite a good file with an empty one.
+  if (!scored.length) {
+    console.log(`\n  ✖ no task was scored (${(c.callFailures ?? []).length} call failure(s)). Nothing written.\n`);
+    continue;
+  }
+  if (c.callFailures?.length) {
+    console.log(`\n  ⚠ ${c.callFailures.length} task(s) never reached the model and are excluded, not zeroed:`);
+    console.log(`     ${c.callFailures.join(', ')}`);
+  }
 
   console.log(`\n  ── SCORE ${(final * 100).toFixed(1)}%  (weighted, ${scored.length} task${scored.length === 1 ? '' : 's'} executed)`);
   for (const [cat, v] of Object.entries(byCat)) console.log(`     ${cat.padEnd(18)} ${((v.s / v.w) * 100).toFixed(0)}%`);
   console.log(`     fully solved       ${solved}/${scored.length}`);
 
-  const file = path.join(OUT, `${c.id}.json`);
   fs.writeFileSync(file, JSON.stringify({
     candidate: { id: c.id, name: c.name, vendor: c.vendor, model: c.model },
     track: 'coding', mode: c.mode, when: new Date().toISOString(),
-    score: final, fullySolved: solved, executed: scored.length, total: tasks.length,
+    score: final, fullySolved: solved, executed: scored.length, total: TASKS.length,
     byCategory: Object.fromEntries(Object.entries(byCat).map(([k, v]) => [k, v.s / v.w])),
-    tasks: tasks.map(t => {
-      const g = c.graded[t.id];
-      return { id: t.id, category: t.category, lang: t.lang, weight: t.weight,
-        attempted: !!g, skipped: g?.skipped ?? false,
-        score: g && g.total ? g.passed / g.total : 0, passed: g?.passed ?? 0, total: g?.total ?? 0,
-        fatal: g?.fatal ?? null, failedChecks: (g?.checks ?? []).filter(x => !x.ok).map(x => x.name) };
-    }),
+    ...(c.callFailures?.length ? { callFailures: c.callFailures } : {}),
+    tasks: ordered,
   }, null, 2));
   console.log(`\n  → ${path.relative(ROOT, file)}\n`);
 }

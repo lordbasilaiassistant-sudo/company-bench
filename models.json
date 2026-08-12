@@ -113,11 +113,13 @@
     "name": "your local model",
     "vendor": "Ollama",
     "api": "ollama",
-    "baseUrl": "http://127.0.0.1:11434",
+    "baseUrlNote": "Omitted on purpose: with no baseUrl the runner follows your OLLAMA_HOST (or OLLAMA_HOST_URL), which is the variable Ollama itself uses. Pin one here only if your server is somewhere those do not point.",
     "model": "llama3.2",
     "keyEnv": null,
     "cost": "local",
-    "disabled": true
+    "disabled": true,
+    "numCtx": 16384,
+    "numCtxNote": "BENCHMARK SETTING ONLY. Capped so the bench measures the MODEL, not an eager KV allocation: Ollama reserves the whole KV cache at load, linear in num_ctx, so context is paid for in offloaded layers. Measured on one 8 GB card from ollama's own server.log: Qwen3-Coder-30B at -c 8192 put 49/49 layers on the GPU with a 768 MiB KV; the same model at -c 262144 put 9/49 on the GPU with a 24576 MiB KV, and graph splits went 104 -> 582. For daily use run the model at the largest context you actually need and buy it back with OLLAMA_KV_CACHE_TYPE=q8_0, which halves KV bytes. Do NOT touch OLLAMA_FLASH_ATTENTION: current Ollama already passes --flash-attn auto so setting it to 1 is a no-op, and setting it to 0 additionally drops num_batch 512 -> 256 on CUDA devices with <= 8 GiB, making it a pessimisation on exactly the cards that need help."
   },
   {
     "id": "ollama-qwythos-9b",
@@ -129,7 +131,9 @@
     "keyEnv": null,
     "cost": "local",
     "maxTokens": 3000,
-    "disabled": true
+    "disabled": true,
+    "numCtx": 16384,
+    "numCtxNote": "BENCHMARK SETTING ONLY. Capped so the bench measures the MODEL, not an eager KV allocation: at its declared 262144 context Qwen3-Coder occupied 43 GB and ran 86% on CPU. For daily use run the model at its maximum context and buy it back with OLLAMA_FLASH_ATTENTION=1 and OLLAMA_KV_CACHE_TYPE=q8_0 — context is what makes a model useful and starving it is not a speedup."
   },
   {
     "id": "ollama-josie-qwen3-8b",
@@ -141,7 +145,9 @@
     "keyEnv": null,
     "cost": "local",
     "maxTokens": 4000,
-    "disabled": true
+    "disabled": true,
+    "numCtx": 16384,
+    "numCtxNote": "BENCHMARK SETTING ONLY. Capped so the bench measures the MODEL, not an eager KV allocation: at its declared 262144 context Qwen3-Coder occupied 43 GB and ran 86% on CPU. For daily use run the model at its maximum context and buy it back with OLLAMA_FLASH_ATTENTION=1 and OLLAMA_KV_CACHE_TYPE=q8_0 — context is what makes a model useful and starving it is not a speedup."
   },
   {
     "id": "ollama-lfm2-2.6b",
@@ -154,7 +160,9 @@
     "cost": "local",
     "maxTokens": 3000,
     "disabled": true,
-    "timeoutMs": 600000
+    "timeoutMs": 600000,
+    "numCtx": 16384,
+    "numCtxNote": "BENCHMARK SETTING ONLY. Capped so the bench measures the MODEL, not an eager KV allocation: at its declared 262144 context Qwen3-Coder occupied 43 GB and ran 86% on CPU. For daily use run the model at its maximum context and buy it back with OLLAMA_FLASH_ATTENTION=1 and OLLAMA_KV_CACHE_TYPE=q8_0 — context is what makes a model useful and starving it is not a speedup."
   },
   {
     "id": "cerebras-gemma4-31b",
@@ -167,5 +175,65 @@
     "keyFile": "cerebras.env",
     "cost": "free tier",
     "maxTokens": 4000
+  },
+  {
+    "id": "ollama-qwythos-9b-fc",
+    "name": "Qwythos 9B (function-calling)",
+    "vendor": "Ollama (local)",
+    "api": "ollama",
+    "baseUrl": "http://127.0.0.1:11435",
+    "model": "hf.co/empero-ai/Qwythos-9B-Claude-Mythos-5-1M-GGUF:Q4_K_M",
+    "keyEnv": null,
+    "cost": "local",
+    "maxTokens": 3000,
+    "timeoutMs": 600000,
+    "disabled": true,
+    "numCtx": 16384,
+    "numCtxNote": "BENCHMARK SETTING ONLY. Capped so the bench measures the MODEL, not an eager KV allocation: at its declared 262144 context Qwen3-Coder occupied 43 GB and ran 86% on CPU. For daily use run the model at its maximum context and buy it back with OLLAMA_FLASH_ATTENTION=1 and OLLAMA_KV_CACHE_TYPE=q8_0 — context is what makes a model useful and starving it is not a speedup."
+  },
+  {
+    "id": "ollama-qwen3-coder-30b",
+    "name": "Qwen3 Coder 30B A3B",
+    "vendor": "Ollama (local)",
+    "api": "ollama",
+    "baseUrl": "http://127.0.0.1:11435",
+    "model": "hf.co/unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF:IQ4_XS",
+    "keyEnv": null,
+    "cost": "local",
+    "maxTokens": 3000,
+    "timeoutMs": 900000,
+    "disabled": true,
+    "numCtx": 16384,
+    "numCtxNote": "BENCHMARK SETTING ONLY. Capped so the bench measures the MODEL, not an eager KV allocation: at its declared 262144 context Qwen3-Coder occupied 43 GB and ran 86% on CPU. For daily use run the model at its maximum context and buy it back with OLLAMA_FLASH_ATTENTION=1 and OLLAMA_KV_CACHE_TYPE=q8_0 — context is what makes a model useful and starving it is not a speedup."
+  },
+  {
+    "id": "ollama-defiant-9b",
+    "name": "Defiant Fable 9B (abliterated)",
+    "vendor": "Ollama (local)",
+    "api": "ollama",
+    "baseUrl": "http://127.0.0.1:11435",
+    "model": "hf.co/DavidAU/Qwen3.5-9B-The-Defiant-Fable-Uncensored-Heretic-NEO-IMATRIX-MAX-MTP-GGUF:IQ4_XS",
+    "keyEnv": null,
+    "cost": "local",
+    "maxTokens": 3000,
+    "timeoutMs": 600000,
+    "disabled": true,
+    "numCtx": 16384,
+    "numCtxNote": "BENCHMARK SETTING ONLY. Capped so the bench measures the MODEL, not an eager KV allocation: at its declared 262144 context Qwen3-Coder occupied 43 GB and ran 86% on CPU. For daily use run the model at its maximum context and buy it back with OLLAMA_FLASH_ATTENTION=1 and OLLAMA_KV_CACHE_TYPE=q8_0 — context is what makes a model useful and starving it is not a speedup."
+  },
+  {
+    "id": "ollama-gemma4-12b-agentic",
+    "name": "Gemma 4 12B agentic",
+    "vendor": "Ollama (local)",
+    "api": "ollama",
+    "baseUrl": "http://127.0.0.1:11435",
+    "model": "hf.co/yuxinlu1/gemma-4-12B-agentic-fable5-composer2.5-v2-3.5x-tau2-GGUF:Q4_K_M",
+    "keyEnv": null,
+    "cost": "local",
+    "maxTokens": 3000,
+    "timeoutMs": 600000,
+    "disabled": true,
+    "numCtx": 16384,
+    "numCtxNote": "BENCHMARK SETTING ONLY. Capped so the bench measures the MODEL, not an eager KV allocation: at its declared 262144 context Qwen3-Coder occupied 43 GB and ran 86% on CPU. For daily use run the model at its maximum context and buy it back with OLLAMA_FLASH_ATTENTION=1 and OLLAMA_KV_CACHE_TYPE=q8_0 — context is what makes a model useful and starving it is not a speedup."
   }
 ]

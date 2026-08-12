@@ -144,8 +144,28 @@ export function loadRegistry(file) {
   for (const m of reg) {
     m.api ??= 'openai';
     m.apiKey = m.keyEnv ? resolveKey(m.keyEnv, m) : 'none';
+    // An ollama entry that does not pin a baseUrl follows the machine's own OLLAMA_HOST. A pinned
+    // one is left exactly as written — someone who typed a port meant it.
+    if (m.api === 'ollama' && !m.baseUrl) m.baseUrl = ollamaBaseUrl();
   }
   return reg;
+}
+
+/**
+ * Where the local Ollama server actually is.
+ *
+ * `OLLAMA_HOST` is the variable Ollama itself defines and the one every user has already exported
+ * (it is what `ollama ps` and `ollama launch` read). This resolver honoured only `OLLAMA_HOST_URL`
+ * and otherwise hard-defaulted to port 11434 — so on a machine whose server listens on 11435, an
+ * `ollama:<tag>` spec produced a bare `fetch failed` against a dead port, with the server sitting
+ * healthy the whole time and logging no request at all. Accept both, and accept the bare `host:port`
+ * form Ollama uses, since `OLLAMA_HOST` has no scheme.
+ */
+export function ollamaBaseUrl() {
+  const raw = process.env.OLLAMA_HOST_URL || process.env.OLLAMA_HOST;
+  if (!raw) return 'http://127.0.0.1:11434';
+  const s = String(raw).trim();
+  return /^https?:\/\//i.test(s) ? s.replace(/\/$/, '') : `http://${s.replace(/\/$/, '')}`;
 }
 
 /** `ollama:qwen3:8b` / `openai:gpt-4o` / `anthropic:claude-opus-5` / a registry id. */
@@ -154,9 +174,16 @@ export function resolveModel(spec, registry) {
   if (known) return known;
   const [scheme, ...rest] = spec.split(':');
   const name = rest.join(':');
+  // `ollama:<tag>` and the registry entry that names the same tag are the SAME candidate, and must
+  // not get two identities. They did: results are filed under the model id, so a full run launched
+  // by tag and a re-run launched by registry id produced two files for one model, one of them a
+  // 60-character slug of a HuggingFace path. Prefer the registry entry whenever the tag matches —
+  // it also carries that entry's numCtx/keepAlive, which the ad-hoc form silently drops.
+  const sameModel = registry.find(m => m.api === scheme && m.model === name);
+  if (sameModel) return sameModel;
   if (scheme === 'ollama') {
     return { id: spec, name: `${name} (ollama)`, api: 'ollama', model: name, cost: 'local',
-      baseUrl: process.env.OLLAMA_HOST_URL || 'http://127.0.0.1:11434', apiKey: 'none' };
+      baseUrl: ollamaBaseUrl(), apiKey: 'none' };
   }
   if (scheme === 'anthropic') {
     return { id: spec, name, api: 'anthropic', model: name, cost: 'paid',

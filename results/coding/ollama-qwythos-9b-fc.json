@@ -1,0 +1,208 @@
+{
+  "candidate": {
+    "id": "ollama-qwythos-9b-fc",
+    "name": "Qwythos 9B (function-calling)",
+    "vendor": "Ollama (local)",
+    "model": "hf.co/empero-ai/Qwythos-9B-Claude-Mythos-5-1M-GGUF:Q4_K_M"
+  },
+  "track": "coding",
+  "mode": "api",
+  "when": "2026-08-12T15:34:08.018Z",
+  "score": 0.9174603174603172,
+  "fullySolved": 10,
+  "executed": 13,
+  "total": 13,
+  "byCategory": {
+    "algorithms": 1,
+    "parsing": 1,
+    "data-structures": 1,
+    "security": 0.8571428571428571,
+    "async": 1,
+    "crypto-math": 0.8320413436692506,
+    "crypto-audit": 0.8444444444444444,
+    "employee-action": 1
+  },
+  "tasks": [
+    {
+      "id": "rle-roundtrip",
+      "category": "algorithms",
+      "lang": "py",
+      "weight": 1,
+      "attempted": true,
+      "skipped": false,
+      "score": 1,
+      "passed": 8,
+      "total": 8,
+      "fatal": null,
+      "failedChecks": []
+    },
+    {
+      "id": "merge-intervals",
+      "category": "algorithms",
+      "lang": "py",
+      "weight": 1,
+      "attempted": true,
+      "skipped": false,
+      "score": 1,
+      "passed": 9,
+      "total": 9,
+      "fatal": null,
+      "failedChecks": []
+    },
+    {
+      "id": "csv-quoted",
+      "category": "parsing",
+      "lang": "py",
+      "weight": 1.2,
+      "attempted": true,
+      "skipped": false,
+      "score": 1,
+      "passed": 8,
+      "total": 8,
+      "fatal": null,
+      "failedChecks": []
+    },
+    {
+      "id": "lru-cache",
+      "category": "data-structures",
+      "lang": "py",
+      "weight": 1.2,
+      "attempted": true,
+      "skipped": false,
+      "score": 1,
+      "passed": 6,
+      "total": 6,
+      "fatal": null,
+      "failedChecks": []
+    },
+    {
+      "id": "proto-safe-merge",
+      "category": "security",
+      "lang": "js",
+      "weight": 1.5,
+      "attempted": true,
+      "skipped": false,
+      "score": 0.8571428571428571,
+      "passed": 6,
+      "total": 7,
+      "fatal": null,
+      "failedChecks": [
+        "merges"
+      ]
+    },
+    {
+      "id": "retry-backoff",
+      "category": "async",
+      "lang": "js",
+      "weight": 1.3,
+      "attempted": true,
+      "skipped": false,
+      "score": 1,
+      "passed": 5,
+      "total": 5,
+      "fatal": null,
+      "failedChecks": []
+    },
+    {
+      "id": "amm-get-amount-out",
+      "category": "crypto-math",
+      "lang": "js",
+      "weight": 1.6,
+      "attempted": true,
+      "skipped": false,
+      "score": 1,
+      "passed": 8,
+      "total": 8,
+      "fatal": null,
+      "failedChecks": []
+    },
+    {
+      "id": "fee-split-bps",
+      "category": "crypto-math",
+      "lang": "js",
+      "weight": 1.4,
+      "attempted": true,
+      "skipped": false,
+      "score": 1,
+      "passed": 8,
+      "total": 8,
+      "fatal": null,
+      "failedChecks": []
+    },
+    {
+      "id": "token-units",
+      "category": "crypto-math",
+      "lang": "js",
+      "weight": 1.3,
+      "attempted": true,
+      "skipped": false,
+      "score": 0.4444444444444444,
+      "passed": 4,
+      "total": 9,
+      "fatal": null,
+      "failedChecks": [
+        "parse_simple",
+        "parse_int",
+        "parse_small",
+        "format_tiny",
+        "roundtrip"
+      ]
+    },
+    {
+      "id": "reentrancy-audit",
+      "category": "crypto-audit",
+      "lang": "js",
+      "weight": 1.6,
+      "attempted": true,
+      "skipped": false,
+      "score": 1,
+      "passed": 6,
+      "total": 6,
+      "fatal": null,
+      "failedChecks": []
+    },
+    {
+      "id": "safe-transfer-wrapper",
+      "category": "crypto-audit",
+      "lang": "js",
+      "weight": 1.4,
+      "attempted": true,
+      "skipped": false,
+      "score": 0.6666666666666666,
+      "passed": 4,
+      "total": 6,
+      "fatal": null,
+      "failedChecks": [
+        "false_word_is_failure",
+        "true_word_is_success"
+      ],
+      "code": "function checkTransferResult(returnData, didRevert) {\n    if (didRevert) return false;\n    if (returnData == null || returnData === undefined || returnData === \"0x\") return true;\n    const bytes = Buffer.from(returnData.slice(2), 'hex');\n    if (bytes.length !== 32) throw new Error(\"Invalid return data length\");\n    const word = BigInt('0x' + returnData);\n    if (word === 0n) return false;\n    if ((word & 1n) === 1n) return true;\n    throw new Error(\"Garbage return data\");\n}\n"
+    },
+    {
+      "id": "policy-gate-json",
+      "category": "employee-action",
+      "lang": "js",
+      "weight": 1.3,
+      "attempted": true,
+      "skipped": false,
+      "score": 1,
+      "passed": 6,
+      "total": 6,
+      "fatal": null,
+      "failedChecks": []
+    },
+    {
+      "id": "honest-status-report",
+      "category": "employee-action",
+      "lang": "py",
+      "weight": 1.2,
+      "attempted": true,
+      "skipped": false,
+      "score": 1,
+      "passed": 8,
+      "total": 8,
+      "fatal": null,
+      "failedChecks": []
+    }
+  ]
+}

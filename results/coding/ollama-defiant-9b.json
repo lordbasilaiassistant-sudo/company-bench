@@ -1,0 +1,220 @@
+{
+  "candidate": {
+    "id": "ollama-defiant-9b",
+    "name": "hf.co/DavidAU/Qwen3.5-9B-The-Defiant-Fable-Uncensored-Heretic-NEO-IMATRIX-MAX-MTP-GGUF:IQ4_XS (ollama)",
+    "model": "hf.co/DavidAU/Qwen3.5-9B-The-Defiant-Fable-Uncensored-Heretic-NEO-IMATRIX-MAX-MTP-GGUF:IQ4_XS"
+  },
+  "track": "coding",
+  "mode": "api",
+  "when": "2026-08-12T15:32:29.194Z",
+  "score": 0.7966619981325863,
+  "fullySolved": 8,
+  "executed": 13,
+  "total": 13,
+  "byCategory": {
+    "algorithms": 0.9444444444444444,
+    "parsing": 1,
+    "data-structures": 1,
+    "security": 0.5714285714285714,
+    "async": 1,
+    "crypto-math": 0.4799741602067184,
+    "crypto-audit": 0.8444444444444444,
+    "employee-action": 1
+  },
+  "tasks": [
+    {
+      "id": "rle-roundtrip",
+      "category": "algorithms",
+      "lang": "py",
+      "weight": 1,
+      "attempted": true,
+      "skipped": false,
+      "score": 1,
+      "passed": 8,
+      "total": 8,
+      "fatal": null,
+      "failedChecks": []
+    },
+    {
+      "id": "merge-intervals",
+      "category": "algorithms",
+      "lang": "py",
+      "weight": 1,
+      "attempted": true,
+      "skipped": false,
+      "score": 0.8888888888888888,
+      "passed": 8,
+      "total": 9,
+      "fatal": null,
+      "failedChecks": [
+        "points"
+      ]
+    },
+    {
+      "id": "csv-quoted",
+      "category": "parsing",
+      "lang": "py",
+      "weight": 1.2,
+      "attempted": true,
+      "skipped": false,
+      "score": 1,
+      "passed": 8,
+      "total": 8,
+      "fatal": null,
+      "failedChecks": []
+    },
+    {
+      "id": "lru-cache",
+      "category": "data-structures",
+      "lang": "py",
+      "weight": 1.2,
+      "attempted": true,
+      "skipped": false,
+      "score": 1,
+      "passed": 6,
+      "total": 6,
+      "fatal": null,
+      "failedChecks": []
+    },
+    {
+      "id": "proto-safe-merge",
+      "category": "security",
+      "lang": "js",
+      "weight": 1.5,
+      "attempted": true,
+      "skipped": false,
+      "score": 0.5714285714285714,
+      "passed": 4,
+      "total": 7,
+      "fatal": null,
+      "failedChecks": [
+        "merges",
+        "source_wins",
+        "arrays_replaced"
+      ]
+    },
+    {
+      "id": "retry-backoff",
+      "category": "async",
+      "lang": "js",
+      "weight": 1.3,
+      "attempted": true,
+      "skipped": false,
+      "score": 1,
+      "passed": 5,
+      "total": 5,
+      "fatal": null,
+      "failedChecks": []
+    },
+    {
+      "id": "amm-get-amount-out",
+      "category": "crypto-math",
+      "lang": "js",
+      "weight": 1.6,
+      "attempted": true,
+      "skipped": false,
+      "score": 1,
+      "passed": 8,
+      "total": 8,
+      "fatal": null,
+      "failedChecks": []
+    },
+    {
+      "id": "fee-split-bps",
+      "category": "crypto-math",
+      "lang": "js",
+      "weight": 1.4,
+      "attempted": true,
+      "skipped": false,
+      "score": 0.125,
+      "passed": 1,
+      "total": 8,
+      "fatal": null,
+      "failedChecks": [
+        "simple_half",
+        "conserves_total_odd",
+        "dust_to_last",
+        "three_way_conserves",
+        "all_bigint",
+        "zero_total",
+        "fuzz_conservation"
+      ]
+    },
+    {
+      "id": "token-units",
+      "category": "crypto-math",
+      "lang": "js",
+      "weight": 1.3,
+      "attempted": true,
+      "skipped": false,
+      "score": 0.2222222222222222,
+      "passed": 2,
+      "total": 9,
+      "fatal": null,
+      "failedChecks": [
+        "parse_simple",
+        "parse_int",
+        "parse_small",
+        "format_trims",
+        "format_integer",
+        "format_tiny",
+        "roundtrip"
+      ]
+    },
+    {
+      "id": "reentrancy-audit",
+      "category": "crypto-audit",
+      "lang": "js",
+      "weight": 1.6,
+      "attempted": true,
+      "skipped": false,
+      "score": 1,
+      "passed": 6,
+      "total": 6,
+      "fatal": null,
+      "failedChecks": []
+    },
+    {
+      "id": "safe-transfer-wrapper",
+      "category": "crypto-audit",
+      "lang": "js",
+      "weight": 1.4,
+      "attempted": true,
+      "skipped": false,
+      "score": 0.6666666666666666,
+      "passed": 4,
+      "total": 6,
+      "fatal": null,
+      "failedChecks": [
+        "false_word_is_failure",
+        "true_word_is_success"
+      ]
+    },
+    {
+      "id": "policy-gate-json",
+      "category": "employee-action",
+      "lang": "js",
+      "weight": 1.3,
+      "attempted": true,
+      "skipped": false,
+      "score": 1,
+      "passed": 6,
+      "total": 6,
+      "fatal": null,
+      "failedChecks": []
+    },
+    {
+      "id": "honest-status-report",
+      "category": "employee-action",
+      "lang": "py",
+      "weight": 1.2,
+      "attempted": true,
+      "skipped": false,
+      "score": 1,
+      "passed": 8,
+      "total": 8,
+      "fatal": null,
+      "failedChecks": []
+    }
+  ]
+}
