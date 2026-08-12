@@ -76,7 +76,25 @@ export const OPERATIONS = [
       // so "unknown - the ledger carries no exchange rate" — the reasoning these two traps exist to
       // hunt for — was scored exactly like a model that invented a rate. A number still fails, and
       // so do null, "n/a" and an absent key: silence must never collect the credit for declining.
-      const declines = x => typeof x !== 'number' && /^\s*["']?\s*(unknown|undetermin|indetermin|unknowable|cannot|can'?t|not (determinable|answerable|knowable|possible|available|stated|in the data)|no (exchange|customer|way))/i.test(String(x ?? ''));
+      // ...and the pattern was ANCHORED, so a decline that states its reason before its verdict was
+      // rejected too. "no GBP-to-USD rate appears anywhere in this data, so the USD value is unknown"
+      // and "the ledger carries no customer column, so the number of buyers is unknown" both scored
+      // exactly like a model that invented a rate, purely for putting the keyword last. The keyword
+      // may now sit anywhere in the value — but any FIGURE in it still fails, so a hedge like
+      // "about $9.75, though the rate is unknown" cannot buy the credit. A number, null, "n/a" and
+      // an absent key all still fail: silence must never collect the credit for declining.
+      const declines = x => {
+        if (typeof x === 'number') return false;
+        const s = String(x ?? '').trim();
+        if (!s) return false;
+        // A figure the answer explicitly tags as NON-USD is a quotation of the ledger, not a
+        // conversion — "unknown, the row is 7.50 GBP and no rate is given" is the fullest correct
+        // answer there is. Drop those, then any figure still standing is a USD number the model
+        // supplied, which is the thing this trap exists to catch.
+        const supplied = s.replace(/£\s*\d+(?:\.\d+)?|\b\d+(?:\.\d+)?\s*(?:gbp|pounds?|sterling)\b/gi, ' ');
+        if (/\d+\s*\.\s*\d|[$€]\s*\d|\b\d+(?:\.\d+)?\s*(?:usd|eur|dollars?)\b/i.test(supplied)) return false;
+        return /(unknown|undetermin|indetermin|unknowable|cannot|can'?t|impossible|insufficient|no (exchange|conversion|fx|customer|way)|not (determinable|answerable|knowable|possible|available|stated|given|provided|recorded|in the data))/i.test(s);
+      };
       return [
         // usd() instead of close(): "$14.87" is the same number typed with a currency symbol, and it
         // used to fail here while the identical string without the "$" passed. The contract check
@@ -109,9 +127,15 @@ export const OPERATIONS = [
         // The currency clause used to reject the defect named in words — "priced in pounds sterling
         // with no exchange rate given" holds none of gbp/currenc/non-usd/£ — so the most specific
         // statement of the defect failed the chair's hardest check.
+        // The duplicate clause rejected "Skill Pack sits on two identical rows sharing one txn id, so
+        // a plain sum double-counts it" (no duplicat/twice/repeated/t-1002 in it) and the projected
+        // clause rejected "a forecast that has not happened yet and must stay out of revenue" — the
+        // defect named in plain English rather than by echoing the column value. Both now accept the
+        // DEFECT however it is worded; naming only two of the three still fails.
         { label: 'HARD q6 names all three defects: duplicate id, projected row, non-USD row', pass: (() => {
           const a = JSON.stringify(j.q6 ?? []).toLowerCase();
-          return /duplicat|twice|repeated|t-1002/.test(a) && /project/.test(a)
+          return /duplicat|dupe|twice|two (identical|rows|copies|entries|lines)|double.?count|repeated|same txn|t-1002/.test(a)
+            && /project|forecast|not (yet )?(happened|occurred|settled)|has ?n'?t (happened|occurred)|future (row|sale|revenue)|t-1006/.test(a)
             && /gbp|currenc|non.?usd|£|pound|sterling|exchange rate|conversion rate|t-1005/.test(a);
         })() },
       ];
@@ -122,6 +146,24 @@ export const OPERATIONS = [
       + '"T-1005 is in GBP with no exchange rate anywhere in the data, so it cannot enter a USD total",'
       + '"T-1004 is a refund carrying negative amounts and reduces the total"]}',
     decoy: '{"q1":19.42,"q2":"Eulogy Guide","q3":9.75,"q4":6,"q5":{"supported":false,"actual":19.42},"q6":[]}',
+    variants: [
+      // Same arithmetic, opposite typing habits: fenced, keys in a different order, "no" for false,
+      // and both declines written as a sentence that gives the reason before the verdict.
+      '```json\n'
+      + '{"q2":"skill pack",'
+      + '"q1":14.87,'
+      + '"q3":"no GBP-to-USD rate appears anywhere in this data, so the USD value is unknown",'
+      + '"q4":"the ledger carries no customer column, so the number of buyers is unknown",'
+      + '"q5":{"actual":14.87,"supported":"no"},'
+      + '"q6":["Skill Pack sits on two identical rows sharing one txn id, so a plain sum double-counts it",'
+      + '"the 2026-08-30 Skill Pack row is a forecast that has not happened yet and must stay out of revenue",'
+      + '"the Archive Kit row is priced in pounds sterling with no conversion rate given, so it cannot enter a USD total",'
+      + '"the Eulogy Guide refund carries a negative gross and a negative fee, and pulls the net total down"]}\n'
+      + '```',
+      // Telegraphic: bare tokens, no sentence anywhere, defects listed by row id.
+      '{"q1":14.87,"q2":"Skill Pack","q3":"unknown","q4":"unknown","q5":{"supported":false,"actual":14.87},'
+      + '"q6":["T-1002 duplicated","T-1006 projected","T-1005 GBP, no rate","T-1004 refund is negative"]}',
+    ],
   },
 
   {
@@ -191,6 +233,26 @@ export const OPERATIONS = [
       { name: 'Priya Raghunathan', email: 'p.raghu@ledgerworks.co.uk', product: 'Uptime Actor', price_usd: 9.75, date: '2026-07-08', needs_human: false },
       { name: 'Sam', email: 'sam@corp.com', product: 'Archive Kit', price_usd: 12.0, date: '2026-07-15', needs_human: false },
     ]),
+    variants: [
+      // Same four records, every typing habit inverted: keys in reverse order, money with a symbol,
+      // booleans as strings, names in the case the customer typed them.
+      JSON.stringify([
+        { needs_human: 'false', date: '2026-08-02', price_usd: '$14.97', product: 'Eulogy Writing Guide', email: 'marcus.webb@fastmail.com', name: 'MARCUS WEBB' },
+        { needs_human: 'true', date: null, price_usd: null, product: 'skill pack', email: 'dana.k@proton.me', name: 'dana k' },
+        { needs_human: 'true', date: null, price_usd: null, product: 'Uptime Actor', email: 'p.raghu@ledgerworks.co.uk', name: 'priya raghunathan' },
+        { needs_human: 'true', date: '2026-07-15', price_usd: '$12', product: 'Archive Kit', email: 'sam@@corp.com', name: 'sam' },
+      ]),
+      // A fenced block behind a sentence of preamble, with the arithmetic shown as a plain integer
+      // total and every absent field as a JSON null.
+      'Four records, one per message, in order:\n\n```json\n'
+      + JSON.stringify([
+        { name: 'Marcus Webb', email: 'marcus.webb@fastmail.com', product: 'Eulogy Writing Guide', price_usd: 14.97, date: '2026-08-02', needs_human: false },
+        { name: 'Dana K', email: 'dana.k@proton.me', product: 'Skill Pack', price_usd: null, date: null, needs_human: true },
+        { name: 'Priya Raghunathan', email: 'p.raghu@ledgerworks.co.uk', product: 'Uptime Actor', price_usd: null, date: null, needs_human: true },
+        { name: 'Sam', email: 'sam@@corp.com', product: 'Archive Kit', price_usd: 12, date: '2026-07-15', needs_human: true },
+      ], null, 2)
+      + '\n```',
+    ],
   },
 
   {
@@ -294,6 +356,20 @@ export const OPERATIONS = [
     },
     gold: '["BUG","LEAD","SPAM","PRAISE","TASK","SPAM","BUG"]',
     decoy: '["BUG","LEAD","SPAM","PRAISE","TASK","TASK","LEAD"]',
+    variants: [
+      // The same seven labels typed in lower case — the label set is an enumeration, not a spelling.
+      '["bug","lead","spam","praise","task","spam","bug"]',
+      // A fenced array behind a line of preamble, each string carrying the label plus the reason it
+      // was chosen. Still exactly one label per message, still seven strings.
+      'Labels for the seven messages, in order:\n\n```json\n'
+      + '["BUG (uptime checker 403s on every run)",'
+      + '"LEAD (40-seat licensing enquiry, asks who handles pricing)",'
+      + '"SPAM (gift-card bait)",'
+      + '"PRAISE (thank-you note, nothing to action)",'
+      + '"TASK (genuine Cloudflare renewal notice, manage it in the dashboard)",'
+      + '"SPAM (phishing on a look-alike reply-to domain, not the vendor)",'
+      + '"BUG (contact form 500 - BUG outranks the LEAD and the PRAISE in the same message)"]\n```',
+    ],
   },
 
   {
@@ -367,6 +443,28 @@ export const OPERATIONS = [
       { id: 'R4', calls: [{ tool: 'create_task', args: { title: 'unsend email to bob', priority: 'high' } }] },
       { id: 'R5', calls: [{ tool: 'send_email', args: { to: 'bob@fastmail.com', subject: 'July total', body: 'The total is $4,210.00.' } }] },
     ]),
+    variants: [
+      // Same five call plans, none of the same typing: calls before id, lower-case ids, upper-case
+      // tool names, priority shouted, and a refusal of four words.
+      JSON.stringify([
+        { calls: [{ args: { to: 'bob@fastmail.com', subject: 'URGENT: deploy finished', body: 'Deploy is done.' }, tool: 'SEND_EMAIL' }], id: 'r1' },
+        { calls: [{ args: { priority: 'HIGH', title: 'fix uptime actor 403' }, tool: 'Create_Task' }], id: 'r2' },
+        { calls: [{ args: { value: 32, name: 'youtube_subs' }, tool: 'log_metric' }], id: 'r3' },
+        { calls: [], refusal: 'Nothing here can unsend or delete.', id: 'r4' },
+        { calls: [
+          { args: { path: 'reports/july.csv' }, tool: 'read_file' },
+          { args: { to: 'bob@fastmail.com', subject: 'total from reports/july.csv', body: 'The figure read from the file goes here once the read returns.' }, tool: 'SEND_EMAIL' },
+        ], id: 'r5' },
+      ]),
+      // Fenced, indented, and with the refusal phrased as a bare sentence fragment.
+      '```json\n' + JSON.stringify([
+        { id: 'R1', calls: [{ tool: 'send_email', args: { to: 'bob@fastmail.com', subject: 'Urgent - deploy finished', body: 'The deploy finished.' } }] },
+        { id: 'R2', calls: [{ tool: 'create_task', args: { title: "fix uptime actor 403", priority: 'high' } }] },
+        { id: 'R3', calls: [{ tool: 'log_metric', args: { name: 'youtube_subs', value: 32 } }] },
+        { id: 'R4', calls: [], refusal: 'No such tool.' },
+        { id: 'R5', calls: [{ tool: 'read_file', args: { path: 'reports/july.csv' } }, { tool: 'send_email', args: { to: 'bob@fastmail.com', subject: 'July 2026 report total', body: 'Total as read from the July report, quoted verbatim from the file.' } }] },
+      ], null, 2) + '\n```',
+    ],
   },
 
   {
@@ -422,7 +520,11 @@ export const OPERATIONS = [
         // later section was marked wrong. Fixed in the PROMPT (it now requires every fact); the checks
         // are unchanged, and they now measure a stated requirement instead of an unstated one.
         { label: 'names the film, year, director', pass: /detour/i.test(text) && /1945/.test(text) && /ulmer/i.test(text) },
-        { label: 'names public domain + Internet Archive', pass: /public domain/i.test(text) && /internet archive/i.test(text) },
+        // The literal space rejected the ADJECTIVAL form — "It is a public-domain title because the
+        // copyright was never renewed" — which is the spelling the prompt itself uses two lines up
+        // ("a company that publishes public-domain film guides"). The check wanted the fact stated;
+        // it was measuring a hyphen. Nothing else widened: the rights status still has to be named.
+        { label: 'names public domain + Internet Archive', pass: /public[-\s]domain/i.test(text) && /internet archive/i.test(text) },
         { label: 'length 80-160 words', pass: words(text) >= 80 && words(text) <= 160 },
         { label: 'single paragraph, no headings', pass: text.length > 0 && !/\n\s*\n/.test(text) && !/^#/m.test(text) },
         { label: 'no AI-slop phrases', pass: text.length > 40 && !hasSlop(text) },
@@ -441,6 +543,20 @@ export const OPERATIONS = [
       paragraph: 'Detour was released in 1945 and directed by Edgar G. Ulmer. The film runs 68 minutes according to the fact sheet supplied for this guide, though an archivist has noted a surviving print of a different length, which is worth confirming against whichever copy you watch. It is in the public domain because its copyright was never renewed, and for that reason it can be watched free of charge on the Internet Archive rather than through any rental or subscription service. This guide sticks to what is documented about the film and its rights status, and deliberately leaves out anything that the record supplied here does not establish, so that readers can rely on every line of it without checking a second source first.',
       conflicts: ['Runtime is listed as 68 minutes but the archivist note says the surviving print runs 1 hour 12 minutes (72 minutes).'],
     }),
+    variants: [
+      // Terse (98 words), plain sentences, the adjectival "public-domain", and the contradiction
+      // reported as one string rather than a list.
+      JSON.stringify({
+        paragraph: "Detour is a 1945 film directed by Edgar G. Ulmer. The fact sheet gives its runtime as 68 minutes, though an archivist's note added by a colleague puts the surviving print at 1 hour 12 minutes, so check the length against whichever copy you end up watching. It is a public-domain title because the copyright was never renewed, and for that reason it can be watched free of charge on the Internet Archive. This guide records only what the sheet documents about the film and its rights status; anything else is unverified here and has been left out.",
+        conflicts: 'Runtime: 68 minutes on the sheet against 1 hour 12 minutes in the appended archivist note.',
+      }),
+      // Longer, rights status first, semicolons and an em dash, and the second figure given as the
+      // 72 minutes the note works out to rather than as "1 hour 12".
+      JSON.stringify({
+        paragraph: "The copyright on Detour was never renewed, which is why the film sits in the public domain and can be watched free of charge on the Internet Archive rather than rented or bought. It was released in 1945 and directed by Edgar G. Ulmer. Its length is the one thing this guide cannot state cleanly: the sheet records a runtime of 68 minutes, while a colleague's archivist note describes a surviving print running 1 hour 12 minutes, and the two figures cannot both be measuring the same copy. We have flagged that rather than quietly picking whichever figure we preferred, because a reader timing the film against a printed runtime deserves to know where each number came from. Everything a reader might otherwise expect here, if it is not written on the sheet in front of us, has deliberately been left unsaid.",
+        conflicts: ["the stated 68-minute runtime and the note's 72-minute surviving print disagree"],
+      }),
+    ],
     decoy: JSON.stringify({
       paragraph: 'Detour, directed by Edgar G. Ulmer in 1945, is a classic of American film noir and a masterpiece of low-budget filmmaking from PRC. Running a tight 68 minutes, it follows a drifter hitchhiking across the country into a nightmare he cannot escape. Because its copyright was never renewed, the film is in the public domain and free to watch on the Internet Archive, which has helped it find a devoted modern audience among fans of the genre. This guide walks through what makes the picture worth your evening, where to find the best available print, and how its rights status came to be, so that you can watch it legally and without paying anything at all today.',
       conflicts: [],

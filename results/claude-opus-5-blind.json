@@ -6,7 +6,7 @@
     "model": "claude-opus-5"
   },
   "mode": "self-administered",
-  "when": "2026-08-12T00:21:12.833Z",
+  "when": "2026-08-12T00:52:41.182Z",
   "benchVersion": 2,
   "tokensPerSecond": null,
   "chairs": {
@@ -1503,7 +1503,7 @@
     "probation": [],
     "reject": []
   },
-  "rescoredFrom": "2026-08-12T00:20:30.289Z",
+  "rescoredFrom": "2026-08-12T00:21:12.833Z",
   "skippedChairs": [
     "ledger",
     "clerk",

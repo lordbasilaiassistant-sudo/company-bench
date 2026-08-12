@@ -64,16 +64,34 @@ A trap is *not* a gotcha. The correct answer must be defensible from the prompt 
 someone who read it carefully and had no access to the scorer. If two answers are both
 defensible, the chair measures nothing and will be rejected.
 
-**3. Ship a `gold` and a `decoy`.**
+**3. Ship a `gold`, a `decoy`, and at least one `variant`.**
 
 - `gold` is a correct answer. It **must** score 100%. If it does not, the scorer punishes
   correct work, and every candidate's low score on that chair is measuring your bug.
 - `decoy` is the attractive wrong answer. It **must** score below 100%. If it does not, the
   chair passes anything.
 
-`node bench/selftest.mjs` enforces both directions plus a third: an empty answer must not score
-above 40%, or silence becomes a viable strategy. It caught thirteen scorer bugs the day this
-repo was written — including three chairs where the gold answer failed its own scorer.
+- `variants` are additional CORRECT answers, worded as differently from the gold as you can manage.
+  Every one **must** score 100%.
+
+The variants requirement exists because of the deepest bias this benchmark had. selftest requires
+`gold` to score 100%, and gold is written by whoever wrote the scorer — so every time a check
+rejected the author's phrasing, the *check* was adjusted. The scorers ended up fitted to one writing
+style, and no candidate model ever got that treatment. Variants are how a check proves it measures
+substance: if it accepts one wording of a correct answer and rejects another, it is measuring style.
+
+When a variant fails, decide honestly which it is: **(a)** the variant is actually wrong — rewrite
+the variant, leave the check alone; or **(b)** the check keys on a proxy for correctness rather than
+on correctness. Most are (b). Real examples found this way: `briefer` rejected "public-domain"
+because the check contained a literal space, on a chair whose own prompt uses the hyphen. `expander`
+never matched "I am" because the pattern only had `i'?m`, so writing without contractions scored as
+refusing to commit. `handoff` used a `[^.]{0,80}` same-sentence window on a chair about two dollar
+amounts, and the decimal point closed the window. A worker written as `A2 (Clerk)` — echoing the
+format the prompt itself prints — cost six checks across two chairs.
+
+`node bench/selftest.mjs` enforces all of it, plus a rule that an empty answer must not score above
+40%, or silence becomes a viable strategy. It caught thirteen scorer bugs the day this repo was
+written — including three chairs where the gold answer failed its own scorer.
 
 **4. Be generous about format, strict about substance.**
 

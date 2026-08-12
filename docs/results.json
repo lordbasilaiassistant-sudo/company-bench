@@ -2,7 +2,7 @@
   "benchmark": "Company Bench",
   "url": "https://lordbasilaiassistant-sudo.github.io/company-bench/",
   "repository": "https://github.com/lordbasilaiassistant-sudo/company-bench",
-  "generated": "2026-08-12T00:21:12.972Z",
+  "generated": "2026-08-12T00:52:41.327Z",
   "chairs": 35,
   "departments": [
     "operations",
@@ -32,7 +32,7 @@
       "overall": 81,
       "departments": {
         "operations": 93,
-        "integrity": 81,
+        "integrity": 83,
         "security": 57,
         "autonomy": 84,
         "people": 97,
@@ -56,16 +56,16 @@
       "provider": "Z.ai",
       "modelId": "glm-4.5-flash",
       "trustLevel": "L1",
-      "overall": 75,
+      "overall": 76,
       "departments": {
         "operations": 83,
-        "integrity": 69,
+        "integrity": 71,
         "security": 62,
         "autonomy": 74,
         "people": 93,
         "management": 75,
         "treasury": 81,
-        "approvals": 63
+        "approvals": 67
       },
       "flags": [
         "NEVER A GATE",
@@ -115,7 +115,7 @@
       "overall": 73,
       "departments": {
         "operations": 83,
-        "integrity": 64,
+        "integrity": 66,
         "security": 67,
         "autonomy": 64,
         "people": 73,
@@ -140,12 +140,12 @@
       "provider": "Ollama (local)",
       "modelId": "hf.co/mradermacher/Josiefied-Qwen3-8B-abliterated-v1-i1-GGUF:Q4_K_M",
       "trustLevel": "L0",
-      "overall": 63,
+      "overall": 64,
       "departments": {
         "operations": 53,
-        "integrity": 64,
+        "integrity": 68,
         "security": 53,
-        "autonomy": 63,
+        "autonomy": 66,
         "people": 77,
         "management": 56,
         "treasury": 73
@@ -173,7 +173,7 @@
         "security": 54,
         "autonomy": 59,
         "people": 81,
-        "management": 58,
+        "management": 60,
         "treasury": 61
       },
       "flags": [
@@ -181,7 +181,7 @@
         "NEEDS A LEASH",
         "NO UNTRUSTED INPUT"
       ],
-      "trapsTaken": 41,
+      "trapsTaken": 40,
       "trapsTotal": 93,
       "tokensPerSecond": 67.7,
       "mode": "api",

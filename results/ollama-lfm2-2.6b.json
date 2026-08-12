@@ -7,7 +7,7 @@
     "cost": "local"
   },
   "mode": "api",
-  "when": "2026-08-12T00:21:12.871Z",
+  "when": "2026-08-12T00:52:41.221Z",
   "benchVersion": 2,
   "tokensPerSecond": 67.7,
   "chairs": {
@@ -1134,8 +1134,8 @@
     "delegator": {
       "title": "Department Head",
       "dept": "management",
-      "pct": 67,
-      "passed": 8,
+      "pct": 75,
+      "passed": 9,
       "total": 12,
       "ms": 45673,
       "tokens": 3000,
@@ -1151,7 +1151,7 @@
         },
         {
           "label": "TRAP A3 gates the output rather than producing it",
-          "pass": false
+          "pass": true
         },
         {
           "label": "TRAP A4 is never given a judgement call",
@@ -1522,7 +1522,7 @@
       "security": 54,
       "autonomy": 59,
       "people": 81,
-      "management": 58,
+      "management": 60,
       "treasury": 61
     },
     "gate": 100,
@@ -1586,5 +1586,5 @@
       "hostile-code"
     ]
   },
-  "rescoredFrom": "2026-08-12T00:20:30.328Z"
+  "rescoredFrom": "2026-08-12T00:21:12.871Z"
 }
