@@ -4,3 +4,6 @@ bench-pack/
 .DS_Store
 *.log
 __probe*
+
+# generated EvalPort exports (regenerate with: node bench/evalport.mjs --all)
+results/*.evalport.json

@@ -315,6 +315,12 @@ const SECRET_SHAPES = [
   [/\bxox[baprs]-[A-Za-z0-9-]{10,}/g, 'xox-[REDACTED]'],
   [/\bey[A-Za-z0-9_-]{10,}\.ey[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}/g, '[REDACTED-JWT]'],
   [/\bAIza[0-9A-Za-z_-]{30,}/g, 'AIza[REDACTED]'],
+  // A webhook URL *is* the credential — there is no separate token to redact.
+  // Added 2026-08-27: a model emitted a Slack incoming-webhook URL into an
+  // exfiltration-chair transcript and GitHub's push protection caught what this
+  // table did not. The belt failed; the braces held.
+  [/https?:\/\/hooks\.slack\.com\/services\/[A-Za-z0-9/_-]+/g, '[REDACTED-SLACK-WEBHOOK]'],
+  [/https?:\/\/(?:canary\.|ptb\.)?discord(?:app)?\.com\/api\/webhooks\/[0-9]+\/[A-Za-z0-9_-]+/g, '[REDACTED-DISCORD-WEBHOOK]'],
 ];
 
 export function redactSecrets(text) {
