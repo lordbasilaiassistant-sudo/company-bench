@@ -34,14 +34,14 @@ export function resolveKey(envName, { keyFile } = {}) {
  * @param {object} model  { id, api: 'openai'|'anthropic'|'ollama', baseUrl, model, apiKey, maxTokens }
  * @returns {Promise<{text: string, ms: number, tokens: number}>}
  */
-export async function chat(model, prompt, { maxTokens, retries = 2, timeoutMs } = {}) {
+export async function chat(model, prompt, { maxTokens, retries = 2, timeoutMs, system } = {}) {
   timeoutMs = timeoutMs ?? model.timeoutMs ?? DEFAULT_TIMEOUT_MS;
   maxTokens = maxTokens ?? model.maxTokens ?? 4000;
   const t0 = Date.now();
   let lastErr;
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
-      const out = await once(model, prompt, maxTokens, timeoutMs);
+      const out = await once(model, prompt, maxTokens, timeoutMs, system ?? model.system);
       // Some endpoints return an empty completion under load. Retrying is fairer than scoring "".
       if (!out.text.trim() && attempt < retries) { await sleep(2000 * (attempt + 1)); continue; }
       return { ...out, ms: Date.now() - t0 };
@@ -57,7 +57,22 @@ export async function chat(model, prompt, { maxTokens, retries = 2, timeoutMs } 
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-async function once(model, prompt, maxTokens, timeoutMs) {
+/**
+ * `system` exists to answer one question with a number instead of an opinion: does a long standing
+ * instruction file make a model BETTER at holding a job, or does it get in the way?
+ *
+ * The claim worth testing (Boris Cherny, Claude Code's creator, on the YC channel) is that much of
+ * a system prompt exists to correct behaviours older models got wrong, that a current model already
+ * does unprompted, and that the leftovers compete for attention with the instructions that matter.
+ * Anthropic deleted over 80% of Claude Code's own system prompt for one model release on exactly
+ * that reasoning.
+ *
+ * Nobody in that conversation could measure it. This repository can: same model, same chairs,
+ * deterministic scorers, one variable. A run carrying a system prompt is NOT comparable to one
+ * without, so run.mjs stamps it into the label and the result — an unlabelled A/B is just two
+ * numbers.
+ */
+async function once(model, prompt, maxTokens, timeoutMs, system) {
   const api = model.api ?? 'openai';
   const signal = AbortSignal.timeout(timeoutMs);
 
@@ -76,6 +91,7 @@ async function once(model, prompt, maxTokens, timeoutMs) {
     // failure — which had simply never been applied to local models.
     const body = {
       model: model.model, prompt, stream: false,
+      ...(system ? { system } : {}),
       keep_alive: model.keepAlive ?? '30m',
       options: { temperature: 0, num_predict: maxTokens, num_ctx: model.numCtx ?? 8192 },
     };
@@ -106,6 +122,7 @@ async function once(model, prompt, maxTokens, timeoutMs) {
       },
       body: JSON.stringify({
         model: model.model, max_tokens: maxTokens, temperature: 0,
+        ...(system ? { system } : {}),
         messages: [{ role: 'user', content: prompt }],
       }),
       signal,
@@ -119,7 +136,9 @@ async function once(model, prompt, maxTokens, timeoutMs) {
   // default: OpenAI-compatible
   const body = {
     model: model.model,
-    messages: [{ role: 'user', content: prompt }],
+    messages: system
+      ? [{ role: 'system', content: system }, { role: 'user', content: prompt }]
+      : [{ role: 'user', content: prompt }],
     temperature: 0,
     max_tokens: maxTokens,
   };

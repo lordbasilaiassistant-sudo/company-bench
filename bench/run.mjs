@@ -27,6 +27,27 @@ const CARDS = path.join(ROOT, 'results', 'cards');
 
 const argv = process.argv.slice(2);
 const flag = n => { const i = argv.indexOf(`--${n}`); return i >= 0 ? argv[i + 1] : undefined; };
+
+/**
+ * --system <file>  run every chair with that file as the model's system prompt.
+ *
+ * For measuring whether a standing instruction file helps or hobbles: same model, same chairs,
+ * one variable. The result is filed under a DIFFERENT id and carries the prompt's identity, because
+ * a run with a system prompt and a run without are two different candidates. CONTRIBUTING.md is
+ * explicit that anything other than the committed prompt at temperature 0 must be stated in the
+ * label — an A/B nobody can tell apart is just two numbers.
+ */
+const systemFile = flag('system');
+let SYSTEM = null, SYSTEM_TAG = '';
+if (systemFile) {
+  SYSTEM = fs.readFileSync(systemFile, 'utf8');
+  const bytes = Buffer.byteLength(SYSTEM);
+  // A short, stable fingerprint so two runs of the "same" file can be told apart if it was edited.
+  let h = 5381; for (let i = 0; i < SYSTEM.length; i++) h = ((h * 33) ^ SYSTEM.charCodeAt(i)) >>> 0;
+  SYSTEM_TAG = `${path.basename(systemFile).replace(/\.[^.]+$/, '')}-${h.toString(36).slice(0, 6)}`;
+  console.log(`\n  SYSTEM PROMPT: ${systemFile} (${bytes} bytes, tag ${SYSTEM_TAG})`);
+  console.log('  This run is NOT comparable to a run without it and is filed separately.\n');
+}
 const has = n => argv.includes(`--${n}`);
 const list = n => (flag(n) ?? '').split(',').map(s => s.trim()).filter(Boolean);
 
@@ -78,7 +99,7 @@ for (const model of candidates) {
   for (const chair of chairs) {
     process.stdout.write(`  ${chair.id.padEnd(16)} `);
     try {
-      const { text, ms, tokens, genRate } = await chat(model, chair.prompt);
+      const { text, ms, tokens, genRate } = await chat(model, chair.prompt, SYSTEM ? { system: SYSTEM } : {});
       const checks = chair.score(text);
       const passed = checks.filter(c => c.pass).length;
       const pct = Math.round((100 * passed) / checks.length);
@@ -93,7 +114,8 @@ for (const model of candidates) {
   }
 
   // `ollama:hf.co/vendor/model:Q8_0` is a perfectly good model id and a terrible filename.
-  const slug = model.id.replace(/[^a-z0-9._-]+/gi, '-').replace(/^-|-$/g, '').slice(0, 64);
+  let slug = model.id.replace(/[^a-z0-9._-]+/gi, '-').replace(/^-|-$/g, '').slice(0, 64);
+  if (SYSTEM_TAG) slug = `${slug}--sys-${SYSTEM_TAG}`.slice(0, 80);
 
   // A partial run (--only / --skip) MERGES over the stored result. Overwriting instead silently
   // deletes every chair you did not re-run, which looks like a model collapsing rather than like
@@ -106,9 +128,11 @@ for (const model of candidates) {
     } catch { /* first run for this model */ }
   }
   const result = buildResult({
-    candidate: { id: slug, name: model.name, vendor: model.vendor, model: model.model, cost: model.cost },
+    candidate: { id: slug, name: model.name + (SYSTEM_TAG ? ` (+${SYSTEM_TAG})` : ''),
+      vendor: model.vendor, model: model.model, cost: model.cost },
     chairs: merged, mode: 'api',
   });
+  if (SYSTEM_TAG) result.systemPrompt = { file: systemFile, bytes: Buffer.byteLength(SYSTEM), tag: SYSTEM_TAG };
   printScorecard(result);
   fs.writeFileSync(path.join(RESULTS, `${slug}.json`), JSON.stringify(result, null, 2));
   fs.writeFileSync(path.join(CARDS, `${slug}.md`), renderResume(result));
