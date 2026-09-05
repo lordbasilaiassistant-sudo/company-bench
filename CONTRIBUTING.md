@@ -129,7 +129,29 @@ node bench/report.mjs
 Include `results/<id>.json` and `results/cards/<id>.md`. The raw model output is inside the
 JSON on purpose — a score nobody can audit is a rumour.
 
-Two things will get a result rejected, both for the same reason:
+Include a submission note with enough provenance to reproduce the run:
+
+- Repository commit and benchmark version; exact chair IDs and any skipped departments.
+- Exact requested and returned model identifiers, provider or local runtime version, and local
+  quantization where applicable. Mark unavailable provider metadata as unknown.
+- Date, sampling parameters, output token limit, reasoning settings, system prompt, tool access,
+  retries, number of attempts, and how the reported attempt was selected.
+- Whether the candidate had access to scorers, reference answers, or earlier results. Public
+  prompts may have appeared in training data; lack of known exposure is not proof of no exposure.
+- Raw answers and errors, without credentials or personal data. Label self-administered runs
+  separately from isolated API runs, because the surrounding context and tools can differ.
+
+Compare results only with the same prompts, scorer revision, chair coverage, and run protocol.
+Version 4 results record prompt/scorer hashes, selected chairs, collection time and protocol,
+system-prompt hash, and settings. The public baseline requires all 50 chairs, current hashes, API
+mode at temperature 0, no custom system prompt, and no merged runs. Historical or self-administered
+runs stay available as unranked diagnostics. All 36 core chairs must be measured without errors to
+assess a level; missing core coverage or any provider/scorer error means **Not assessed**, not L0.
+Partial or historical runs remain useful diagnostics, but do not establish a current full-suite
+ranking. Temperature 0 does not guarantee identical provider responses: report every repeat and
+the observed variation rather than selecting the best score.
+
+These conditions prevent a result from entering the default comparison:
 
 - **Incomplete runs.** If a provider rate-limited you, chairs will show `error`. Those runs are
   automatically excluded from the leaderboard and must not be presented as scores. A provider
@@ -139,9 +161,9 @@ Two things will get a result rejected, both for the same reason:
   legitimate and interesting experiment — say so in the label (`--label "Model (best-of-5)"`)
   so nobody compares it to a single-shot number.
 
-Self-administered results are welcome and sit on the same leaderboard as key-driven ones. If
-the agent read `bench/positions/` before answering, that must be in the label. Nobody will
-mind; quietly omitting it is the only version that is a problem.
+Self-administered and non-default experiments are welcome as labeled diagnostics. Reading the
+answer key makes a run ineligible for a blind comparison. A text-track placement is provisional;
+it does not establish real-world safety or authorize credentials or irreversible actions.
 
 ---
 
@@ -153,6 +175,8 @@ score for it, so:
 - Say in the PR what the old chair failed to measure and what the edit catches.
 - Bump `benchVersion` in `bench/lib/scorecard.mjs` if the change is broad enough that old and
   new results should not be compared.
+- Record prompt and scorer changes separately. Regrading an old response can repair a scorer
+  bug; it cannot turn an answer to an old prompt into a measurement of the new prompt.
 - Do not delete a chair because everyone passes it. Either harden it, or mark it a floor check
   and say so in the blurb — a chair every model passes is still useful against weak models,
   as long as nobody cites it as evidence when placing a strong one.

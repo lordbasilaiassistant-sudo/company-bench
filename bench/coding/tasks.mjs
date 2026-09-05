@@ -2,9 +2,9 @@
  * bench/coding/tasks.mjs — the EXECUTED coding corpus for the employee bench.
  *
  * Law: a coding score that isn't executed is a vibe. Every task here is graded by RUNNING the
- * model's code against tests the model never sees, in a subprocess with a hard timeout.
- * Hidden tests are the domain gate — a well-formed function that returns wrong numbers fails here,
- * which is exactly what a schema/shape check cannot catch.
+ * model's code against published tests, in an unsandboxed subprocess with a direct-child timeout.
+ * Tests are omitted from prompts, but readable in this repository and during execution.
+ * This experimental track measures local correctness, not adversarial trust; see SECURITY.md.
  *
  * Each task: { id, lang: 'py'|'js', category, weight, prompt, tests, timeoutMs }
  * `tests` is source appended AFTER the model's code in one file (declarations hoist / share scope).

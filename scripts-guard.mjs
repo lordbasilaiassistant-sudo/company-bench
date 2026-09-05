@@ -15,13 +15,17 @@ import { hasSecretShape, redactSecrets } from './bench/lib/parse.mjs';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const targets = [];
-for (const dir of ['results', path.join('results', 'cards'), 'docs']) {
+function collect(d) {
+  for (const f of fs.readdirSync(d, { withFileTypes: true })) {
+    const p = path.join(d, f.name);
+    if (f.isDirectory()) collect(p);
+    else if (f.isFile() && /\.(json|md|csv|html|txt)$/.test(f.name)) targets.push(p);
+  }
+}
+for (const dir of ['results', 'docs']) {
   const d = path.join(ROOT, dir);
   if (!fs.existsSync(d)) continue;
-  for (const f of fs.readdirSync(d)) {
-    const p = path.join(d, f);
-    if (fs.statSync(p).isFile() && /\.(json|md|csv|html|txt)$/.test(f)) targets.push(p);
-  }
+  collect(d);
 }
 
 const bad = [];

@@ -21,6 +21,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import assert from 'node:assert/strict';
 import { DEPARTMENTS, CHAIRS } from './positions/index.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -29,6 +30,7 @@ const WRITE = process.argv.includes('--write');
 
 const chairs = CHAIRS.length;
 const depts = DEPARTMENTS.length;
+const coreChairs = DEPARTMENTS.filter(d => !d.optional).reduce((n, d) => n + d.chairs.length, 0);
 let checks = 0, traps = 0;
 for (const c of CHAIRS) {
   const list = c.score('');
@@ -53,6 +55,15 @@ const word = n => WORDS[n] ?? String(n);
  * that gets silently corrected is worse than no corrections log.
  */
 const RULES = [
+  [/\b(All|any of the) \d+ core chairs\b/g, `$1 ${coreChairs} core chairs`],
+  [/\b(requires?|require) all \d+(\s+)chairs\b/g, `$1 all ${chairs}$2chairs`],
+  [/\b\d+-chair (?:diagnostic |diagnostic benchmark|benchmark)/g,
+    m => m.replace(/^\d+/, String(chairs))],
+  [/\(\d+ tasks\)/g, `(${chairs} tasks)`],
+  [/\banswer all \d+ tasks\b/g, `answer all ${chairs} tasks`],
+  [/# all \d+ chairs\b/g, `# all ${chairs} chairs`],
+  [/^(?:Zero|One|Two|Three|Four|Five|Six|Seven|Eight|Nine|Ten|\d+) departments\. `node bench\/run\.mjs --list`/gm,
+    `${word(depts)[0].toUpperCase() + word(depts).slice(1)} departments. \`node bench/run.mjs --list\``],
   [/\b\d+ chairs across (?:zero|one|two|three|four|five|six|seven|eight|nine|ten|\d+) departments\b/g,
     `${chairs} chairs across ${word(depts)} departments`],
   [/\bseats a model in \d+ chairs across \d+ departments\b/g,
@@ -76,15 +87,46 @@ const RULES = [
  *   docs/LOCAL-CANDIDATES.md describes specific past runs at the size they ran at
  *   docs/llms.txt            a copy made by report.mjs; editing it would be undone next build
  */
-const FILES = ['README.md', 'llms.txt', 'CONTRIBUTING.md', 'bench/site.mjs'];
+const FILES = ['README.md', 'llms.txt', 'CONTRIBUTING.md', 'bench/site.mjs',
+  'package.json', 'PROMPT.md', 'skills/company-bench/SKILL.md'];
+
+function synchronize(source, rel) {
+  let output = source;
+  for (const [re, to] of RULES) output = output.replace(re, to);
+  if (rel === 'README.md') {
+    const table = '| Department | The question it answers | Chairs |\n|---|---|---|\n' +
+      DEPARTMENTS.map(d => `| **${d.label}**${d.optional ? ' _(optional)_' : ''} | ${d.question} | ${d.chairs.map(c => `\`${c.id}\``).join(' ')} |`).join('\n');
+    output = output.replace(/\| Department \| The question it answers \| Chairs \|\r?\n\|---\|---\|---\|\r?\n(?:\|[^\n]*\|(?:\r?\n|$))+/,
+      `${table}\n`);
+  }
+  return output;
+}
+
+if (process.argv.includes('--selftest')) {
+  for (const [before, after] of [
+    ['A 25-chair benchmark', `A ${chairs}-chair benchmark`],
+    ['(35 tasks)', `(${chairs} tasks)`],
+    ['answer all 25 tasks', `answer all ${chairs} tasks`],
+    ['# all 25 chairs', `# all ${chairs} chairs`],
+    ['All 25 core chairs', `All ${coreChairs} core chairs`],
+    ['Baseline rankings require all 25\nchairs', `Baseline rankings require all ${chairs}\nchairs`],
+    ['Eight departments. `node bench/run.mjs --list`', `${word(depts)[0].toUpperCase() + word(depts).slice(1)} departments. \`node bench/run.mjs --list\``],
+    ['a frontier model sat all 29 chairs cold', 'a frontier model sat all 29 chairs cold'],
+    ['25 s median per chair across 32 chairs', '25 s median per chair across 32 chairs'],
+  ]) assert.equal(synchronize(before, ''), after);
+  const tableFixture = '| Department | The question it answers | Chairs |\n|---|---|---|\n| old | old | old |\n';
+  const table = synchronize(tableFixture, 'README.md');
+  for (const c of CHAIRS) assert.ok(table.includes(`\`${c.id}\``), `org chart missing ${c.id}`);
+  assert.equal(synchronize(table, 'README.md'), table, 'sync must be idempotent');
+  console.log('  count synchronization regression cases passed');
+}
 
 let stale = 0;
 for (const rel of FILES) {
   const p = path.join(ROOT, rel);
   if (!fs.existsSync(p)) continue;
   const before = fs.readFileSync(p, 'utf8');
-  let after = before;
-  for (const [re, to] of RULES) after = after.replace(re, to);
+  const after = synchronize(before, rel);
   if (after === before) { console.log(`  ${rel.padEnd(28)} ok`); continue; }
 
   const changed = [];

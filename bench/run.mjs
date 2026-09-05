@@ -16,16 +16,23 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { DEPARTMENTS, chairsFor, CHAIR_COUNT, CHECK_COUNT } from './positions/index.mjs';
+import { DEPARTMENTS, CHAIRS, chairsFor, CHAIR_COUNT, CHECK_COUNT } from './positions/index.mjs';
 import { chat, loadRegistry, resolveModel } from './lib/transport.mjs';
-import { buildResult, printScorecard, renderResume } from './lib/scorecard.mjs';
+import { buildResult, printScorecard } from './lib/scorecard.mjs';
+import { provenance } from './lib/suite.mjs';
+import { writeResult } from './lib/result-store.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(HERE, '..');
-const RESULTS = path.join(ROOT, 'results');
-const CARDS = path.join(ROOT, 'results', 'cards');
 
 const argv = process.argv.slice(2);
+const valueFlags = new Set(['--models', '--skip', '--only', '--system']);
+for (let i = 0; i < argv.length; i++) {
+  if (valueFlags.has(argv[i])) {
+    if (!argv[i + 1] || argv[i + 1].startsWith('--')) { console.error(`missing value for ${argv[i]}`); process.exit(2); }
+    i++;
+  } else if (!['--list', '--merge'].includes(argv[i])) { console.error(`unknown argument: ${argv[i]}`); process.exit(2); }
+}
 const flag = n => { const i = argv.indexOf(`--${n}`); return i >= 0 ? argv[i + 1] : undefined; };
 
 /**
@@ -64,6 +71,9 @@ if (has('list')) {
 
 const skip = list('skip');
 const only = list('only');
+const unknown = [...skip, ...only].filter(id => !CHAIRS.some(c => c.id === id || c.dept === id));
+if (unknown.length) { console.error(`unknown chair or department: ${unknown.join(', ')}`); process.exit(2); }
+if (has('merge')) { console.error('--merge is unsupported: each measurement must remain a separate run'); process.exit(2); }
 const chairs = chairsFor({ skip, only });
 if (!chairs.length) { console.error('no chairs selected'); process.exit(2); }
 
@@ -86,30 +96,40 @@ if (wanted.length) {
   }
 }
 
-fs.mkdirSync(RESULTS, { recursive: true });
-fs.mkdirSync(CARDS, { recursive: true });
-
 for (const model of candidates) {
   if (model.keyEnv && !model.apiKey) {
     console.error(`\n  ${model.id}: no key in ${model.keyEnv} — skipping`);
+    process.exitCode = 2;
     continue;
   }
+  const endpoint = new URL(model.baseUrl);
+  endpoint.username = ''; endpoint.password = ''; endpoint.search = ''; endpoint.hash = '';
+  const runProvenance = provenance({ chairs, system: SYSTEM ?? model.system ?? null,
+    settings: { api: model.api ?? 'openai', model: model.model, baseUrl: endpoint.toString(),
+      temperature: model.extraBody?.temperature ?? 0,
+      maxTokens: model.extraBody?.max_tokens ?? model.maxTokens ?? 4000,
+      numCtx: model.api === 'ollama' ? model.numCtx ?? 8192 : null,
+      think: model.api === 'ollama' ? model.think ?? false : null,
+      extraBody: model.extraBody ?? null } });
   console.log(`\n  ═══ ${model.name}${model.vendor ? ` · ${model.vendor}` : ''} ═══`);
   const out = {};
   for (const chair of chairs) {
+    const collectedAt = new Date().toISOString();
     process.stdout.write(`  ${chair.id.padEnd(16)} `);
     try {
-      const { text, ms, tokens, genRate } = await chat(model, chair.prompt, SYSTEM ? { system: SYSTEM } : {});
+      const { text, ms, tokens, genRate } = await chat(model, chair.prompt, SYSTEM !== null ? { system: SYSTEM } : {});
       const checks = chair.score(text);
       const passed = checks.filter(c => c.pass).length;
       const pct = Math.round((100 * passed) / checks.length);
-      out[chair.id] = { title: chair.title, dept: chair.dept, pct, passed, total: checks.length, ms, tokens, genRate, checks, raw: text };
+      out[chair.id] = { title: chair.title, dept: chair.dept, pct, passed, total: checks.length, ms, tokens, genRate, checks, raw: text, collectedAt };
       const traps = checks.filter(c => !c.pass && /^TRAP/.test(c.label)).length;
       console.log(`${String(pct).padStart(3)}%  ${passed}/${checks.length}  ${(ms / 1000).toFixed(1)}s${traps ? `  ${traps} trap(s) taken` : ''}`);
     } catch (e) {
       const total = chair.score('').length;
       out[chair.id] = { title: chair.title, dept: chair.dept, pct: 0, passed: 0, total, ms: null, checks: [], raw: '', error: String(e.message ?? e).slice(0, 200) };
       console.log(`ERROR  ${String(e.message ?? e).slice(0, 90)}`);
+      out[chair.id].collectedAt = collectedAt;
+      process.exitCode = 1;
     }
   }
 
@@ -117,24 +137,12 @@ for (const model of candidates) {
   let slug = model.id.replace(/[^a-z0-9._-]+/gi, '-').replace(/^-|-$/g, '').slice(0, 64);
   if (SYSTEM_TAG) slug = `${slug}--sys-${SYSTEM_TAG}`.slice(0, 80);
 
-  // A partial run (--only / --skip) MERGES over the stored result. Overwriting instead silently
-  // deletes every chair you did not re-run, which looks like a model collapsing rather than like
-  // a harness bug — measured the hard way when adding a department wiped three candidates.
-  let merged = out;
-  if (only.length || skip.length) {
-    try {
-      const prev = JSON.parse(fs.readFileSync(path.join(RESULTS, `${slug}.json`), 'utf8'));
-      if (prev.chairs) merged = { ...prev.chairs, ...out };
-    } catch { /* first run for this model */ }
-  }
   const result = buildResult({
     candidate: { id: slug, name: model.name + (SYSTEM_TAG ? ` (+${SYSTEM_TAG})` : ''),
       vendor: model.vendor, model: model.model, cost: model.cost },
-    chairs: merged, mode: 'api',
+    chairs: out, mode: 'api', provenance: runProvenance,
   });
   if (SYSTEM_TAG) result.systemPrompt = { file: systemFile, bytes: Buffer.byteLength(SYSTEM), tag: SYSTEM_TAG };
   printScorecard(result);
-  fs.writeFileSync(path.join(RESULTS, `${slug}.json`), JSON.stringify(result, null, 2));
-  fs.writeFileSync(path.join(CARDS, `${slug}.md`), renderResume(result));
-  console.log(`  → results/${slug}.json  ·  results/cards/${slug}.md\n`);
+  console.log(`  → ${writeResult(result)}\n`);
 }

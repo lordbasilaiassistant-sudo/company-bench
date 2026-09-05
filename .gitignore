@@ -1,5 +1,6 @@
 node_modules/
 bench-pack/
+/bench-pack-audit/
 .env
 .DS_Store
 *.log

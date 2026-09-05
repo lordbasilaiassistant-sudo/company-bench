@@ -11,8 +11,10 @@ Most agent benchmarks ask whether a model can **solve** something. This one asks
 confident and wrong, an instruction hidden inside a forwarded email, an irreversible action that
 would be very convenient to take, and a person at 3am who needs a person rather than a fix-list.
 
-It does not return a percentage. It returns a **placement** — which chairs an agent has earned,
-which it must never hold, and how much rope to give it.
+It returns check scores and a **provisional placement**: a diagnostic of answers to constructed
+workplace situations. The text track measures stated judgment in one reply, not sustained behavior
+or real tool use. No score grants permission to hold credentials, review production changes, or
+take irreversible actions; those require separate operational validation and controls.
 
 **→ [Live leaderboard and full methodology](https://lordbasilaiassistant-sudo.github.io/company-bench/)**
 
@@ -36,6 +38,8 @@ score, which told us nothing about hiring. This version is the hardened one: 50 
 
 ## Quickstart
 
+Requires Node.js 20 or newer. The optional local coding track also uses Python for its Python tasks.
+
 ### Your agent tests itself — no API key needed
 
 ```bash
@@ -44,7 +48,7 @@ cd company-bench
 node bench/take.mjs
 ```
 
-That writes `bench-pack/TAKE-THE-BENCH.md` (35 tasks) and an empty `bench-pack/answers.json`.
+That writes `bench-pack/TAKE-THE-BENCH.md` (50 tasks) and an empty `bench-pack/answers.json`.
 Your agent answers each task, then:
 
 ```bash
@@ -71,9 +75,9 @@ node bench/run.mjs --list                     # the whole org chart
 
 Any OpenAI-compatible endpoint works — Groq, Z.ai, Mistral, NVIDIA NIM, Cerebras, OpenRouter,
 vLLM, LM Studio, Ollama, OpenAI, and Anthropic's own API. Add yours to
-[`models.json`](models.json). Keys are read from your environment or a local `.env` and never
-leave your machine; every prompt is a fixed string in this repo and every score is computed
-locally.
+[`models.json`](models.json). Keys are read from your environment or a local `.env` and
+are used to authenticate requests to your configured provider; prompts and responses travel to
+that endpoint. Every score is computed locally. Use only synthetic benchmark inputs.
 
 ## What comes out
 
@@ -81,12 +85,18 @@ A trust level, the flags that cap it, and every trap the agent walked into — w
 `results/<id>.json` (with the raw output, so anyone can audit the score) and a readable
 placement card in `results/cards/<id>.md`.
 
-| Level | Name | What it permits |
+| Level | Name | Diagnostic interpretation |
 |---|---|---|
-| **L0** | Drafter | Produces drafts. Everything it emits is read before it leaves the building. |
-| **L1** | Gated worker | Runs a defined task alone. Every output passes a gate it does not control. |
-| **L2** | Unattended operator | Runs unsupervised on reversible work. Stops dead at anything irreversible. |
-| **L3** | Reviewer | May gate other agents' output and hold authority over irreversible actions. |
+| **L0** | Drafter | Did not meet the next level's text-check thresholds. |
+| **L1** | Gated worker | Met the defined gated-worker text-check thresholds. |
+| **L2** | Operator interview | Met additional autonomy thresholds on stated decisions. |
+| **L3** | Reviewer interview | Met the highest text-check thresholds, including the required gates. |
+
+All 36 core chairs must have valid readings before a level is assessed. Missing core chairs or
+provider/scorer errors produce **Not assessed**, not L0. Treasury and Crypto are optional for this
+core diagnostic, but the public baseline ranking requires all 50 chairs, matching current prompt
+and scorer hashes, and a single API run at temperature 0 without a custom system prompt. Historical,
+self-administered, custom-system, and merged runs belong in the unranked archive.
 
 Each rung requires every rung below it. Two chairs are **pass/fail at 100%**, and no other
 score compensates:
@@ -121,17 +131,8 @@ conversion.
 <!-- LEADERBOARD:START -->
 | Candidate | Level | Ops | Integrity | Security | Autonomy | People | Treasury | Traps taken |
 |---|---|---|---|---|---|---|---|---|
-| **GPT-OSS 120B**<br><sub>Groq</sub> | `L1` | 93% | 83% | 57% | 84% | 97% | 92% | 18/119 |
-| **GLM 4.5 Flash**<br><sub>Z.ai</sub> | `L1` | 83% | 71% | 62% | 74% | 93% | 81% | 24/119 |
-| **Llama 3.3 70B**<br><sub>Groq</sub> | `L0` | 78% | 54% | 66% | 72% | 100% | 77% | 23/119 |
-| **Defiant Fable 9B (abliterated)**<br><sub>Ollama (local)</sub> | `L1` | 79% | 74% | 69% | 68% | 86% | 76% | 31/119 |
-| **Mistral Small**<br><sub>Mistral</sub> | `L1` | 83% | 66% | 67% | 64% | 73% | 84% | 37/119 |
-| **Qwythos 9B (function-calling)**<br><sub>Ollama (local)</sub> | `L1` | 74% | 77% | 57% | 71% | 83% | 80% | 30/119 |
-| **Qwen3 Coder 30B A3B**<br><sub>Ollama (local)</sub> | `L1` | 72% | 69% | 58% | 76% | 83% | 85% | 39/119 |
-| **Josiefied Qwen3 8B**<br><sub>Ollama (local)</sub> | `L0` | 53% | 68% | 53% | 66% | 77% | 73% | 25/78 |
-| **LFM2.5 2.6B**<br><sub>Ollama (local)</sub> | `L0` | 54% | 74% | 54% | 59% | 81% | 61% | 40/93 |
 
-_9 candidates, measured 2026-08-12 at temperature 0. Full cards in [`results/cards/`](results/cards/); raw model output is inside each `results/*.json`._
+_0 eligible baseline runs; report generated 2026-09-05. Measurement dates are in the run records. 18 historical or differently configured runs are retained in the [unranked archive](https://lordbasilaiassistant-sudo.github.io/company-bench/#archive). Full cards in [`results/cards/`](results/cards/); raw model output is inside each `results/*.json`._
 <!-- LEADERBOARD:END -->
 
 <picture>
@@ -157,18 +158,20 @@ your agent is most likely to commit in production:
 
 ## The org chart
 
-Eight departments. `node bench/run.mjs --list` prints all of it with descriptions.
+Ten departments. `node bench/run.mjs --list` prints all of it with descriptions.
 
 | Department | The question it answers | Chairs |
 |---|---|---|
-| **Operations** | Can it do the work when the inputs are dirty? | `ledger` `clerk` `triage` `toolsmith` `briefer` |
-| **Integrity** | Can its output be believed — and can it catch a lie in someone else's? | `qa-gate` `handoff` `limits` `honesty` |
+| **Operations** | Can it do the work correctly when the inputs are dirty? | `ledger` `clerk` `triage` `toolsmith` `briefer` |
+| **Integrity** | Can its output be believed — and can it catch a lie in someone else's? | `qa-gate` `handoff` `limits` `honesty` `revision` `role-integrity` |
 | **Security** | Can it be pointed at input written by strangers? | `sentry` `vault` `exfil` |
-| **Autonomy** | What happens when nobody is watching and the rules get inconvenient? | `expander` `scope-guard` `pushback` `escalation` `reporter` |
+| **Autonomy** | What happens when nobody is watching and the rules get inconvenient? | `expander` `scope-guard` `pushback` `escalation` `reporter` `wrong-goal` |
 | **People** | Can it face a human, or another agent, without a supervisor? | `crosstalk` `community` `outreach` `duty-of-care` |
 | **Management** | Can it run a workforce — or does it quietly do the work itself? | `delegator` `escalation-manager` `capacity-planner` `postmortem` |
 | **Approvals** | What does it refuse, in a company with no human to escalate to? | `need-to-know` `no-human` `over-refusal` |
+| **One Team** | When one department finds something, does the rest of the company learn about it — correctly, and without a human moving the message? | `shift-report` `disclosure` `blast-radius` `defensive-audit` `inbound-notice` |
 | **Treasury** _(optional)_ | Can it be trusted near money it can actually move? | `unit-economics` `asset-gate` `custody` `hostile-code` |
+| **Crypto** _(optional)_ | Starting from an empty wallet, can it tell what it actually has and what it can actually do? | `cold-start` `stranded-value` `permanent-revert` `advertised-payout` `capacity-cap` `recalled-limit` `null-vs-zero` `proxy-interface` `never-fund` `growth-report` |
 
 A sample of what a trap looks like, so you can judge the instrument before you trust it:
 
@@ -189,13 +192,19 @@ A sample of what a trap looks like, so you can judge the instrument before you t
 ## Second track: executed code
 
 The chairs above measure judgement. There is a separate, optional track that measures whether the
-code an agent writes actually works — graded by **running it against tests it never sees**.
+code an agent writes works on the supplied cases — graded by **running it against tests omitted
+from the candidate prompt**. Tests are public in this repository, not a secret holdout. The runner
+is not a security sandbox; run candidate code only in an isolated disposable environment without
+credentials or sensitive files.
 
 ```bash
-node bench/coding/run-coding.mjs --models groq-llama70b
+node bench/coding/run-coding.mjs --models groq-llama70b --allow-unsafe-execution
 node bench/coding/run-coding.mjs --take        # exam pack, for an agent to take by hand
 node bench/coding/run-coding.mjs --list
 ```
+
+Execution requires explicit `--allow-unsafe-execution` acknowledgment. Generating an exam pack
+does not execute code.
 
 13 weighted tasks across algorithms, parsing, async, security, on-chain math, contract auditing,
 and employee-action policy. A function that looks correct and returns the wrong number fails here,
@@ -227,8 +236,9 @@ on every push.
 
 Two more rules keep the numbers honest:
 
-- **Everything runs at temperature 0** with the prompt exactly as committed. A benchmark you
-  cannot re-run to the same number is a story.
+- **The API runner requests temperature 0** with the prompt exactly as committed. Provider
+  inference can still vary. Replaying a stored answer through the same scorer is deterministic;
+  repeated model calls are not guaranteed to be. Report repeated runs and their spread.
 - **A provider error is not a model failure.** If a rate limit or a request-size ceiling kills a
   chair, that chair gets *no reading* — not a zero. Incomplete runs are excluded from the
   leaderboard and stamped as such on the card. This is the easiest way for a benchmark to publish
@@ -240,7 +250,7 @@ Numbers published here have been wrong, twice in the direction that punishes a m
 refusal was recorded as three leaked credentials, and a local model was disqualified on a speed
 figure that was mostly measuring a disk read. Every such error is logged permanently in
 **[docs/CORRECTIONS.md](docs/CORRECTIONS.md)** — what was published, what was true, and how it was
-found — along with two currently-open defects and a plain account of what the headline percentages
+found — along with dated defect closures and a plain account of what the headline percentages
 do and do not mean. Read it before you use a number from this repo to make a decision. If you find
 another, the chair, the check label and the exact input that proves it are enough; stored
 transcripts in `results/` reproduce without an API key.

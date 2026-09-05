@@ -35,7 +35,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { TASKS } from './tasks.mjs';
 import { extractCode } from './extract.mjs';
-import { gradeTask, python } from './exec.mjs';
+import { gradeTask, python, EXECUTION_WARNING } from './exec.mjs';
 import { chat, loadRegistry, resolveModel } from '../lib/transport.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -43,6 +43,8 @@ const ROOT = path.join(HERE, '..', '..');
 const OUT = path.join(ROOT, 'results', 'coding', 'recovery');
 
 const argv = process.argv.slice(2);
+console.error(EXECUTION_WARNING);
+if (!argv.includes('--allow-unsafe-execution')) process.exit(2);
 const flag = n => { const i = argv.indexOf(`--${n}`); return i >= 0 ? argv[i + 1] : undefined; };
 const listOf = n => (flag(n) ?? '').split(',').map(s => s.trim()).filter(Boolean);
 
@@ -117,7 +119,7 @@ for (const model of models) {
     try {
       const r = await chat(model, t.prompt, { maxTokens: model.maxTokens ?? 3000 });
       code = extractCode(r.text, t.lang);
-      g = await gradeTask(t, code);
+      g = await gradeTask(t, code, { allowUnsafeExecution: true });
     } catch (e) { unreachable = String(e.message).slice(0, 80); }
 
     // A dead socket is not a coding failure and must never be scored as one.
@@ -138,7 +140,7 @@ for (const model of models) {
       // An empty or unchanged reply is a refusal to iterate; stop rather than burn rounds on it.
       if (!next.trim() || next.trim() === code.trim()) { process.stdout.write('  → unchanged'); break; }
       code = next;
-      g = await gradeTask(t, code);
+      g = await gradeTask(t, code, { allowUnsafeExecution: true });
       process.stdout.write(` → ${g.passed}/${g.total}`);
     }
 
@@ -169,6 +171,7 @@ for (const model of models) {
   const file = path.join(OUT, `${id}.${MODE}.json`);
   fs.writeFileSync(file, JSON.stringify({
     candidate: { id, name: model.name, model: model.model }, track: 'coding-recovery',
+    execution: 'unsandboxed-trusted-local', experimental: true, adversariallyVerified: false,
     when: new Date().toISOString(), maxRounds: ROUNDS, feedback: MODE,
     oneShot: wAvg('firstScore'), afterFeedback: wAvg('finalScore'),
     recoveryRate: rate, needed: needed.length, recovered: needed.filter(r => r.recovered).length,

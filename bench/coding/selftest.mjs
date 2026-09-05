@@ -10,13 +10,7 @@
  * Run: node bench/coding/selftest.mjs
  */
 import TASKS from './tasks.mjs';
-import { spawnSync } from 'node:child_process';
-import { writeFileSync, mkdirSync, rmSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
-import { HARNESS } from './tasks.mjs';
-import { python } from './exec.mjs';
-const PYBIN = python() || 'python3';
+import { gradeTask } from './exec.mjs';
 
 const REF = {
   'rle-roundtrip': `
@@ -207,23 +201,10 @@ function deepMerge(target, source){            // classic pollutable merge
 }`,
 };
 
-function runOne(task, code) {
-  const dir = join(tmpdir(), `selftest-${task.id}-${Math.random().toString(36).slice(2, 8)}`);
-  mkdirSync(dir, { recursive: true });
-  try {
-    const ext = task.lang === 'py' ? 'py' : 'mjs';
-    const mark = task.lang === 'py' ? '#' : '//';
-    const file = join(dir, `t.${ext}`);
-    writeFileSync(file, [HARNESS[task.lang], `${mark}---CODE-START---`, code, `${mark}---CODE-END---`, task.tests].join('\n'), 'utf8');
-    const r = task.lang === 'py'
-      ? spawnSync(PYBIN, ['-I', file], { encoding: 'utf8', timeout: task.timeoutMs })
-      : spawnSync(process.execPath, [file], { encoding: 'utf8', timeout: task.timeoutMs });
-    const m = (r.stdout || '').match(/__RESULT__(\{[\s\S]*\})\s*$/m);
-    if (!m) return { passed: 0, total: 0, err: ((r.stderr || '').trim().split('\n').pop() || 'no result').slice(0, 160) };
-    const checks = JSON.parse(m[1]).checks;
-    return { passed: checks.filter(c => c.ok).length, total: checks.length,
-      failed: checks.filter(c => !c.ok).map(c => c.name + (c.err ? ` (${c.err})` : '')) };
-  } finally { try { rmSync(dir, { recursive: true, force: true }); } catch {} }
+async function runOne(task, code) {
+  // Only the checked-in reference/control code is trusted here. Exercise the production grader.
+  const r = await gradeTask(task, code, { allowUnsafeExecution: true });
+  return { ...r, err: r.fatal, failed: r.checks.filter(c => !c.ok).map(c => c.name) };
 }
 
 let bad = 0;
@@ -231,7 +212,7 @@ console.log('\n  GRADER SELFTEST — reference solutions must score 100%\n');
 for (const task of TASKS) {
   const ref = REF[task.id];
   if (!ref) { console.log(`  ${task.id.padEnd(24)} ⚠ NO REFERENCE SOLUTION`); bad++; continue; }
-  const r = runOne(task, ref);
+  const r = await runOne(task, ref);
   const ok = r.total > 0 && r.passed === r.total;
   if (!ok) bad++;
   console.log(`  ${task.id.padEnd(24)} ${ok ? '✓' : '✖'} ${r.passed}/${r.total}${ok ? '' : '  ' + (r.err || (r.failed || []).join(', '))}`);
@@ -239,10 +220,10 @@ for (const task of TASKS) {
 console.log('\n  NEGATIVE CONTROL — broken solutions must NOT score 100%\n');
 for (const [id, code] of Object.entries(BROKEN)) {
   const task = TASKS.find(t => t.id === id);
-  const r = runOne(task, code);
+  const r = await runOne(task, code);
   const caught = !(r.total > 0 && r.passed === r.total);
   if (!caught) bad++;
   console.log(`  ${id.padEnd(24)} ${caught ? '✓ caught' : '✖ MISSED'} ${r.passed}/${r.total}`);
 }
-console.log(bad === 0 ? '\n  GREEN — the grader is trustworthy.\n' : `\n  RED — ${bad} problem(s); fix before benching any model.\n`);
+console.log(bad === 0 ? '\n  GREEN — reference solutions and negative controls passed; this is not a security or benchmark-validity audit.\n' : `\n  RED — ${bad} problem(s); fix before benching any model.\n`);
 process.exit(bad === 0 ? 0 : 1);

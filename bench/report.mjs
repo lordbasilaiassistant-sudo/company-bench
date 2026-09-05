@@ -13,6 +13,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { DEPARTMENTS, CHAIRS } from './positions/index.mjs';
 import { siteHtml } from './site.mjs';
+import { rankingEligibility, PROMPT_HASH, SCORER_HASH } from './lib/suite.mjs';
+import { resultCatalog } from './lib/catalog.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(HERE, '..');
@@ -45,20 +47,6 @@ const FONT = "ui-sans-serif, -apple-system, 'Segoe UI', Inter, Helvetica, Arial,
 const MONO = "ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace";
 
 /* ─────────────────────────── data ─────────────────────────── */
-
-function load() {
-  if (!fs.existsSync(RESULTS)) return [];
-  return fs.readdirSync(RESULTS)
-    .filter(f => f.endsWith('.json'))
-    .map(f => { try { return JSON.parse(fs.readFileSync(path.join(RESULTS, f), 'utf8')); } catch { return null; } })
-    .filter(r => r && r.chairs && r.placement)
-    // An incomplete run has no defensible reading. It stays in results/ and off the leaderboard.
-    .filter(r => !r.placement.incomplete)
-    // Rows authored by the benchmark's own author are excluded from every published number.
-    // See docs/CORRECTIONS.md: the scorers were iteratively fitted to those answers.
-    .filter(r => !r.excluded)
-    .sort((a, b) => b.placement.overall - a.placement.overall);
-}
 
 const trapChecksOf = r => Object.entries(r.chairs).flatMap(([id, ch]) =>
   (ch.checks ?? []).filter(c => /^TRAP/.test(c.label)).map(c => ({ chair: id, label: c.label.replace(/^TRAP /, ''), pass: c.pass })));
@@ -194,8 +182,8 @@ function trapsSvg(rows, P) {
 
 function ladderSvg(rows, P) {
   const LEVELS = [
-    { id: 'L3', name: 'Reviewer', rule: 'May gate other agents’ output and hold irreversible authority.' },
-    { id: 'L2', name: 'Unattended operator', rule: 'Runs alone on reversible work. Stops dead at anything irreversible.' },
+    { id: 'L3', name: 'Reviewer interview', rule: 'Meets interview thresholds; does not grant production authority.' },
+    { id: 'L2', name: 'Operator interview', rule: 'Meets interview thresholds; unattended behavior is untested.' },
     { id: 'L1', name: 'Gated worker', rule: 'Runs a defined task. Every output passes a gate it does not control.' },
     { id: 'L0', name: 'Drafter', rule: 'Produces drafts. Everything it emits is read before it ships.' },
   ];
@@ -307,11 +295,13 @@ function leaderboardMd(rows) {
 
 /* ─────────────────────────── main ─────────────────────────── */
 
-const rows = load();
-if (!rows.length) {
-  console.error('\n  No complete results yet. Run: node bench/run.mjs --models <id>\n');
-  process.exit(1);
-}
+const catalog = resultCatalog(RESULTS);
+const rows = catalog.baseline;
+const archive = catalog.archive.map(r => ({
+  id: r.candidate.id, name: r.candidate.name, when: r.when, mode: r.mode,
+  chairs: Object.keys(r.chairs).length, reasons: rankingEligibility(r).eligible ? ['earlier baseline run'] : rankingEligibility(r).reasons,
+  transcript: `https://github.com/lordbasilaiassistant-sudo/company-bench/blob/main/results/${r.storagePath.split('/').map(encodeURIComponent).join('/')}`,
+}));
 
 const ranked = rows.filter(r => !r.reference);
 for (const [k, fn] of [['matrix', matrixSvg], ['traps', trapsSvg], ['ladder', ladderSvg], ['profile', profileSvg]]) {
@@ -325,10 +315,10 @@ const totals = {
 };
 const bare = svg => svg.replace(/^<\?xml[^>]*\?>\s*/, '');
 fs.writeFileSync(path.join(DOCS, 'index.html'), siteHtml(rows, {
-  totals,
+  totals, archive,
   charts: { trapsLight: bare(trapsSvg(ranked, LIGHT)), trapsDark: bare(trapsSvg(ranked, DARK)),
     profileLight: bare(profileSvg(ranked, LIGHT)), profileDark: bare(profileSvg(ranked, DARK)) },
-}));
+}).replace(/[ \t]+$/gm, ''));
 // Machine-readable endpoints. An agent pointed at the page should not have to parse HTML, and a
 // crawler cannot read a chart — so every number in the SVGs also exists here as data.
 fs.writeFileSync(path.join(DOCS, 'results.json'), JSON.stringify({
@@ -341,13 +331,17 @@ fs.writeFileSync(path.join(DOCS, 'results.json'), JSON.stringify({
   checks: CHAIRS.reduce((n, c) => n + c.score('').length, 0),
   traps: CHAIRS.reduce((n, c) => n + c.score('').filter(x => /^TRAP/.test(x.label)).length, 0),
   scoring: 'deterministic; no LLM judge',
-  trustLevels: { L0: 'drafter', L1: 'gated worker', L2: 'unattended operator', L3: 'reviewer' },
+  trustLevels: { L0: 'drafter interview', L1: 'gated worker interview', L2: 'operator interview', L3: 'reviewer interview' },
+  promptHash: PROMPT_HASH, scorerHash: SCORER_HASH,
+  comparison: 'All current chairs, API baseline, temperature 0, no custom system prompt or merged runs. Interview results do not grant production authority.',
+  archive,
   results: ranked.map(r => ({
     model: r.candidate.name, provider: r.candidate.vendor ?? null, modelId: r.candidate.model ?? r.candidate.id,
     trustLevel: r.placement.level, overall: r.placement.overall,
     departments: r.placement.dept, flags: r.placement.flags.map(f => f.label),
     trapsTaken: trapChecksOf(r).filter(t => !t.pass).length, trapsTotal: trapChecksOf(r).length,
     tokensPerSecond: r.tokensPerSecond ?? null, mode: r.mode, measured: r.when.slice(0, 10),
+    runId: r.runId, provenance: r.provenance,
   })),
 }, null, 2));
 
@@ -369,7 +363,8 @@ fs.writeFileSync(path.join(RESULTS, 'LEADERBOARD.md'), table + '\n');
 const readmePath = path.join(ROOT, 'README.md');
 if (fs.existsSync(readmePath)) {
   const md = fs.readFileSync(readmePath, 'utf8');
-  const note = `\n_${rows.length} candidate${rows.length === 1 ? '' : 's'}, measured ${new Date().toISOString().slice(0, 10)} at temperature 0. `
+  const note = `\n_${rows.length} eligible baseline run${rows.length === 1 ? '' : 's'}; report generated ${new Date().toISOString().slice(0, 10)}. `
+    + `Measurement dates are in the run records. ${archive.length} historical or differently configured runs are retained in the [unranked archive](https://lordbasilaiassistant-sudo.github.io/company-bench/#archive). `
     + `Full cards in [\`results/cards/\`](results/cards/); raw model output is inside each \`results/*.json\`._\n`;
   const next = md.replace(
     /<!-- LEADERBOARD:START -->[\s\S]*?<!-- LEADERBOARD:END -->/,

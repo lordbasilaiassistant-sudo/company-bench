@@ -375,3 +375,67 @@ the proxy first, then look for the correct answer that trips it.
 If you find one, open an issue with the candidate, the chair, the check label, and the exact input
 that proves it. A reproduction against a stored transcript in `results/` is enough — no API key and
 no spend required, and `bench/rescore.mjs` replays them.
+
+---
+
+## 2026-09-05 — Earlier open defects verified closed; public claims narrowed
+
+The OPEN headings above are preserved as the historical record. On this date the checked-out
+implementation already contained fixes for both; this entry records verification, not a claim
+that these code fixes were first made today.
+
+- **OPEN 1 closed:** a byte scan of `bench/positions/management.mjs` found **zero `0x08` bytes**.
+  Starting from `delegator.gold`, replacing `if_behind` with `For any remaining pages skip the A3
+  audit, publishing only after A2 confirms price and stock correctness.` makes
+  `TRAP if_behind cuts scope, never the gate` return `pass: false`.
+- **OPEN 2 closed:** `tryJson('{"note":"the invoice says “paid”"}')` returns an object whose
+  `note` is `the invoice says "paid"`. Raw JSON is parsed before string normalization in
+  `bench/lib/parse.mjs`; valid quoted content no longer turns into an unparseable answer.
+
+These are local deterministic probes, with no new model call and no claim that older published
+scores automatically become comparable to today's prompts.
+
+**Documentation corrections:** the measured current registry contains **50 chairs, 10 departments,
+414 checks, and 146 traps**. The quickstart still said 35 tasks, the copy-paste prompt and skill
+said 25, and the README org chart omitted departments and chairs. `node bench/sync-counts.mjs
+--selftest` now checks the additional count surfaces and the complete README org chart, including
+regressions that preserve historical measurements.
+
+The public introduction and model-submission guidance now distinguish deterministic replay of
+stored answers from nondeterministic provider inference, and provisional text interview levels
+from authority to act in production. Coding tests are public repository fixtures omitted from
+candidate prompts, not a secret holdout, and local code execution is not a security sandbox.
+Public comparisons require matching prompt/scorer revisions, full coverage, and disclosed run
+provenance; self-administered and historical results remain diagnostics rather than baseline ranks.
+
+## 2026-09-05 — Coverage, provenance, replay and execution integrity
+
+The diagnostic on commit `0679c49` reproduced two failures while the previous selftests passed:
+five synthetic perfect chair answers earned L3 with `incomplete: false`, and a coding answer with
+no implementation earned 1/1 by printing a forged result and exiting. These were instrument
+probes, not candidate scores.
+
+Result schema v4 requires all 36 core chairs for an interview level; absent core readings or
+provider/scorer errors return `level: null`. Full baseline publication requires all 50 chairs,
+current prompt/scorer fingerprints and a standard API run. Scoring fingerprints include complete
+source modules and normalize checkout line endings. Partial runs are separate measurements,
+and immutable run records survive subsequent interviews. Exclusions apply across aliases of the
+same run. Replaying an existing transcript preserves its original measurement date.
+
+A review also reproduced redaction changing a leaked-secret answer from 14% to 43%. Redacted
+transcripts now have explicit metadata and cannot be independently rescored or ranked. A literal
+redaction placeholder in an otherwise unchanged modern answer is still valid data. Legacy
+transcripts without that metadata are conservatively marked unverifiable when they contain
+redaction markers. Historical/custom/self-administered readings remain in the unranked archive;
+the archive preserves evidence without pretending it was collected under the current protocol.
+
+The coding track is disabled without explicit trusted-local opt-in. It rejects malformed result
+manifests, early/failed exits, timeouts and duplicate result lines, but candidate code still shares
+an interpreter with its tests. Full-manifest forgery remains possible. This track is experimental
+local correctness diagnostics, not adversarially verified evidence. See
+[`bench/coding/SECURITY.md`](../bench/coding/SECURITY.md).
+
+Regression reproductions are in `bench/integrity.test.mjs`, `bench/runner.test.mjs`, and
+`bench/coding/integrity.test.mjs`. Their passing state verifies these cases, not general validity
+or production reliability of the benchmark. The public single-response track remains an
+interview instrument, not an authorization system.

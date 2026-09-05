@@ -8,6 +8,8 @@
 import { DEPARTMENTS } from '../positions/index.mjs';
 import { redactSecrets } from './parse.mjs';
 import { placement, verdictOf, gradeOf } from './placement.mjs';
+import { randomUUID } from 'node:crypto';
+import { BENCH_VERSION } from './suite.mjs';
 
 const C = {
   reset: '\x1b[0m', dim: '\x1b[2m', bold: '\x1b[1m',
@@ -38,20 +40,26 @@ export function throughput(chairs) {
   return Math.round((tokens / (ms / 1000)) * 10) / 10;
 }
 
-export function buildResult({ candidate, chairs, mode }) {
+export function buildResult({ candidate, chairs, mode, provenance = null }) {
+  chairs = structuredClone(chairs);
   // Scoring already ran against the untouched text; from here on the transcript is written to
   // disk, so anything credential-shaped is redacted before it can be committed or published.
   for (const r of Object.values(chairs)) {
-    if (typeof r.raw === 'string') r.raw = redactSecrets(r.raw);
+    if (typeof r.raw === 'string') {
+      const safe = redactSecrets(r.raw);
+      r.redacted = r.redacted === true || safe !== r.raw;
+      r.raw = safe;
+    }
+    const error = r.error || r.scorerError || (r.unanswered ? 'unanswered' : null)
+      || (!Number.isFinite(r.pct) || r.pct < 0 || r.pct > 100 ? 'invalid score' : null);
+    if (error) { r.error = error; r.pct = null; r.passed = null; r.checks = []; }
   }
-  const forPlacement = Object.fromEntries(Object.entries(chairs).map(([id, r]) => [id, { pct: r.pct, dept: r.dept, error: r.error }]));
+  const forPlacement = Object.fromEntries(Object.entries(chairs).map(([id, r]) => [id, { pct: r.pct, dept: r.dept, error: r.error, scorerError: r.scorerError, unanswered: r.unanswered }]));
   const deptsRun = [...new Set(Object.values(chairs).map(r => r.dept))];
   return {
-    candidate, mode, when: new Date().toISOString(),
-    // v3 adds the One Team department (5 chairs). The aggregate now includes a flow no earlier run
-    // was ever asked about, so a v2 overall and a v3 overall are not the same measurement and must
-    // not be put on one line. Per-chair scores are still comparable across both.
-    benchVersion: 3,
+    candidate, mode, when: new Date().toISOString(), runId: randomUUID(), provenance,
+    // v4 records coverage and provenance; historical readings are never silently promoted.
+    benchVersion: BENCH_VERSION,
     tokensPerSecond: throughput(chairs),
     chairs,
     placement: placement(forPlacement, { deptsRun }),
@@ -71,7 +79,7 @@ export function trapTally(chairs) {
  * decide whether an agent can be left in a seat.
  */
 export const WHY_TRAPS_LEAD =
-  'An averaged score hides catastrophic single failures, and the failures are what decide whether an agent can hold a seat.';
+  'An average can hide individual failures. Read the failed checks and raw answers; neither a score nor a trap count certifies production behavior.';
 
 export function printScorecard(result) {
   const { candidate, chairs, placement: p } = result;
@@ -85,10 +93,10 @@ export function printScorecard(result) {
   console.log('');
 
   // ── the headline: traps and flags, before any percentage ──
-  console.log(`  ${c('bold', 'TRAPS TAKEN')}   ${c(trapTone, `${t.took} of ${t.total}`)}` +
-    `   ${p.flags.length ? c('red', `⛔ ${p.flags.length} disqualifying flag${p.flags.length > 1 ? 's' : ''}`) : c('green', '✓ no disqualifying flags')}`);
-  console.log(c('grey', `                the count that predicts production failure`));
-  console.log(c('grey', `  overall       ${p.overall}%  (weighted average — useful only for comparing similar models)`));
+  console.log(`  ${c('bold', 'TRAPS TAKEN')}   ${c(trapTone, t.total ? `${t.took} of ${t.total}` : 'no checks measured')}` +
+    `   ${p.flags.length ? c('red', `⛔ ${p.flags.length} disqualifying flag${p.flags.length > 1 ? 's' : ''}`) : c('grey', 'no flags among measured checks')}`);
+  console.log(c('grey', `                failures on these interview fixtures`));
+  console.log(c('grey', `  observed mean ${p.overall}%  (equal-weight department means; compare the same tested scope)`));
   console.log(c('grey', `                ${WHY_TRAPS_LEAD}`));
   console.log('');
 
@@ -111,18 +119,18 @@ export function printScorecard(result) {
 
   console.log(c('grey', `  ${line(64)}`));
   if (p.incomplete) {
-    console.log(`  ${c('yellow', 'INCOMPLETE RUN')} — ${p.errored.length} chair(s) errored: ${p.errored.join(', ')}`);
+    console.log(`  ${c('yellow', 'INCOMPLETE RUN')} — ${p.missing.length} required chair(s) missing; ${p.errored.length} errored; ${p.invalid.length} unknown.`);
     console.log(c('grey', '  A provider error is not a candidate failure. Those chairs have no reading,'));
     console.log(c('grey', '  no trust level is asserted, and this result must not be published as a score.'));
     console.log('');
   }
-  console.log(`  ${c('bold', 'TRUST LEVEL')}   ${c('cyan', p.level + ' — ' + p.levelName)}`);
+  console.log(`  ${c('bold', 'INTERVIEW LEVEL')}   ${c('cyan', (p.level ?? 'UNASSESSED') + ' — ' + p.levelName)}`);
   console.log(c('grey', `                ${p.levelRule}`));
   console.log('');
   for (const f of p.flags) {
     console.log(`  ${c('red', '⛔ ' + f.label)}  ${c('grey', f.why)}`);
   }
-  if (!p.flags.length) console.log(`  ${c('green', '✓ no disqualifying flags')}`);
+  if (!p.flags.length) console.log(c('grey', '  No flags among measured checks; missing evidence is not a pass.'));
   console.log('');
   console.log(`  ${c('grey', 'hire for   ')} ${p.hire.join(', ') || c('grey', '—')}`);
   console.log(`  ${c('grey', 'probation  ')} ${p.probation.join(', ') || c('grey', '—')}`);
@@ -142,7 +150,9 @@ export function renderResume(result) {
   for (const d of DEPARTMENTS) {
     for (const [id, r] of Object.entries(chairs)) {
       if (r.dept !== d.id) continue;
-      rows.push(`| ${d.label} | ${r.title} | \`${id}\` | ${r.pct}% | ${gradeOf(r.pct)} | ${verdictOf(r.pct)} |`);
+      const noReading = r.error || r.scorerError || r.unanswered;
+      const verdict = p.reject.includes(id) ? 'DO NOT PLACE' : verdictOf(r.pct);
+      rows.push(`| ${d.label} | ${r.title} | \`${id}\` | ${noReading ? 'No reading' : r.pct + '%'} | ${noReading ? '—' : gradeOf(r.pct)} | ${noReading ? 'ERROR' : verdict} |`);
     }
   }
 
@@ -156,23 +166,27 @@ export function renderResume(result) {
 > Company Bench v${result.benchVersion} · ${result.mode} · ${result.when.slice(0, 10)}
 > ${candidate.vendor ? `${candidate.vendor} · ` : ''}\`${candidate.model ?? candidate.id}\`${candidate.cost ? ` · ${candidate.cost}` : ''}${median ? ` · median latency ${median}ms` : ''}
 
-${p.incomplete ? `> ⚠️ **INCOMPLETE RUN** — ${p.errored.length} chair(s) errored (\`${p.errored.join('`, `')}\`). A provider
+${p.incomplete ? `> ⚠️ **INCOMPLETE RUN** — ${p.missing.length} required chair(s) missing, ${p.errored.length} errored, ${p.invalid.length} unknown. A provider
 error is not a candidate failure: those chairs have no reading, no trust level is asserted,
 and this card must not be cited as a score.
 ` : ''}
-## ${t.took} of ${t.total} planted traps taken · ${p.flags.length ? `${p.flags.length} disqualifying flag${p.flags.length > 1 ? 's' : ''}` : 'no disqualifying flags'}
+## ${t.total ? `${t.took} of ${t.total} planted traps taken` : 'No trap checks measured'} · ${p.flags.length ? `${p.flags.length} disqualifying flag${p.flags.length > 1 ? 's' : ''}` : 'no flags among measured checks'}
 
 Read those two numbers first. ${WHY_TRAPS_LEAD}
 
-${p.flags.length ? p.flags.map(f => `**⛔ ${f.label}** — ${f.why}`).join('\n\n') : '**No disqualifying flags.**'}
+${p.flags.length ? p.flags.map(f => `**⛔ ${f.label}** — ${f.why}`).join('\n\n') : '**No flags among measured checks. Missing evidence is not a pass.**'}
 
-## Trust level: ${p.level} — ${p.levelName}
+## Interview level: ${p.level ?? 'UNASSESSED'} — ${p.levelName}
 
 ${p.levelRule}
 
+These are single-response interview results, not certification for production permissions.
+Coverage: ${p.coverage.requiredAnswered}/${p.coverage.required} required chairs; ${p.coverage.answered}/${p.coverage.total} total.
+Run ID: \`${result.runId ?? 'legacy'}\`. Prompt version: \`${result.provenance?.promptHash ?? 'unknown'}\`.
+
 ## Departments
 
-<sub>Overall ${p.overall}% — a weighted average, kept because it is real and useful for comparing similar
+<sub>Overall ${p.overall}% — an equal-weight mean of department means, kept for comparing the same tested scope across
 models. It is not the headline: the trap count above is.</sub>
 
 ${DEPARTMENTS.filter(d => p.dept[d.id] !== undefined).map(d => `- **${d.label}** — ${p.dept[d.id]}%  ·  _${d.question}_`).join('\n')}
@@ -185,11 +199,11 @@ ${rows.join('\n')}
 
 ## Traps taken — ${t.took} of ${t.total}, named
 
-${trapsTaken.length ? trapsTaken.map(t => `- ${t.replace(/^TRAP /, '')}`).join('\n') : '- none — it walked past every planted wrong answer'}
+${trapsTaken.length ? trapsTaken.map(t => `- ${t.replace(/^TRAP /, '')}`).join('\n') : t.total ? '- No failures among the trap checks measured.' : '- No trap checks measured.'}
 
 ## Every missed check, verbatim
 
-${failures.length ? failures.join('\n') : '- none — clean sweep'}
+${failures.length ? failures.join('\n') : '- No failed checks recorded; consult coverage and errors above.'}
 
 ---
 *Reproduce: \`node bench/run.mjs --models ${candidate.id}\` · raw transcript in \`results/${candidate.id}.json\`*

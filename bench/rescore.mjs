@@ -18,6 +18,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { CHAIRS } from './positions/index.mjs';
 import { buildResult, renderResume } from './lib/scorecard.mjs';
+import { SCORER_HASH, unverifiableTranscript } from './lib/suite.mjs';
+import { writeResult } from './lib/result-store.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(HERE, '..');
@@ -40,20 +42,29 @@ for (const f of files) {
   for (const [id, old] of Object.entries(prev.chairs)) {
     const chair = CHAIRS.find(c => c.id === id);
     if (!chair) { out[id] = old; continue; }           // chair was removed; keep history intact
-    if (old.error) { out[id] = old; continue; }        // no transcript to rescore
+    if (old.error && !old.scorerError) { out[id] = old; continue; } // provider failure has no transcript
+    if (unverifiableTranscript(old)) {
+      out[id] = { ...old, redacted: true, pct: null, checks: [], scorerError: 'Redacted transcript cannot be independently rescored' };
+      continue;
+    }
     if (typeof old.raw !== 'string') { out[id] = old; continue; }
 
     // Same rule as grade.mjs: one chair may fail to score, the replay may not die.
     let checks;
     try { checks = chair.score(old.raw); }
-    catch (e) { out[id] = { ...old, scorerError: String(e.message ?? e).slice(0, 160) }; continue; }
+    catch (e) { out[id] = { ...old, pct: null, checks: [], scorerError: String(e.message ?? e).slice(0, 160) }; continue; }
     const passed = checks.filter(c => c.pass).length;
     const pct = Math.round((100 * passed) / checks.length);
     out[id] = { ...old, title: chair.title, dept: chair.dept, pct, passed, total: checks.length, checks };
+    delete out[id].scorerError;
+    delete out[id].error;
     if (pct !== old.pct) deltas.push(`${id} ${old.pct}→${pct}`);
   }
 
-  const next = buildResult({ candidate: prev.candidate, chairs: out, mode: prev.mode });
+  const next = buildResult({ candidate: prev.candidate, chairs: out, mode: prev.mode,
+    provenance: prev.provenance ? { ...prev.provenance, scorerHash: SCORER_HASH } : null });
+  next.when = prev.when; // replay is not a new model interview
+  next.rescoredAt = new Date().toISOString();
   next.rescoredFrom = prev.when;
   if (prev.skippedChairs) next.skippedChairs = prev.skippedChairs;
   // buildResult() only knows about chairs, so flags that mark WHAT a result is must be carried
@@ -64,9 +75,7 @@ for (const f of files) {
   const RECOMPUTED = new Set(['candidate','mode','when','benchVersion','tokensPerSecond','chairs','placement']);
   for (const [k, v] of Object.entries(prev)) if (!RECOMPUTED.has(k) && next[k] === undefined) next[k] = v;
 
-  fs.writeFileSync(path.join(RESULTS, f), JSON.stringify(next, null, 2));
-  fs.mkdirSync(path.join(RESULTS, 'cards'), { recursive: true });
-  fs.writeFileSync(path.join(RESULTS, 'cards', f.replace(/\.json$/, '.md')), renderResume(next));
+  writeResult(next);
 
   const lvl = prev.placement?.level !== next.placement.level
     ? `  level ${prev.placement?.level} → ${next.placement.level}` : '';

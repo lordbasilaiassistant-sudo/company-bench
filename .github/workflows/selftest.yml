@@ -8,13 +8,22 @@ on:
 
 jobs:
   scorers:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: '20' }
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
       - name: Every chair accepts its gold answer and rejects its decoy
         run: node bench/selftest.mjs
+      - name: Public runner, coverage and coding integrity regressions
+        run: npm test
+      - name: Executed coding reference and negative controls
+        run: node bench/coding/selftest.mjs
       - name: The org chart loads
         run: node bench/run.mjs --list
       - name: No published file carries a credential-shaped string
@@ -24,6 +33,9 @@ jobs:
       # a stale count is the project describing itself incorrectly to every automated reader it has.
       # They were hand-written and went stale across four department additions before this gate.
       - name: The chair and check counts in the docs are true
-        run: node bench/sync-counts.mjs
+        run: node bench/sync-counts.mjs --selftest
+      - name: Public report builds including empty baseline and historical archive
+        run: node bench/report.mjs
       - name: The exam pack generates
+        shell: bash
         run: node bench/take.mjs --out /tmp/pack && test -s /tmp/pack/TAKE-THE-BENCH.md

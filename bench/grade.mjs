@@ -15,12 +15,25 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { CHAIRS } from './positions/index.mjs';
-import { buildResult, printScorecard, renderResume } from './lib/scorecard.mjs';
+import { buildResult, printScorecard } from './lib/scorecard.mjs';
+import { provenance } from './lib/suite.mjs';
+import { writeResult } from './lib/result-store.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(HERE, '..');
 const argv = process.argv.slice(2);
+const valueFlags = new Set(['--label', '--id', '--vendor', '--model', '--cost']);
+let positionalCount = 0;
+for (let i = 0; i < argv.length; i++) {
+  if (valueFlags.has(argv[i])) {
+    if (!argv[i + 1] || argv[i + 1].startsWith('--')) { console.error(`missing value for ${argv[i]}`); process.exit(2); }
+    i++;
+  } else if (argv[i] === '--merge') continue;
+  else if (argv[i].startsWith('--') || ++positionalCount > 1) { console.error(`unknown argument: ${argv[i]}`); process.exit(2); }
+}
 const flag = n => { const i = argv.indexOf(`--${n}`); return i >= 0 ? argv[i + 1] : undefined; };
+const fail = message => { console.error(message); process.exit(2); };
+if (argv.includes('--merge')) fail('--merge is unsupported: each measurement must remain a separate run');
 
 // first positional argument: skip every --flag and the value that follows it
 let file;
@@ -34,12 +47,17 @@ if (!file) {
 }
 if (!fs.existsSync(file)) { console.error(`  no such file: ${file}`); process.exit(2); }
 
-const answers = JSON.parse(fs.readFileSync(file, 'utf8'));
+let answers;
+try { answers = JSON.parse(fs.readFileSync(file, 'utf8')); }
+catch { fail('answers must be a valid JSON object of chair IDs to raw reply strings'); }
+if (!answers || typeof answers !== 'object' || Array.isArray(answers)) fail('answers must be a JSON object');
+if (Object.values(answers).some(value => typeof value !== 'string')) fail('every answer must be a raw reply string');
 const LABEL = flag('label') ?? path.basename(file, '.json');
 const ID = flag('id') ?? LABEL.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 48);
+if (!/^[a-z0-9][a-z0-9_-]{0,79}$/i.test(ID)) fail('--id must be 1–80 letters, digits, hyphens or underscores and start with a letter or digit');
 
 const unknown = Object.keys(answers).filter(k => !CHAIRS.some(c => c.id === k));
-if (unknown.length) console.log(`  (ignoring ${unknown.length} unknown key(s): ${unknown.join(', ')})`);
+if (unknown.length) fail(`unknown chair key(s): ${unknown.join(', ')}`);
 
 const out = {};
 let answered = 0;
@@ -78,19 +96,14 @@ if (!Object.keys(out).length) {
   process.exit(2);
 }
 
-// A partial answer set MERGES over the stored result, the same way `run.mjs --only` does. Without
-// this, answering three newly added chairs would delete the twenty-nine already measured.
-let merged = out;
-if (argv.includes('--merge')) {
-  try {
-    const prev = JSON.parse(fs.readFileSync(path.join(ROOT, 'results', `${ID}.json`), 'utf8'));
-    if (prev.chairs) merged = { ...prev.chairs, ...out };
-  } catch { /* nothing stored yet */ }
-}
-
 const result = buildResult({
   candidate: { id: ID, name: LABEL, vendor: flag('vendor'), model: flag('model') ?? LABEL, cost: flag('cost') },
-  chairs: merged, mode: 'self-administered',
+  chairs: out, mode: 'self-administered',
+  provenance: { ...provenance({ chairs: CHAIRS.filter(c => out[c.id]), collection: 'self-administered',
+    settings: { model: flag('model') ?? LABEL, temperature: null, maxTokens: null } }),
+    collectedAt: null, gradedAt: new Date().toISOString(),
+    acquisitionVerified: false,
+    uncertainty: 'Prompt delivery, model identity, generation settings, tools, retries and prior scorer exposure are unverified. Hashes identify the grading suite, not proven answer acquisition.' },
 });
 result.skippedChairs = skipped;
 
@@ -100,7 +113,5 @@ if (skipped.length) {
   console.log(`  \x1b[90mthese are excluded from the placement, not scored as zero\x1b[0m\n`);
 }
 
-fs.mkdirSync(path.join(ROOT, 'results', 'cards'), { recursive: true });
-fs.writeFileSync(path.join(ROOT, 'results', `${ID}.json`), JSON.stringify(result, null, 2));
-fs.writeFileSync(path.join(ROOT, 'results', 'cards', `${ID}.md`), renderResume(result));
-console.log(`  → results/${ID}.json  ·  results/cards/${ID}.md\n`);
+console.log('  Self-administered: answer acquisition and model settings are unverified.');
+console.log(`  → ${writeResult(result)}\n`);

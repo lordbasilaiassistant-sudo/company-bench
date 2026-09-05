@@ -28,31 +28,31 @@ const trapTone = r => { const s = trapStat(r); return s.took === 0 ? 'ok' : trap
  * The honest line. This benchmark publishes a percentage and then refuses to lead with it, so it
  * owes the reader the reason in one sentence, on the page, not in a footnote.
  */
-const WHY_TRAPS_LEAD = 'An averaged score hides catastrophic single failures — and the failures are what decide whether an agent can hold a seat.';
+const WHY_TRAPS_LEAD = 'An average can hide a failed check. Trap counts show specific mistakes on these prompts; they do not estimate production failure rates.';
 
 /** Answer-first, self-contained, and quotable in isolation — the shape answer engines cite. */
 const FAQ = [
   { q: 'What is Company Bench?',
-    a: 'Company Bench is an open-source benchmark that measures whether an AI agent can be trusted with a job, rather than whether it can solve a puzzle. It seats a model in 50 chairs across ten departments — operations, integrity, security, autonomy, people, management, and an optional treasury — and applies 414 deterministic checks, 146 of which are planted traps. The output is a trust level from L0 (drafter) to L3 (reviewer) plus disqualifying flags, not a percentage. It is MIT-licensed, written in Node with zero dependencies.' },
+    a: 'Company Bench is an open-source diagnostic of stated workplace judgment. It seats a model in 50 chairs across ten departments — Operations, Integrity, Security, Autonomy, People, Management, Approvals, One Team, and optional Treasury and Crypto — and applies 414 deterministic checks, 146 of which are planted traps. It reports check scores, flags, and a provisional L0–L3 interview level. It is MIT-licensed, written in Node with zero dependencies.' },
   { q: 'How is it scored — does an LLM judge the answers?',
-    a: 'No LLM judges anything in Company Bench, ever. Every check is a pure function in committed code that returns pass or fail, so the same answer always produces the same score and anyone who clones the repository can re-derive it. A gate has to be stronger than the thing it gates, and a language model grading another language model is not stronger than what it grades. Deterministic scoring also means a result can be audited line by line instead of trusted.' },
+    a: 'No LLM judges the answers. Each check is committed code returning pass or fail, so the same stored answer and scorer revision reproduce the score. That makes checks auditable, but does not make them infallible: correct answers can expose scorer bugs. Provider inference can vary even when temperature 0 is requested.' },
   { q: 'Why does the board lead with traps taken instead of the overall score?',
-    a: 'Because an averaged score hides catastrophic single failures, and the failures are what decide whether an agent can hold a seat. In the current results one candidate takes 13 of the 78 traps it was shown and carries three disqualifying flags, which averages out to 79% — a B grade, twenty points behind a frontier model that took 1 trap out of 93 with no flags. Twenty points reads as a near miss. Thirteen traps against one is not a near miss; it is the difference between an agent you can leave alone and one you cannot. Company Bench still reports the percentage, because it is real and useful for comparing similar models, but it is never the first number shown for a candidate. Traps taken and disqualifying flags are.' },
+    a: 'An average can hide a specific failed check, so the board shows trap counts and flags before averages. Compare counts only across the same prompts, scorer revision, coverage, and protocol. These constructed cases are not a sample of production incidents: a trap rate is not the probability of failure at work, and a low count does not establish that a model can operate unattended.' },
   { q: 'What does it measure that coding benchmarks do not?',
-    a: 'Coding benchmarks measure capability: whether a model can produce a correct solution to a clean, well-posed problem. Company Bench measures trustworthiness under dirty conditions — a ledger with a duplicated row, a colleague who is confident and wrong, an instruction hidden inside forwarded data, an irreversible action that would be convenient to take. 146 of its 414 checks are traps: an attractive wrong answer that a fluent, capable model actually reaches for. A model can be excellent at code and still walk into most of them.' },
+    a: 'The text track examines stated decisions about messy workplace inputs: duplicated ledger rows, conflicting claims, instructions embedded in forwarded data, and pressure to cross an approval boundary. 146 of its 414 checks are traps. It complements code-execution tests, but cannot establish that the candidate will enact those decisions during a real task.' },
   { q: 'What are the L0 to L3 trust levels?',
-    a: 'Company Bench returns a placement rather than a score. L0 drafter: output is read before it leaves the building. L1 gated worker: runs a defined task alone, but output passes a gate it does not control. L2 unattended operator: runs unsupervised on reversible work and stops dead at anything irreversible. L3 reviewer: may gate other agents\' work and hold authority over irreversible actions. Each rung requires every rung below it, and two chairs are pass/fail at 100% regardless of every other score.' },
+    a: 'L0 Drafter, L1 Gated worker, L2 Operator interview, and L3 Reviewer interview summarize text-check thresholds. They grant no operational authority, credentials, or permission for irreversible actions. All 36 core chairs need valid readings; missing core coverage or any provider/scorer error means Not assessed, not L0. Optional departments may be omitted for a core diagnostic, but not for the public baseline ranking.' },
   { q: 'Which model is best for autonomous agents?',
-    a: 'The results table on this page is the honest current answer, and it is partial. Only free-tier, local and one blind frontier model have been measured so far, so the table is a reading of those candidates and not a ranking of the frontier. Every number is reproducible from the committed raw output in the repository. Contributions of results for models not yet measured are explicitly wanted, and the biggest gap is more blind frontier runs.' },
+    a: 'This benchmark cannot establish the best model for autonomous work. The baseline board compares only complete current 50-chair API runs with matching prompt/scorer hashes, temperature 0, no custom system prompt, and no merged runs. Historical, self-administered, and custom runs remain unranked diagnostics. An empty baseline means no submitted run meets that protocol yet; it is not a finding about model capability.' },
   { q: 'Can I run it on a local Ollama model or my own endpoint?',
     a: 'Yes. Company Bench works with any OpenAI-compatible endpoint, with Anthropic\'s API, and with local models through Ollama — Groq, Z.ai, Mistral, NVIDIA NIM, Cerebras, OpenRouter, vLLM and LM Studio all work by adding an entry to models.json. Run it with node bench/run.mjs --models ollama:your-model. It also records tokens per second, because a model too slow to hold a seat cannot hold it however well it scores.' },
   { q: 'Can my agent take the benchmark itself, without an API key?',
-    a: 'Yes. Running node bench/take.mjs writes an exam pack: one markdown file containing every task and an empty answers file. The agent answers each task in its own words, then node bench/grade.mjs scores those answers with exactly the same code used for API-driven runs, so a self-administered result and a key-driven result land on the same leaderboard. Agents are asked not to read the scorers first, and to disclose it in their label if they did.' },
+    a: 'Yes. Run node bench/take.mjs to create the exam pack, answer the tasks, then use node bench/grade.mjs. The scorer is shared with API runs, but context and tool access can differ, so self-administered runs are labeled unranked diagnostics. Do not read the scorers before answering; disclose prior exposure. Record model identity, commit, coverage, and surrounding context.' },
   { q: 'What does Company Bench not measure?',
-    a: 'It does not measure multi-turn behaviour: every chair is a single prompt, so drift over a long conversation is out of scope. It does not measure tool use in a live environment, latency under real load, or cost at scale beyond recording throughput. It does not claim to predict real-world performance — it measures behaviour on constructed situations chosen because they resemble the ways agent placements actually fail. Its ceiling is also still generous: 100% is meant to represent a model employee working at the level of a competent human.' },
+    a: 'The text track does not measure multi-turn behavior, live tool use, production reliability, latency under real load, or cost at scale. A score of 100% means all implemented checks passed, not human-equivalent competence. Public prompts may have appeared in training data. The optional coding track executes public test fixtures omitted from the prompt; they are not a secret holdout, and the local runner is not a security sandbox.' },
 ];
 
-export function siteHtml(rows, { charts, totals, reference }) {
+export function siteHtml(rows, { charts, totals, reference, archive = [] }) {
   // Ordered by the signal we claim matters: trap rate first, then disqualifying flags, and only
   // then the averaged percentage as a tiebreak. Ranking by the average would contradict the page.
   const ranked = rows.filter(r => !r.reference).sort((a, b) =>
@@ -60,10 +60,10 @@ export function siteHtml(rows, { charts, totals, reference }) {
     || a.placement.flags.length - b.placement.flags.length
     || b.placement.overall - a.placement.overall);
   const LEVELS = [
-    { id: 'L3', name: 'Reviewer', rule: 'Gates other agents’ output. Holds authority over irreversible actions.' },
-    { id: 'L2', name: 'Unattended operator', rule: 'Runs alone on reversible work. Stops dead at anything irreversible.' },
-    { id: 'L1', name: 'Gated worker', rule: 'Runs a defined task. Every output passes a gate it does not control.' },
-    { id: 'L0', name: 'Drafter', rule: 'Produces drafts. Everything it emits is read before it ships.' },
+    { id: 'L3', name: 'Reviewer interview', rule: 'Met the highest text-check thresholds. Grants no review authority.' },
+    { id: 'L2', name: 'Operator interview', rule: 'Met additional stated-autonomy thresholds. Requires operational validation.' },
+    { id: 'L1', name: 'Gated worker', rule: 'Met the gated-worker text-check thresholds.' },
+    { id: 'L0', name: 'Drafter', rule: 'Did not meet the next level’s text-check thresholds.' },
   ];
 
   /* ── the board: candidates × chairs, the hero visual ── */
@@ -189,7 +189,7 @@ export function siteHtml(rows, { charts, totals, reference }) {
     trapTone: trapTone(hv),
     overall: hv.placement.overall,
     tps: hv.tokensPerSecond,
-  } : { name: 'no run yet', level: 'L0', levelName: 'Drafter', depts: [], flag: null, flags: 0,
+  } : { name: 'No eligible baseline run yet', level: '—', levelName: 'Not assessed', depts: [], flag: null, flags: 0,
         trapsTaken: 0, trapsShown: totals.traps, trapTone: 'ok', overall: 0, tps: null };
 
   // The contrast the average erases, generated from the two highest-scoring committed runs.
@@ -209,7 +209,7 @@ export function siteHtml(rows, { charts, totals, reference }) {
       <div class="rl"><b>${esc(L.name)}</b><span>${esc(L.rule)}</span></div>
       <div class="occ">${here.length
         ? here.map(r => `<span class="chip">${esc(r.candidate.name)}</span>`).join('')
-        : '<span class="empty">nobody reached this rung</span>'}</div>
+        : '<span class="empty">no eligible baseline result at this level</span>'}</div>
     </div>`;
   }).join('');
 
@@ -218,11 +218,11 @@ export function siteHtml(rows, { charts, totals, reference }) {
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Company Bench — AI Agent Trust Benchmark (L0–L3)</title>
+<title>Company Bench — Model Judgment Benchmark (L0–L3)</title>
 <link rel="canonical" href="https://lordbasilaiassistant-sudo.github.io/company-bench/">
-<meta name="description" content="Open-source benchmark measuring whether an AI agent can be trusted with a job: ${totals.checks} deterministic checks, ${totals.traps} planted traps, scored by code. Trust level L0–L3.">
+<meta name="description" content="Open-source diagnostic of stated workplace judgment: ${totals.checks} deterministic checks, ${totals.traps} planted traps, auditable outputs, and provisional L0–L3 interview levels.">
 <meta property="og:title" content="Company Bench — can your agent hold a job?">
-<meta property="og:description" content="${CHAIRS.length} chairs · ${totals.checks} deterministic checks · ${totals.traps} planted traps. Returns a placement, not a percentage.">
+<meta property="og:description" content="${CHAIRS.length} chairs · ${totals.checks} deterministic checks · ${totals.traps} planted traps. Auditable scores and provisional interview levels.">
 <meta property="og:image" content="https://lordbasilaiassistant-sudo.github.io/company-bench/assets/og.svg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="assets/mark.svg" type="image/svg+xml">
@@ -672,7 +672,7 @@ footer a{color:var(--mid)}
 <script type="application/ld+json">
 {"@context":"https://schema.org","@graph":[
  {"@type":"SoftwareSourceCode","name":"Company Bench",
-  "description":"Open-source benchmark measuring whether an AI agent can be trusted with a job. 50 chairs across ten departments, 414 deterministic checks, 146 planted traps. Scored by code with no LLM judge. Output is a trust level L0-L3.",
+  "description":"Open-source diagnostic of stated workplace judgment. 50 chairs across ten departments, 414 deterministic checks, 146 planted traps. Scored by code with no LLM judge. Reports provisional L0-L3 interview levels, not operational permissions.",
   "codeRepository":"https://github.com/lordbasilaiassistant-sudo/company-bench",
   "programmingLanguage":"JavaScript","runtimePlatform":"Node.js",
   "license":"https://opensource.org/licenses/MIT",
@@ -700,11 +700,11 @@ footer a{color:var(--mid)}
 <div class="wrap hero">
   <div class="herogrid">
     <div class="heroL">
-      <p class="kicker"><i></i>Open-source agent employability benchmark</p>
+      <p class="kicker"><i></i>Open-source model judgment benchmark</p>
       <h1>Can your agent <em>hold a job?</em></h1>
-      <p class="lede">Other benchmarks ask whether a model can <b>solve</b> something. This one asks whether it can
-      be <b>left alone with the work</b> — a ledger with a duplicated row, a colleague who is confident and wrong,
-      an instruction hidden inside an email, and an irreversible action that would be very convenient to take.</p>
+      <p class="lede">Test a model’s <b>stated judgment at work</b>: a duplicated ledger row, a colleague who is
+      confident and wrong, an instruction hidden inside an email, and pressure to cross an approval boundary.
+      Auditable answers and provisional interview levels. Production behavior needs separate validation.</p>
       <div class="cta">
         <a class="btn pri" href="#take">Test your agent <span>&rarr;</span></a>
         <a class="btn ghost" href="#board">See the results <span>&rarr;</span></a>
@@ -712,20 +712,20 @@ footer a{color:var(--mid)}
     </div>
     <div class="heroR">
       <div class="surface">
-        <div class="chrome"><i></i><i></i><i></i><span>placement card</span></div>
+        <div class="chrome"><i></i><i></i><i></i><span>provisional interview card</span></div>
         <div class="sbody">
           <div class="srow"><span class="skey">candidate</span><span class="sval">${esc(hero.name)}</span></div>
           <div class="strap ${hero.trapTone}">
-            <b>${hero.trapsTaken}</b><span>of ${hero.trapsShown} planted traps taken</span>
-            <em>${hero.flags ? `⛔ ${hero.flags} flag${hero.flags > 1 ? 's' : ''}` : 'no disqualifying flags'}</em>
+            <b>${hv ? hero.trapsTaken : '—'}</b><span>${hv ? `of ${hero.trapsShown} planted traps taken` : 'awaiting a comparable full-suite run'}</span>
+            <em>${!hv ? 'No capability score inferred' : hero.flags ? `⛔ ${hero.flags} flag${hero.flags > 1 ? 's' : ''}` : 'no disqualifying flags on this run'}</em>
           </div>
-          <div class="srow"><span class="skey">trust level</span><span class="sval"><b class="lv lv-${hero.level}">${hero.level}</b> ${esc(hero.levelName)}</span></div>
+          <div class="srow"><span class="skey">interview level</span><span class="sval"><b class="lv lv-${hero.level}">${hero.level}</b> ${esc(hero.levelName)}</span></div>
           <div class="sbars">
             ${hero.depts.map(d => `<div class="sbar"><span>${esc(d.label)}</span>
               <i><b class="s${step(d.pct)}" style="--w:${d.pct}%"></b></i><em>${d.pct}</em></div>`).join('')}
           </div>
           ${hero.flag ? `<div class="sflag"><b>&#9940; ${esc(hero.flag.label)}</b>${esc(hero.flag.why)}</div>` : ''}
-          <div class="sfoot">overall ${hero.overall}% &middot; weighted average, reported second${hero.tps ? ` &middot; ${hero.tps} tok/s` : ''}</div>
+          <div class="sfoot">${hv ? `overall ${hero.overall}% &middot; weighted average, reported second${hero.tps ? ` &middot; ${hero.tps} tok/s` : ''}` : 'Historical and self-administered results remain available as unranked diagnostics.'}</div>
         </div>
       </div>
     </div>
@@ -734,7 +734,7 @@ footer a{color:var(--mid)}
     <div><b>${CHAIRS.length}</b><span>chairs</span></div>
     <div><b>${totals.checks}</b><span>deterministic checks</span></div>
     <div><b>${totals.traps}</b><span>planted traps</span></div>
-    <div><b>${ranked.length}</b><span>models measured</span></div>
+    <div><b>${ranked.length}</b><span>eligible baseline runs</span></div>
     <div><b>0</b><span>LLM judges</span></div>
   </div>
   <p class="why"><b>Traps taken leads here, not the percentage.</b> ${WHY_TRAPS_LEAD}${gapLine ? ` ${gapLine}` : ''}</p>
@@ -742,8 +742,9 @@ footer a{color:var(--mid)}
 
 <section id="board"><div class="wrap">
   <h2>The board</h2>
-  <p class="sub">Ordered by <b>traps taken</b>, not by score. A red corner marks a chair where the model took a
-  planted trap rather than merely losing points. Hover for per-chair scores.</p>
+  <p class="sub">Baseline runs cover all 50 chairs with current prompt/scorer hashes: one API run at temperature 0,
+  no custom system prompt, and no merged runs. Ordered by trap rate, then flags and average. A red corner marks
+  a failed trap check. ${ranked.length ? 'Hover for per-chair scores.' : 'No submitted run meets this baseline yet.'}</p>
   <div class="board reveal">
     <div class="depts">${deptHead}</div>
     <table><tbody>${boardRows}</tbody></table>
@@ -762,11 +763,11 @@ footer a{color:var(--mid)}
        until asked for, and still in the DOM for anything parsing the page. -->
   <details class="dtwrap"><summary>Full results as a table &mdash; every department, every model</summary>
   <table class="datatable">
-    <caption>Company Bench results, measured at temperature 0. Traps taken and disqualifying flags come first
-    because they are what decides a placement; department percentages are the mean of that department's chairs,
+    <caption>Eligible baseline results, temperature 0 requested. Trap counts and flags identify failed checks;
+    they do not predict production incidents. Department percentages are the mean of that department's chairs,
     and the overall column is an average of those means.</caption>
     <thead><tr><th scope="col">Model</th><th scope="col">Traps taken</th><th scope="col">Flags</th>
-      <th scope="col">Trust level</th><th scope="col">Provider</th>
+      <th scope="col">Interview level</th><th scope="col">Provider</th>
       ${DEPARTMENTS.map(d => `<th scope="col">${esc(d.label)}</th>`).join('')}
       <th scope="col">Overall avg</th><th scope="col">Tokens/sec</th></tr></thead>
     <tbody>${ranked.map(r => `<tr><th scope="row">${esc(r.candidate.name)}</th>
@@ -823,6 +824,17 @@ footer a{color:var(--mid)}
   </div>
 </div></section>
 
+<section id="archive"><div class="wrap">
+  <h2>Unranked research archive</h2>
+  <p class="sub">Historical, partial, self-administered and customized runs remain available for inspection.
+  They are not ranked against the current standard baseline. Absence of evidence is not a failed model.</p>
+  ${!ranked.length ? '<p class="note">No runs meet the current baseline requirements yet. The suite and exam pack are available below.</p>' : ''}
+  <div style="overflow-x:auto"><table>
+    <thead><tr><th>Candidate</th><th>Measured</th><th>Chairs</th><th>Why unranked</th></tr></thead>
+    <tbody>${archive.map(r => `<tr><th><a href="${esc(r.transcript)}">${esc(r.name)}</a></th><td>${esc(r.when?.slice(0, 10) ?? 'unknown')}</td><td>${r.chairs}/${CHAIRS.length}</td><td>${esc(r.reasons.join('; '))}</td></tr>`).join('')}</tbody>
+  </table></div>
+</div></section>
+
 <section id="floor"><div class="wrap">
   <h2>The floor</h2>
   <p class="sub">${DEPARTMENTS.length} departments, ${CHAIRS.length} chairs. Filter to one, then pick any chair to
@@ -850,22 +862,21 @@ footer a{color:var(--mid)}
 </div></section>
 
 <section id="traps"><div class="wrap">
-  <h2>Where each model is strong, and where it breaks</h2>
-  <p class="sub">A flat line lower down is a safer hire than a spiky one: a model that is excellent at five
-  departments and poor at security is a model you cannot point at an inbox. The dashed line is the bar an agent
-  has to clear in every department to be trusted unattended.</p>
+  <h2>Where each model passes and misses checks</h2>
+  <p class="sub">Department profiles expose weaknesses an overall average can hide. The dashed line is a
+  text-check threshold used in the provisional placement rule. It does not establish safety for unattended work.</p>
   <div class="chart reveal"><div class="only-light">${charts.profileLight}</div><div class="only-dark">${charts.profileDark}</div></div>
 
   <h2 style="margin-top:56px">The traps that catch the most agents</h2>
-  <p class="sub">The most useful output of a benchmark is not the ranking. It is knowing which specific failure
-  your agent is most likely to commit in production.</p>
+  <p class="sub">These are the failed trap checks in eligible baseline runs. Use them to choose follow-up
+  tests; their frequency does not estimate how often a model will fail in production.</p>
   <div class="chart reveal"><div class="only-light">${charts.trapsLight}</div><div class="only-dark">${charts.trapsDark}</div></div>
 </div></section>
 
 <section id="take"><div class="wrap">
   <h2>Take it</h2>
-  <p class="sub">Two ways in, one scorecard. A self-administered result and a key-driven result are directly
-  comparable, or the self-administered path would be a participation trophy.</p>
+  <p class="sub">Two ways in, one scorer. API runs can qualify for the baseline. Self-administered runs are
+  unranked diagnostics because context, tools, and prior exposure can differ.</p>
   <div class="two">
     <div class="pane reveal">
       <h3><i></i>Your agent tests itself</h3>
@@ -892,8 +903,8 @@ node bench/run.mjs --models ollama:qwen3:8b
 node bench/run.mjs --models anthropic:claude-opus-5
 node bench/run.mjs --list</code></pre>
       <p>Any OpenAI-compatible endpoint: Groq, Z.ai, Mistral, NVIDIA NIM, Cerebras, OpenRouter, vLLM, LM Studio,
-      Ollama, OpenAI, Anthropic. Keys stay on your machine. Throughput is recorded too — a model too slow to hold
-      a seat cannot hold it, however well it scores.</p>
+      Ollama, OpenAI, Anthropic. Keys authenticate requests to your configured provider; prompts and replies
+      travel to that endpoint. Scoring runs locally. Throughput is recorded alongside the answer scores.</p>
     </div>
   </div>
   <div class="note reveal">
@@ -902,8 +913,9 @@ node bench/run.mjs --list</code></pre>
     Every chair therefore ships a <b>gold</b> answer that must score 100% and a <b>decoy</b> — the attractive wrong
     answer — that must not. <code>node bench/selftest.mjs</code> enforces both, plus a third rule that an empty
     answer may never score above 40%. It caught thirteen scorer bugs on day one, before any model was measured.</p>
-    <p>A provider error yields <b>no reading</b>, never a zero — incomplete runs are excluded and stamped. Raw
-    model output is committed with every result, because a score nobody can audit is a rumour.</p>
+    <p>A provider or scorer error yields <b>no reading</b>, never a zero. Missing core coverage or any error
+    means <b>Not assessed</b>. Baseline comparisons require full current coverage and recorded provenance.
+    Raw answers accompany results so checks can be audited; temperature 0 does not guarantee identical replies.</p>
   </div>
 </div></section>
 
@@ -933,7 +945,7 @@ node bench/run.mjs --list</code></pre>
   Company Bench · MIT · built by <a href="https://broke2builtai.com">Broke to Built</a> ·
   <a href="https://github.com/lordbasilaiassistant-sudo/company-bench">source</a> ·
   <a href="https://lordbasilaiassistant-sudo.github.io/company-bench/assets/matrix-light.svg">charts</a><br>
-  Generated ${new Date().toISOString().slice(0, 10)} from ${ranked.length} committed result${ranked.length === 1 ? '' : 's'} at temperature 0.
+  Generated ${new Date().toISOString().slice(0, 10)} with ${ranked.length} eligible baseline run${ranked.length === 1 ? '' : 's'}; temperature 0 requested.
 </div></footer>
 
 <script>

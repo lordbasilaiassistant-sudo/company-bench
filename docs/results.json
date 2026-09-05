@@ -2,7 +2,7 @@
   "benchmark": "Company Bench",
   "url": "https://lordbasilaiassistant-sudo.github.io/company-bench/",
   "repository": "https://github.com/lordbasilaiassistant-sudo/company-bench",
-  "generated": "2026-08-12T17:04:13.902Z",
+  "generated": "2026-09-05T23:55:37.044Z",
   "chairs": 50,
   "departments": [
     "operations",
@@ -20,262 +20,289 @@
   "traps": 146,
   "scoring": "deterministic; no LLM judge",
   "trustLevels": {
-    "L0": "drafter",
-    "L1": "gated worker",
-    "L2": "unattended operator",
-    "L3": "reviewer"
+    "L0": "drafter interview",
+    "L1": "gated worker interview",
+    "L2": "operator interview",
+    "L3": "reviewer interview"
   },
-  "results": [
+  "promptHash": "95283ba9e592f68d2a258bd0a1cb4b33de996f14337be45a45a39f8ff86f31a1",
+  "scorerHash": "114f80efd6ac5f99f929fb8290f4d7260915c3e588fd7e680cc10b09476684af",
+  "comparison": "All current chairs, API baseline, temperature 0, no custom system prompt or merged runs. Interview results do not grant production authority.",
+  "archive": [
     {
-      "model": "GPT-OSS 120B",
-      "provider": "Groq",
-      "modelId": "openai/gpt-oss-120b",
-      "trustLevel": "L1",
-      "overall": 82,
-      "departments": {
-        "operations": 93,
-        "integrity": 83,
-        "security": 57,
-        "autonomy": 84,
-        "people": 97,
-        "treasury": 92,
-        "management": 59,
-        "approvals": 83,
-        "crypto": 92
-      },
-      "flags": [
-        "NEVER HOLDS A KEY",
-        "NEEDS A LEASH",
-        "NO UNTRUSTED INPUT"
-      ],
-      "trapsTaken": 18,
-      "trapsTotal": 119,
-      "tokensPerSecond": 248.1,
+      "id": "glm-flash",
+      "name": "GLM 4.5 Flash",
+      "when": "2026-09-05T23:54:14.172Z",
       "mode": "api",
-      "measured": "2026-08-12"
+      "chairs": 50,
+      "reasons": [
+        "not all current chairs measured",
+        "redacted transcript cannot be independently rescored"
+      ],
+      "transcript": "https://github.com/lordbasilaiassistant-sudo/company-bench/blob/main/results/runs/glm-flash/48aada9b-756c-4611-9a8e-914fc6e6af72.json"
     },
     {
-      "model": "GLM 4.5 Flash",
-      "provider": "Z.ai",
-      "modelId": "glm-4.5-flash",
-      "trustLevel": "L1",
-      "overall": 76,
-      "departments": {
-        "operations": 83,
-        "integrity": 71,
-        "security": 62,
-        "autonomy": 74,
-        "people": 93,
-        "management": 75,
-        "treasury": 81,
-        "approvals": 67,
-        "crypto": 79
-      },
-      "flags": [
-        "NEVER A GATE",
-        "NEVER HOLDS A KEY",
-        "NEEDS A LEASH",
-        "NO UNTRUSTED INPUT"
-      ],
-      "trapsTaken": 24,
-      "trapsTotal": 119,
-      "tokensPerSecond": 27.7,
+      "id": "glm-flash",
+      "name": "GLM 4.5 Flash",
+      "when": "2026-09-05T23:54:14.172Z",
       "mode": "api",
-      "measured": "2026-08-12"
+      "chairs": 50,
+      "reasons": [
+        "not all current chairs measured",
+        "missing or different scorer version",
+        "redacted transcript cannot be independently rescored"
+      ],
+      "transcript": "https://github.com/lordbasilaiassistant-sudo/company-bench/blob/main/results/runs/glm-flash/81b36b8f-01fa-4134-a9de-a86d7b6528e1.json"
     },
     {
-      "model": "Llama 3.3 70B",
-      "provider": "Groq",
-      "modelId": "llama-3.3-70b-versatile",
-      "trustLevel": "L0",
-      "overall": 75,
-      "departments": {
-        "operations": 78,
-        "integrity": 54,
-        "security": 66,
-        "autonomy": 72,
-        "people": 100,
-        "management": 72,
-        "treasury": 77,
-        "approvals": 77,
-        "crypto": 81
-      },
-      "flags": [
-        "NEVER A GATE",
-        "NEVER HOLDS A KEY",
-        "NEEDS A LEASH",
-        "NO UNTRUSTED INPUT"
-      ],
-      "trapsTaken": 23,
-      "trapsTotal": 119,
-      "tokensPerSecond": 70.8,
+      "id": "glm-flash",
+      "name": "GLM 4.5 Flash",
+      "when": "2026-09-05T23:54:14.172Z",
       "mode": "api",
-      "measured": "2026-08-12"
+      "chairs": 50,
+      "reasons": [
+        "not all current chairs measured",
+        "missing or different scorer version",
+        "redacted transcript cannot be independently rescored"
+      ],
+      "transcript": "https://github.com/lordbasilaiassistant-sudo/company-bench/blob/main/results/runs/glm-flash/79b665ae-6463-4fa4-98bf-af3d9172b5f7.json"
     },
     {
-      "model": "Defiant Fable 9B (abliterated)",
-      "provider": "Ollama (local)",
-      "modelId": "hf.co/DavidAU/Qwen3.5-9B-The-Defiant-Fable-Uncensored-Heretic-NEO-IMATRIX-MAX-MTP-GGUF:IQ4_XS",
-      "trustLevel": "L1",
-      "overall": 74,
-      "departments": {
-        "operations": 79,
-        "integrity": 74,
-        "security": 69,
-        "autonomy": 68,
-        "people": 86,
-        "management": 61,
-        "approvals": 73,
-        "treasury": 76,
-        "crypto": 77
-      },
-      "flags": [
-        "NEVER HOLDS A KEY",
-        "NEEDS A LEASH",
-        "NO UNTRUSTED INPUT"
-      ],
-      "trapsTaken": 31,
-      "trapsTotal": 119,
-      "tokensPerSecond": 17.9,
+      "id": "glm-flash",
+      "name": "GLM 4.5 Flash",
+      "when": "2026-09-05T23:40:45.752Z",
       "mode": "api",
-      "measured": "2026-08-12"
+      "chairs": 50,
+      "reasons": [
+        "not all current chairs measured",
+        "missing or different prompt version",
+        "missing or different scorer version",
+        "not an API baseline",
+        "non-baseline or unknown temperature",
+        "redacted transcript cannot be independently rescored"
+      ],
+      "transcript": "https://github.com/lordbasilaiassistant-sudo/company-bench/blob/main/results/runs/glm-flash/previous-f7a26891a929d85e046226e97ec0919afd86d7895bf2f08ecc51122546025d6a.json"
     },
     {
-      "model": "Mistral Small",
-      "provider": "Mistral",
-      "modelId": "mistral-small-latest",
-      "trustLevel": "L1",
-      "overall": 73,
-      "departments": {
-        "operations": 83,
-        "integrity": 66,
-        "security": 67,
-        "autonomy": 64,
-        "people": 73,
-        "management": 77,
-        "treasury": 84,
-        "approvals": 68,
-        "crypto": 75
-      },
-      "flags": [
-        "NEVER A GATE",
-        "NEVER HOLDS A KEY",
-        "NEEDS A LEASH",
-        "NO UNTRUSTED INPUT"
-      ],
-      "trapsTaken": 37,
-      "trapsTotal": 119,
-      "tokensPerSecond": 94.5,
+      "id": "glm-flash--sys-sys-old-31pyc8",
+      "name": "GLM 4.5 Flash (+sys-old-31pyc8)",
+      "when": "2026-08-12T18:00:57.599Z",
       "mode": "api",
-      "measured": "2026-08-12"
+      "chairs": 50,
+      "reasons": [
+        "not all current chairs measured",
+        "missing or different prompt version",
+        "missing or different scorer version",
+        "not an API baseline",
+        "custom system prompt",
+        "non-baseline or unknown temperature",
+        "redacted transcript cannot be independently rescored"
+      ],
+      "transcript": "https://github.com/lordbasilaiassistant-sudo/company-bench/blob/main/results/glm-flash--sys-sys-old-31pyc8.json"
     },
     {
-      "model": "Qwythos 9B (function-calling)",
-      "provider": "Ollama (local)",
-      "modelId": "hf.co/empero-ai/Qwythos-9B-Claude-Mythos-5-1M-GGUF:Q4_K_M",
-      "trustLevel": "L1",
-      "overall": 73,
-      "departments": {
-        "operations": 74,
-        "integrity": 77,
-        "security": 57,
-        "autonomy": 71,
-        "people": 83,
-        "management": 67,
-        "approvals": 67,
-        "treasury": 80,
-        "crypto": 77
-      },
-      "flags": [
-        "NEVER HOLDS A KEY",
-        "NEEDS A LEASH",
-        "NO UNTRUSTED INPUT"
-      ],
-      "trapsTaken": 30,
-      "trapsTotal": 119,
-      "tokensPerSecond": 32.4,
+      "id": "glm-flash--sys-sys-new-2jegtk",
+      "name": "GLM 4.5 Flash (+sys-new-2jegtk)",
+      "when": "2026-08-12T17:52:47.905Z",
       "mode": "api",
-      "measured": "2026-08-12"
+      "chairs": 50,
+      "reasons": [
+        "not all current chairs measured",
+        "missing or different prompt version",
+        "missing or different scorer version",
+        "not an API baseline",
+        "custom system prompt",
+        "non-baseline or unknown temperature",
+        "redacted transcript cannot be independently rescored"
+      ],
+      "transcript": "https://github.com/lordbasilaiassistant-sudo/company-bench/blob/main/results/glm-flash--sys-sys-new-2jegtk.json"
     },
     {
-      "model": "Qwen3 Coder 30B A3B",
-      "provider": "Ollama (local)",
-      "modelId": "hf.co/unsloth/Qwen3-Coder-30B-A3B-Instruct-GGUF:IQ4_XS",
-      "trustLevel": "L1",
-      "overall": 70,
-      "departments": {
-        "operations": 72,
-        "integrity": 69,
-        "security": 58,
-        "autonomy": 76,
-        "people": 83,
-        "management": 66,
-        "approvals": 60,
-        "treasury": 85,
-        "crypto": 60
-      },
-      "flags": [
-        "NEVER HOLDS A KEY",
-        "NEEDS A LEASH",
-        "NO UNTRUSTED INPUT"
-      ],
-      "trapsTaken": 39,
-      "trapsTotal": 119,
-      "tokensPerSecond": 25.7,
+      "id": "cerebras-gemma4-31b",
+      "name": "Gemma 4 31B",
+      "when": "2026-08-12T17:03:46.678Z",
       "mode": "api",
-      "measured": "2026-08-12"
+      "chairs": 35,
+      "reasons": [
+        "not all current chairs measured",
+        "missing or different prompt version",
+        "missing or different scorer version",
+        "not an API baseline",
+        "non-baseline or unknown temperature"
+      ],
+      "transcript": "https://github.com/lordbasilaiassistant-sudo/company-bench/blob/main/results/cerebras-gemma4-31b.json"
     },
     {
-      "model": "Josiefied Qwen3 8B",
-      "provider": "Ollama (local)",
-      "modelId": "hf.co/mradermacher/Josiefied-Qwen3-8B-abliterated-v1-i1-GGUF:Q4_K_M",
-      "trustLevel": "L0",
-      "overall": 64,
-      "departments": {
-        "operations": 53,
-        "integrity": 68,
-        "security": 53,
-        "autonomy": 66,
-        "people": 77,
-        "management": 56,
-        "treasury": 73
-      },
-      "flags": [
-        "NEVER HOLDS A KEY",
-        "NEEDS A LEASH",
-        "NO UNTRUSTED INPUT"
-      ],
-      "trapsTaken": 25,
-      "trapsTotal": 78,
-      "tokensPerSecond": 24.5,
+      "id": "cerebras-glm47",
+      "name": "GLM 4.7",
+      "when": "2026-08-12T17:03:46.128Z",
       "mode": "api",
-      "measured": "2026-08-12"
+      "chairs": 35,
+      "reasons": [
+        "not all current chairs measured",
+        "missing or different prompt version",
+        "missing or different scorer version",
+        "not an API baseline",
+        "non-baseline or unknown temperature"
+      ],
+      "transcript": "https://github.com/lordbasilaiassistant-sudo/company-bench/blob/main/results/cerebras-glm47.json"
     },
     {
-      "model": "LFM2.5 2.6B",
-      "provider": "Ollama (local)",
-      "modelId": "hf.co/Abiray/LFM2.5-2.6B-Heretic-Abliterated-GGUF:Q8_0",
-      "trustLevel": "L0",
-      "overall": 63,
-      "departments": {
-        "operations": 54,
-        "integrity": 74,
-        "security": 54,
-        "autonomy": 59,
-        "people": 81,
-        "management": 60,
-        "treasury": 61
-      },
-      "flags": [
-        "NEVER HOLDS A KEY",
-        "NEEDS A LEASH",
-        "NO UNTRUSTED INPUT"
-      ],
-      "trapsTaken": 40,
-      "trapsTotal": 93,
-      "tokensPerSecond": 67.7,
+      "id": "nim-llama70b",
+      "name": "Llama 3.3 70B",
+      "when": "2026-08-12T17:03:45.447Z",
       "mode": "api",
-      "measured": "2026-08-12"
+      "chairs": 35,
+      "reasons": [
+        "not all current chairs measured",
+        "missing or different prompt version",
+        "missing or different scorer version",
+        "not an API baseline",
+        "non-baseline or unknown temperature",
+        "redacted transcript cannot be independently rescored"
+      ],
+      "transcript": "https://github.com/lordbasilaiassistant-sudo/company-bench/blob/main/results/nim-llama70b.json"
+    },
+    {
+      "id": "ollama-qwen3-coder-30b",
+      "name": "Qwen3 Coder 30B A3B",
+      "when": "2026-08-12T16:33:04.655Z",
+      "mode": "api",
+      "chairs": 45,
+      "reasons": [
+        "not all current chairs measured",
+        "missing or different prompt version",
+        "missing or different scorer version",
+        "not an API baseline",
+        "non-baseline or unknown temperature",
+        "redacted transcript cannot be independently rescored"
+      ],
+      "transcript": "https://github.com/lordbasilaiassistant-sudo/company-bench/blob/main/results/ollama-qwen3-coder-30b.json"
+    },
+    {
+      "id": "ollama-defiant-9b",
+      "name": "Defiant Fable 9B (abliterated)",
+      "when": "2026-08-12T16:32:33.995Z",
+      "mode": "api",
+      "chairs": 45,
+      "reasons": [
+        "not all current chairs measured",
+        "missing or different prompt version",
+        "missing or different scorer version",
+        "not an API baseline",
+        "non-baseline or unknown temperature",
+        "redacted transcript cannot be independently rescored"
+      ],
+      "transcript": "https://github.com/lordbasilaiassistant-sudo/company-bench/blob/main/results/ollama-defiant-9b.json"
+    },
+    {
+      "id": "ollama-qwythos-9b-fc",
+      "name": "Qwythos 9B (function-calling)",
+      "when": "2026-08-12T16:32:11.902Z",
+      "mode": "api",
+      "chairs": 45,
+      "reasons": [
+        "not all current chairs measured",
+        "missing or different prompt version",
+        "missing or different scorer version",
+        "not an API baseline",
+        "non-baseline or unknown temperature",
+        "redacted transcript cannot be independently rescored"
+      ],
+      "transcript": "https://github.com/lordbasilaiassistant-sudo/company-bench/blob/main/results/ollama-qwythos-9b-fc.json"
+    },
+    {
+      "id": "mistral-small",
+      "name": "Mistral Small",
+      "when": "2026-08-12T16:31:54.400Z",
+      "mode": "api",
+      "chairs": 45,
+      "reasons": [
+        "not all current chairs measured",
+        "missing or different prompt version",
+        "missing or different scorer version",
+        "not an API baseline",
+        "non-baseline or unknown temperature"
+      ],
+      "transcript": "https://github.com/lordbasilaiassistant-sudo/company-bench/blob/main/results/mistral-small.json"
+    },
+    {
+      "id": "groq-gptoss120b",
+      "name": "GPT-OSS 120B",
+      "when": "2026-08-12T16:31:30.711Z",
+      "mode": "api",
+      "chairs": 45,
+      "reasons": [
+        "not all current chairs measured",
+        "missing or different prompt version",
+        "missing or different scorer version",
+        "not an API baseline",
+        "non-baseline or unknown temperature"
+      ],
+      "transcript": "https://github.com/lordbasilaiassistant-sudo/company-bench/blob/main/results/groq-gptoss120b.json"
+    },
+    {
+      "id": "groq-llama70b",
+      "name": "Llama 3.3 70B",
+      "when": "2026-08-12T16:31:29.245Z",
+      "mode": "api",
+      "chairs": 45,
+      "reasons": [
+        "not all current chairs measured",
+        "missing or different prompt version",
+        "missing or different scorer version",
+        "not an API baseline",
+        "non-baseline or unknown temperature"
+      ],
+      "transcript": "https://github.com/lordbasilaiassistant-sudo/company-bench/blob/main/results/groq-llama70b.json"
+    },
+    {
+      "id": "ollama-qwythos-9b",
+      "name": "Huihui Qwythos 9B",
+      "when": "2026-08-12T00:52:41.227Z",
+      "mode": "api",
+      "chairs": 25,
+      "reasons": [
+        "not all current chairs measured",
+        "missing or different prompt version",
+        "missing or different scorer version",
+        "not an API baseline",
+        "non-baseline or unknown temperature",
+        "redacted transcript cannot be independently rescored"
+      ],
+      "transcript": "https://github.com/lordbasilaiassistant-sudo/company-bench/blob/main/results/ollama-qwythos-9b.json"
+    },
+    {
+      "id": "ollama-lfm2-2.6b",
+      "name": "LFM2.5 2.6B",
+      "when": "2026-08-12T00:52:41.221Z",
+      "mode": "api",
+      "chairs": 32,
+      "reasons": [
+        "not all current chairs measured",
+        "missing or different prompt version",
+        "missing or different scorer version",
+        "not an API baseline",
+        "non-baseline or unknown temperature",
+        "redacted transcript cannot be independently rescored"
+      ],
+      "transcript": "https://github.com/lordbasilaiassistant-sudo/company-bench/blob/main/results/ollama-lfm2-2.6b.json"
+    },
+    {
+      "id": "ollama-josie-qwen3-8b",
+      "name": "Josiefied Qwen3 8B",
+      "when": "2026-08-12T00:52:41.214Z",
+      "mode": "api",
+      "chairs": 29,
+      "reasons": [
+        "not all current chairs measured",
+        "missing or different prompt version",
+        "missing or different scorer version",
+        "not an API baseline",
+        "non-baseline or unknown temperature"
+      ],
+      "transcript": "https://github.com/lordbasilaiassistant-sudo/company-bench/blob/main/results/ollama-josie-qwen3-8b.json"
     }
-  ]
+  ],
+  "results": []
 }

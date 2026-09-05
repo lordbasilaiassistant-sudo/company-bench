@@ -9,7 +9,7 @@
  *   node bench/coding/run-coding.mjs --list
  *
  * A coding score that was not executed is a vibe. Every task here is graded by RUNNING the
- * model's code against tests it never sees, in a subprocess with a hard timeout. Tasks are
+ * model's code against published tests, in an unsandboxed subprocess. Tasks are
  * weighted, because a wrong AMM price and a wrong string reverse are not the same mistake.
  */
 import fs from 'node:fs';
@@ -17,7 +17,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import TASKS from './tasks.mjs';
 import { extractCode } from './extract.mjs';
-import { gradeTask, python } from './exec.mjs';
+import { gradeTask, python, EXECUTION_WARNING } from './exec.mjs';
 import { chat, loadRegistry, resolveModel } from '../lib/transport.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -34,7 +34,7 @@ const listOf = n => (flag(n) ?? '').split(',').map(s => s.trim()).filter(Boolean
 // model in the registry". Launched in a loop, that ran the whole track against seven free-tier API
 // providers for two hours, burning quota, hanging on rate-limit backoff, and never writing a file.
 // Unknown flags now stop the run before a single call is made.
-const KNOWN_FLAGS = new Set(['models', 'tasks', 'answers', 'label', 'id', 'out', 'take', 'list', 'all']);
+const KNOWN_FLAGS = new Set(['models', 'tasks', 'answers', 'label', 'id', 'out', 'take', 'list', 'all', 'allow-unsafe-execution']);
 const ALIASES = { model: 'models', task: 'tasks', 'answer': 'answers' };
 for (const a of argv) {
   if (!a.startsWith('--')) continue;
@@ -47,6 +47,10 @@ for (const a of argv) {
 }
 
 const only = listOf('tasks');
+if (!has('list') && !has('take')) {
+  console.error(EXECUTION_WARNING);
+  if (!has('allow-unsafe-execution')) process.exit(2);
+}
 const tasks = only.length ? TASKS.filter(t => only.includes(t.id)) : TASKS;
 if (only.length) {
   const unknown = only.filter(id => !TASKS.some(t => t.id === id));
@@ -71,14 +75,15 @@ if (has('take')) {
   const md = [
     '# Company Bench — executed coding track',
     '',
-    `${tasks.length} tasks. Your code is executed against hidden tests you will not see. A function that`,
+    `${tasks.length} tasks. Your code is executed against published tests omitted from this pack. A function that`,
     'looks right and returns the wrong number fails here, which is the whole point of executing it.',
     '',
     '## How to take it',
     '',
     '1. Answer each task with the code block it asks for, and nothing else.',
     '2. Put your complete raw reply for each task into `coding-answers.json` under its task id.',
-    '3. Run: `node bench/coding/run-coding.mjs --answers bench-pack/coding-answers.json --label "Your Model"`',
+    '3. Review the code and prepare a disposable environment without credentials. Execution is unsandboxed.',
+    '4. Run: `node bench/coding/run-coding.mjs --allow-unsafe-execution --answers bench-pack/coding-answers.json --label "Your Model"`',
     '',
     'Do not read `bench/coding/tasks.mjs` first — the hidden tests are in it.',
     '',
@@ -127,7 +132,7 @@ async function answersFromModel(model) {
       continue;
     }
     const code = extractCode(answers[t.id] ?? '', t.lang);
-    const g = await gradeTask(t, code);
+    const g = await gradeTask(t, code, { allowUnsafeExecution: has('allow-unsafe-execution') });
     g.code = code;                       // the exact source that was executed — see note at persist time
     reportLine(t, g);
     graded[t.id] = g;
@@ -160,7 +165,7 @@ if (answersFile) {
     const answer = raw[t.id];
     if (!answer || !String(answer).trim()) { console.log('—  not attempted'); continue; }
     const code = extractCode(String(answer), t.lang);
-    const g = await gradeTask(t, code);
+    const g = await gradeTask(t, code, { allowUnsafeExecution: has('allow-unsafe-execution') });
     g.code = code;
     reportLine(t, g);
     graded[t.id] = g;
@@ -254,6 +259,7 @@ for (const c of candidates) {
   fs.writeFileSync(file, JSON.stringify({
     candidate: { id: c.id, name: c.name, vendor: c.vendor, model: c.model },
     track: 'coding', mode: c.mode, when: new Date().toISOString(),
+    execution: 'unsandboxed-trusted-local', experimental: true, adversariallyVerified: false,
     score: final, fullySolved: solved, executed: scored.length, total: TASKS.length,
     byCategory: Object.fromEntries(Object.entries(byCat).map(([k, v]) => [k, v.s / v.w])),
     ...(c.callFailures?.length ? { callFailures: c.callFailures } : {}),

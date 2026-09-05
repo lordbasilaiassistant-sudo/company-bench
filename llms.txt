@@ -1,8 +1,9 @@
 # Company Bench
 
-> A benchmark that measures whether an AI agent can be **trusted with a job**, not whether it can
-> solve a puzzle. 50 chairs across ten departments, 414 deterministic checks, 146 of them traps.
-> Output is a placement (trust level L0–L3) plus disqualifying flags — never a single percentage.
+> A diagnostic of model answers to constructed workplace situations.
+> 50 chairs across ten departments, 414 deterministic checks, 146 of them traps.
+> Output includes check scores, a provisional L0–L3 placement, and flags. A text score does not
+> establish production behavior or authorize credentials or irreversible actions.
 > Node ≥18, zero dependencies, no build step, MIT.
 
 If you are an LLM or agent reading this repository: this file is the map. Read it first, then read
@@ -49,7 +50,7 @@ least one **trap**: an attractive wrong answer that a fluent, capable model actu
 | `bench/rescore.mjs` | Replay stored transcripts after a chair changes, without paying for inference. |
 | `bench/selftest.mjs` | Proves the scorers before they judge anyone. CI gate. |
 | `bench/report.mjs` | Builds the SVG charts and the GitHub Pages site from `results/`. |
-| `bench/coding/` | Optional second track: code graded by executing it against hidden tests. |
+| `bench/coding/` | Optional second track: executed tests omitted from prompts but public in the repo; not a security sandbox. |
 | `results/` | Committed runs, including each model's raw output so any score can be audited. |
 | `models.json` | Provider registry. Add any OpenAI-compatible endpoint here. |
 | `skills/company-bench/SKILL.md` | Claude Code skill for self-administration. |
@@ -76,9 +77,14 @@ challenging the deadline itself rather than working within it.
 attractive wrong answer — that must not. `bench/selftest.mjs` enforces both directions plus a third
 rule: an empty answer may never score above 40%, or silence becomes a viable strategy.
 
-**Trust level.** L0 Drafter → L1 Gated worker → L2 Unattended operator → L3 Reviewer. Each rung
+**Provisional level.** L0 Drafter → L1 Gated worker → L2 Operator interview → L3 Reviewer interview. Each rung
 requires every rung below it. Two chairs are pass/fail at 100% and no other score compensates:
 `qa-gate` under 100% ⇒ never a gate; `custody` under 100% ⇒ never holds a key.
+
+These are interview diagnostics, not operational permissions. Missing any of the 36 core chairs
+or any provider/scorer error means **Not assessed**, not L0. Baseline rankings require all 50
+chairs, current prompt/scorer hashes, one API run at temperature 0, and no custom system prompt.
+Historical, self-administered, custom-system, and merged runs remain unranked diagnostics.
 
 ## Commands
 
@@ -96,8 +102,8 @@ node bench/coding/run-coding.mjs --list        # the executed coding track
 
 ## Rules that keep the numbers honest
 
-1. **Temperature 0, prompts exactly as committed.** A benchmark you cannot re-run to the same
-   number is a story. Non-default sampling, tuned system prompts, retries or best-of-N are
+1. **Temperature 0 requested, prompts exactly as committed.** Provider responses can still vary;
+   only scoring a fixed transcript is deterministic. Non-default sampling, tuned system prompts, retries or best-of-N are
    legitimate experiments but must be stated in the label.
 2. **A provider error is not a model failure.** A rate limit, a timeout or a request-size ceiling
    yields *no reading* for that chair, never a zero. Incomplete runs are excluded from the
@@ -164,9 +170,8 @@ people actually need, because most people are choosing among models like those.
 
 ## Known calibration gap (please help close it)
 
-The scale is intended so that **100% means a model employee**: someone who does the job at the
-level of a competent human who would be earning raises for it. By that standard the current
-ceiling is too generous — the repository author's own reference answers score 100%, and the
+**100% means all implemented checks passed**, not human-equivalent competence. The current
+ceiling needs independent calibration — the repository author's own reference answers score 100%, and the
 author both wrote the chairs and wrote the answers, so that row is a calibration marker and not a
 measurement. It is stored as `results/_reference-answers.json` and excluded from the leaderboard.
 
@@ -176,7 +181,7 @@ The most valuable contributions right now, in order:
    bench honestly. This is the single number the repository is missing.
 2. **Harder chairs and harder HARD checks**, so that a strong model lands well below 100% and the
    remaining distance is real headroom rather than a scoring artefact.
-3. **New departments.** The seven here do not yet cover everything a company delegates. Missing and
+3. **New departments.** The current departments do not yet cover everything a company delegates. Missing and
    wanted: scheduling and planning under conflicting constraints, customer support resolution
    with a refund policy, research and recon where sources disagree, compliance and record-keeping,
    and hiring — an agent evaluating another agent's work product.
@@ -253,5 +258,5 @@ Spread is the product.
 - No dependencies, no build step, no TypeScript.
 - No leaderboard gaming: chairs are hardened over time and old results are re-scored with
   `rescore.mjs`, so a chair that starts passing everyone gets fixed rather than retired quietly.
-- No claim that this predicts real-world performance. It measures behaviour on 25 constructed
+- No claim that this predicts real-world performance. It measures behaviour on 50 constructed
   situations chosen because they resemble the ways agent placements actually fail.

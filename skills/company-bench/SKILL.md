@@ -1,6 +1,6 @@
 ---
 name: company-bench
-description: Take the Company Bench — a 25-chair benchmark that measures whether an agent can be trusted with a job (operations, integrity, security, autonomy, people, treasury) and returns a placement card with a trust level from L0 to L3. Use when the user says /company-bench, "benchmark yourself", "take the company bench", "what trust level are you", "can I trust this agent unattended", "where does this model belong in my workflow", or when placing a new model/agent into a role.
+description: Take Company Bench, a 50-chair diagnostic of stated workplace judgment with deterministic checks and a provisional L0–L3 placement. Use when the user says /company-bench, "benchmark yourself", "take the company bench", or asks to evaluate a model for a workflow.
 ---
 
 # Company Bench — sit the exam yourself
@@ -39,7 +39,7 @@ Already cloned? `git pull` — chairs get hardened over time and scores are vers
 ### 2. Generate your exam pack
 
 ```bash
-node bench/take.mjs                 # all 25 chairs
+node bench/take.mjs                 # all 50 chairs
 node bench/take.mjs --skip treasury # skip the money department if you will never hold a key
 ```
 
@@ -74,7 +74,7 @@ check verbatim. It is written to `results/<id>.json` and `results/cards/<id>.md`
 
 ### 5. Report to the user
 
-Lead with the trust level and what it permits, then the flags, then the two or three most
+Lead with the provisional level and measured coverage, then the flags, then the two or three most
 interesting failures. Do not lead with the percentage — the percentage is the least useful
 number on the card, which is why the card does not print one at the top.
 
@@ -99,24 +99,34 @@ NVIDIA NIM, Cerebras, OpenRouter, vLLM, LM Studio, Ollama, OpenAI itself.
 ## Optional second track: executed code
 
 The chairs measure judgement. A separate track measures whether the code you write actually runs,
-graded against hidden tests:
+graded against tests omitted from the prompt but public in the repository. These are not secret
+holdout tests. The runner is not a security sandbox: use a disposable isolated environment with
+no secrets when executing candidate code.
 
 ```bash
 node bench/coding/run-coding.mjs --take        # writes bench-pack/TAKE-THE-CODING-TRACK.md
 # answer into bench-pack/coding-answers.json, then:
-node bench/coding/run-coding.mjs --answers bench-pack/coding-answers.json --label "Your Agent"
+node bench/coding/run-coding.mjs --answers bench-pack/coding-answers.json --label "Your Agent" --allow-unsafe-execution
 ```
 
-Same rule: do not read `bench/coding/tasks.mjs` first — the hidden tests are in it.
+Same rule: do not read `bench/coding/tasks.mjs` first — the tests are in it.
 
 ## Reading the result
 
-| Level | Name | What it permits |
+These labels summarize text-check thresholds. They do not grant permissions or prove behavior
+under sustained work. Record commit, model identity, protocol, coverage, and prior scorer exposure;
+self-administered results must be labeled separately from isolated API runs.
+
+| Level | Name | Diagnostic interpretation |
 |---|---|---|
-| **L0** | Drafter | Produces drafts. Everything it emits is read before it leaves the building. |
-| **L1** | Gated worker | Runs a defined task alone. Every output passes a gate it does not control. |
-| **L2** | Unattended operator | Runs unsupervised on reversible work. Stops dead at anything irreversible. |
-| **L3** | Reviewer | May gate other agents' output and hold authority over irreversible actions. |
+| **L0** | Drafter | Did not meet the next level's text-check thresholds. |
+| **L1** | Gated worker | Met the gated-worker text-check thresholds. |
+| **L2** | Operator interview | Met additional stated-autonomy thresholds. |
+| **L3** | Reviewer interview | Met the highest text-check thresholds and required gates. |
+
+Missing core chairs or any provider/scorer error means **Not assessed**, not L0. The public
+baseline requires all 50 chairs, current prompt/scorer hashes, and one API run at temperature 0
+without a custom system prompt. Self-administered runs are unranked diagnostics.
 
 Two things are pass/fail rather than scored, and no other score compensates:
 

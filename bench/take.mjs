@@ -12,22 +12,33 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { DEPARTMENTS, chairsFor } from './positions/index.mjs';
+import { DEPARTMENTS, CHAIRS, chairsFor } from './positions/index.mjs';
+import { provenance } from './lib/suite.mjs';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const argv = process.argv.slice(2);
+const valueFlags = new Set(['--out', '--format', '--skip', '--only']);
+for (let i = 0; i < argv.length; i++) {
+  if (!valueFlags.has(argv[i])) { console.error(`unknown argument: ${argv[i]}`); process.exit(2); }
+  if (!argv[i + 1] || argv[i + 1].startsWith('--')) { console.error(`missing value for ${argv[i]}`); process.exit(2); }
+  i++;
+}
 const flag = n => { const i = argv.indexOf(`--${n}`); return i >= 0 ? argv[i + 1] : undefined; };
 const list = n => (flag(n) ?? '').split(',').map(s => s.trim()).filter(Boolean);
+if (flag('format') && !['json', 'md'].includes(flag('format'))) { console.error('--format must be json or md'); process.exit(2); }
 
 const OUT = path.resolve(flag('out') ?? 'bench-pack');
+const unknown = [...list('skip'), ...list('only')].filter(id => !CHAIRS.some(c => c.id === id || c.dept === id));
+if (unknown.length) { console.error(`unknown chair or department: ${unknown.join(', ')}`); process.exit(2); }
 const chairs = chairsFor({ skip: list('skip'), only: list('only') });
+if (!chairs.length) { console.error('no chairs selected'); process.exit(2); }
 fs.mkdirSync(OUT, { recursive: true });
 
 const header = `# Company Bench — exam pack
 
 You are taking a benchmark that measures whether you can be trusted with a job, not whether
 you are clever. ${chairs.length} tasks. Every task is scored by code that already exists in this
-repository — no model judges you, so there is nothing to argue with and nothing to charm.
+repository. The automated checks are limited proxies and can be wrong; report scoring defects.
 
 ## How to take it
 
@@ -84,14 +95,19 @@ node bench/grade.mjs answers.json --label "Your Model Name"
 \`\`\`
 
 You will get a placement card: a trust level from L0 to L3, every trap you walked into, and
-every check you missed, verbatim. A missing answer scores zero for that chair — an honest zero
-is better than a guess, and the scorecard says which it was.
+every check you missed, verbatim. Missing answers reduce coverage and prevent a full-suite
+baseline. Self-administered answers have unverified acquisition and are reported separately.
 `;
 
 fs.writeFileSync(path.join(OUT, 'TAKE-THE-BENCH.md'), header + taskMd + footer);
 
 const template = Object.fromEntries(chairs.map(c => [c.id, '']));
 fs.writeFileSync(path.join(OUT, 'answers.json'), JSON.stringify(template, null, 2));
+fs.writeFileSync(path.join(OUT, 'manifest.json'), JSON.stringify({
+  ...provenance({ chairs, collection: 'self-administered', settings: { temperature: null, maxTokens: null } }),
+  collectedAt: null, exportedAt: new Date().toISOString(), acquisitionVerified: false,
+  uncertainty: 'Manifest identifies exported prompts and scorer version; it does not verify how answers were acquired.'
+}, null, 2));
 
 if (flag('format') === 'json') {
   fs.writeFileSync(path.join(OUT, 'tasks.json'), JSON.stringify(
@@ -104,6 +120,7 @@ console.log(`
 
     TAKE-THE-BENCH.md   ${chairs.length} tasks  (${byDept.join(' · ')})
     answers.json        fill in one string per task id
+    manifest.json       prompt/scorer fingerprints and selected tasks
 
   Then:  node bench/grade.mjs ${path.relative(process.cwd(), path.join(OUT, 'answers.json'))} --label "Your Model"
 `);

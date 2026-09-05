@@ -1,11 +1,12 @@
 {
   "name": "company-bench",
-  "version": "2.0.0",
-  "description": "Can your agent hold a job? A 25-chair benchmark that measures whether an AI agent can be trusted with real work — dirty data, planted lies, prompt injection, irreversible actions, and people. Deterministic scoring, no LLM judge.",
+  "version": "3.0.0",
+  "description": "A 50-chair diagnostic benchmark for model judgment on workplace scenarios, with deterministic scoring, auditable outputs, and an optional executed-code track. No LLM judge.",
   "type": "module",
   "license": "MIT",
-  "engines": { "node": ">=18" },
+  "engines": { "node": ">=20" },
   "scripts": {
+    "test": "node --test bench/integrity.test.mjs bench/runner.test.mjs bench/coding/integrity.test.mjs",
     "selftest": "node bench/selftest.mjs",
     "list": "node bench/run.mjs --list",
     "take": "node bench/take.mjs",

@@ -43,7 +43,10 @@ export async function chat(model, prompt, { maxTokens, retries = 2, timeoutMs, s
     try {
       const out = await once(model, prompt, maxTokens, timeoutMs, system ?? model.system);
       // Some endpoints return an empty completion under load. Retrying is fairer than scoring "".
-      if (!out.text.trim() && attempt < retries) { await sleep(2000 * (attempt + 1)); continue; }
+      if (typeof out.text !== 'string' || !out.text.trim()) {
+        if (attempt < retries) { await sleep(2000 * (attempt + 1)); continue; }
+        throw new Error('empty completion after retries; no reading');
+      }
       return { ...out, ms: Date.now() - t0 };
     } catch (e) {
       lastErr = e;
@@ -74,6 +77,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
  */
 async function once(model, prompt, maxTokens, timeoutMs, system) {
   const api = model.api ?? 'openai';
+  if (!['openai', 'anthropic', 'ollama'].includes(api)) throw new Error(`unsupported API: ${api}`);
   const signal = AbortSignal.timeout(timeoutMs);
 
   if (api === 'ollama') {
@@ -104,6 +108,7 @@ async function once(model, prompt, maxTokens, timeoutMs, system) {
     });
     if (!res.ok) throw new Error(`ollama ${res.status}: ${(await res.text()).slice(0, 200)}`);
     const j = await res.json();
+    if (j.done_reason === 'length') throw new Error('truncated completion (length); no reading');
     // eval_duration is nanoseconds of GENERATION only. Reporting it separately keeps a cold start
     // from being read as a slow model.
     const genRate = j.eval_count && j.eval_duration
@@ -129,6 +134,7 @@ async function once(model, prompt, maxTokens, timeoutMs, system) {
     });
     if (!res.ok) throw new Error(`anthropic ${res.status}: ${(await res.text()).slice(0, 300)}`);
     const j = await res.json();
+    if (j.stop_reason === 'max_tokens') throw new Error('truncated completion (max_tokens); no reading');
     const text = (j.content ?? []).filter(b => b.type === 'text').map(b => b.text).join('');
     return { text, tokens: j.usage?.output_tokens ?? 0 };
   }
@@ -142,7 +148,13 @@ async function once(model, prompt, maxTokens, timeoutMs, system) {
     temperature: 0,
     max_tokens: maxTokens,
   };
-  if (model.extraBody) Object.assign(body, model.extraBody);
+  if (model.extraBody) {
+    const reserved = ['model', 'messages', 'temperature', 'max_tokens', 'stream'];
+    if (reserved.some(key => Object.hasOwn(model.extraBody, key))) {
+      throw new Error('extraBody cannot override model, messages, temperature, max_tokens or stream');
+    }
+    Object.assign(body, model.extraBody);
+  }
   const res = await fetch(`${model.baseUrl.replace(/\/$/, '')}/chat/completions`, {
     method: 'POST',
     headers: { 'content-type': 'application/json', authorization: `Bearer ${model.apiKey}` },
@@ -151,9 +163,10 @@ async function once(model, prompt, maxTokens, timeoutMs, system) {
   });
   if (!res.ok) throw new Error(`${model.id} ${res.status}: ${(await res.text()).slice(0, 300)}`);
   const j = await res.json();
+  if (j.choices?.[0]?.finish_reason === 'length') throw new Error('truncated completion (length); no reading');
   const msg = j.choices?.[0]?.message ?? {};
-  // Reasoning models sometimes put the answer in reasoning_content when content is truncated.
-  const text = msg.content || msg.reasoning_content || '';
+  // Hidden reasoning is not the submitted answer.
+  const text = msg.content ?? '';
   return { text, tokens: j.usage?.completion_tokens ?? 0 };
 }
 
@@ -206,11 +219,11 @@ export function resolveModel(spec, registry) {
   }
   if (scheme === 'anthropic') {
     return { id: spec, name, api: 'anthropic', model: name, cost: 'paid',
-      baseUrl: 'https://api.anthropic.com', apiKey: resolveKey('ANTHROPIC_API_KEY') };
+      baseUrl: 'https://api.anthropic.com', keyEnv: 'ANTHROPIC_API_KEY', apiKey: resolveKey('ANTHROPIC_API_KEY') };
   }
   if (scheme === 'openai') {
     return { id: spec, name, api: 'openai', model: name, cost: 'paid',
-      baseUrl: 'https://api.openai.com/v1', apiKey: resolveKey('OPENAI_API_KEY') };
+      baseUrl: 'https://api.openai.com/v1', keyEnv: 'OPENAI_API_KEY', apiKey: resolveKey('OPENAI_API_KEY') };
   }
   return null;
 }

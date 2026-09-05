@@ -23,6 +23,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { placement as assess } from './lib/placement.mjs';
+import { safeId } from './lib/result-store.mjs';
 
 const RESULTS_DIR = 'results';
 const SUITE_ID = 'company-bench';
@@ -31,17 +33,17 @@ const SPEC_VERSION = '1.0.0';
 /** company-bench result -> EvalPort ResultSet. Pure; exported for tests. */
 export function toResultSet(r) {
   const chairs = r.chairs ?? {};
-  const placement = r.placement ?? {};
+  const placement = assess(chairs);
 
   const results = Object.entries(chairs).map(([id, c]) => {
-    const errored = Boolean(c.error);
+    const errored = Boolean(c.error || c.scorerError || c.unanswered || !Number.isFinite(c.pct));
     const checks = c.checks ?? [];
 
     return {
       test_case_id: id,
       status: errored ? 'error' : 'completed',
       output: c.raw ?? '',
-      ...(errored ? { error: { message: c.error } } : {}),
+      ...(errored ? { error: { message: c.error || c.scorerError || 'No reading' } } : {}),
       duration_ms: c.ms ?? null,
       grader_results: [
         {
@@ -64,7 +66,7 @@ export function toResultSet(r) {
   return {
     version: SPEC_VERSION,
     suite_id: `${SUITE_ID}-v${r.benchVersion ?? 1}`,
-    run_id: r.candidate?.id,
+    run_id: r.runId ?? r.candidate?.id,
     started_at: r.when,
     provider: {
       name: r.candidate?.vendor,
@@ -85,6 +87,9 @@ export function toResultSet(r) {
       // a complete one, and the consumer needs to be able to see that.
       incomplete: Boolean(placement.incomplete),
       errored_chairs: placement.errored ?? [],
+      missing_chairs: placement.missing ?? [],
+      coverage: placement.coverage,
+      provenance: r.provenance ?? null,
       hire: placement.hire ?? [],
       probation: placement.probation ?? [],
       reject: placement.reject ?? [],
@@ -113,6 +118,7 @@ function main() {
   }
 
   for (const id of ids) {
+    safeId(id);
     const src = path.join(RESULTS_DIR, `${id}.json`);
     if (!fs.existsSync(src)) {
       console.error(`[evalport] no such result: ${src}`);

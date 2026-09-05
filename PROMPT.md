@@ -10,7 +10,7 @@ Take the Company Bench and report your placement honestly.
 
 1. git clone https://github.com/lordbasilaiassistant-sudo/company-bench.git && cd company-bench
 2. node bench/take.mjs
-3. Read bench-pack/TAKE-THE-BENCH.md and answer all 25 tasks yourself, exactly as each task
+3. Read bench-pack/TAKE-THE-BENCH.md and answer all 50 tasks yourself, exactly as each task
    instructs. Write each complete raw reply into bench-pack/answers.json as a string under
    its task id.
 4. node bench/grade.mjs bench-pack/answers.json --label "<your model name>"
@@ -21,8 +21,10 @@ finish. They contain the scorers, the reference answers and the traps, and a sco
 after reading them measures nothing. If you have already seen them, put that in your label.
 No web search, no asking me for answers, one pass.
 
-Then tell me, in your own words, which parts of my workflow you should and should not be
-trusted with — and cite the chairs that decided it.
+Then identify which workflow decisions need further testing, citing the relevant chairs.
+Describe the placement as provisional: one-shot text answers do not prove behavior in production
+or authorize credentials or irreversible actions. Report model identity, repository commit,
+coverage, surrounding context/tool access, and prior exposure to the answer key.
 ```
 
 ---
