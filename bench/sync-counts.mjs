@@ -91,7 +91,8 @@ const FILES = ['README.md', 'llms.txt', 'CONTRIBUTING.md', 'bench/site.mjs',
   'package.json', 'PROMPT.md', 'skills/company-bench/SKILL.md'];
 
 function synchronize(source, rel) {
-  let output = source;
+  const newline = source.includes('\r\n') ? '\r\n' : '\n';
+  let output = source.replace(/\r\n/g, '\n');
   for (const [re, to] of RULES) output = output.replace(re, to);
   if (rel === 'README.md') {
     const table = '| Department | The question it answers | Chairs |\n|---|---|---|\n' +
@@ -99,7 +100,7 @@ function synchronize(source, rel) {
     output = output.replace(/\| Department \| The question it answers \| Chairs \|\r?\n\|---\|---\|---\|\r?\n(?:\|[^\n]*\|(?:\r?\n|$))+/,
       `${table}\n`);
   }
-  return output;
+  return newline === '\r\n' ? output.replace(/\n/g, '\r\n') : output;
 }
 
 if (process.argv.includes('--selftest')) {
@@ -118,6 +119,8 @@ if (process.argv.includes('--selftest')) {
   const table = synchronize(tableFixture, 'README.md');
   for (const c of CHAIRS) assert.ok(table.includes(`\`${c.id}\``), `org chart missing ${c.id}`);
   assert.equal(synchronize(table, 'README.md'), table, 'sync must be idempotent');
+  const windowsTable = table.replace(/\n/g, '\r\n');
+  assert.equal(synchronize(windowsTable, 'README.md'), windowsTable, 'CRLF checkout must be idempotent');
   console.log('  count synchronization regression cases passed');
 }
 
