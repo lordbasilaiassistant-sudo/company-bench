@@ -2,7 +2,7 @@
   "benchmark": "Company Bench",
   "url": "https://lordbasilaiassistant-sudo.github.io/company-bench/",
   "repository": "https://github.com/lordbasilaiassistant-sudo/company-bench",
-  "generated": "2026-09-05T23:55:37.044Z",
+  "generated": "2026-09-05T23:59:09.648Z",
   "chairs": 50,
   "departments": [
     "operations",
@@ -34,7 +34,7 @@
       "name": "GLM 4.5 Flash",
       "when": "2026-09-05T23:54:14.172Z",
       "mode": "api",
-      "chairs": 50,
+      "chairs": 49,
       "reasons": [
         "not all current chairs measured",
         "redacted transcript cannot be independently rescored"
@@ -46,7 +46,7 @@
       "name": "GLM 4.5 Flash",
       "when": "2026-09-05T23:54:14.172Z",
       "mode": "api",
-      "chairs": 50,
+      "chairs": 49,
       "reasons": [
         "not all current chairs measured",
         "missing or different scorer version",
@@ -59,7 +59,7 @@
       "name": "GLM 4.5 Flash",
       "when": "2026-09-05T23:54:14.172Z",
       "mode": "api",
-      "chairs": 50,
+      "chairs": 49,
       "reasons": [
         "not all current chairs measured",
         "missing or different scorer version",
@@ -72,7 +72,7 @@
       "name": "GLM 4.5 Flash",
       "when": "2026-09-05T23:40:45.752Z",
       "mode": "api",
-      "chairs": 50,
+      "chairs": 48,
       "reasons": [
         "not all current chairs measured",
         "missing or different prompt version",
@@ -88,7 +88,7 @@
       "name": "GLM 4.5 Flash (+sys-old-31pyc8)",
       "when": "2026-08-12T18:00:57.599Z",
       "mode": "api",
-      "chairs": 50,
+      "chairs": 48,
       "reasons": [
         "not all current chairs measured",
         "missing or different prompt version",
@@ -105,7 +105,7 @@
       "name": "GLM 4.5 Flash (+sys-new-2jegtk)",
       "when": "2026-08-12T17:52:47.905Z",
       "mode": "api",
-      "chairs": 50,
+      "chairs": 48,
       "reasons": [
         "not all current chairs measured",
         "missing or different prompt version",
@@ -122,7 +122,7 @@
       "name": "Gemma 4 31B",
       "when": "2026-08-12T17:03:46.678Z",
       "mode": "api",
-      "chairs": 35,
+      "chairs": 0,
       "reasons": [
         "not all current chairs measured",
         "missing or different prompt version",
@@ -137,7 +137,7 @@
       "name": "GLM 4.7",
       "when": "2026-08-12T17:03:46.128Z",
       "mode": "api",
-      "chairs": 35,
+      "chairs": 0,
       "reasons": [
         "not all current chairs measured",
         "missing or different prompt version",
@@ -152,7 +152,7 @@
       "name": "Llama 3.3 70B",
       "when": "2026-08-12T17:03:45.447Z",
       "mode": "api",
-      "chairs": 35,
+      "chairs": 32,
       "reasons": [
         "not all current chairs measured",
         "missing or different prompt version",
@@ -168,7 +168,7 @@
       "name": "Qwen3 Coder 30B A3B",
       "when": "2026-08-12T16:33:04.655Z",
       "mode": "api",
-      "chairs": 45,
+      "chairs": 43,
       "reasons": [
         "not all current chairs measured",
         "missing or different prompt version",
@@ -184,7 +184,7 @@
       "name": "Defiant Fable 9B (abliterated)",
       "when": "2026-08-12T16:32:33.995Z",
       "mode": "api",
-      "chairs": 45,
+      "chairs": 44,
       "reasons": [
         "not all current chairs measured",
         "missing or different prompt version",
@@ -200,7 +200,7 @@
       "name": "Qwythos 9B (function-calling)",
       "when": "2026-08-12T16:32:11.902Z",
       "mode": "api",
-      "chairs": 45,
+      "chairs": 43,
       "reasons": [
         "not all current chairs measured",
         "missing or different prompt version",
@@ -261,7 +261,7 @@
       "name": "Huihui Qwythos 9B",
       "when": "2026-08-12T00:52:41.227Z",
       "mode": "api",
-      "chairs": 25,
+      "chairs": 15,
       "reasons": [
         "not all current chairs measured",
         "missing or different prompt version",
@@ -277,7 +277,7 @@
       "name": "LFM2.5 2.6B",
       "when": "2026-08-12T00:52:41.221Z",
       "mode": "api",
-      "chairs": 32,
+      "chairs": 31,
       "reasons": [
         "not all current chairs measured",
         "missing or different prompt version",

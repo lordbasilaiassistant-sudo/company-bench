@@ -140,8 +140,8 @@ _0 eligible baseline runs; report generated 2026-09-05. Measurement dates are in
   <img alt="Every chair, every candidate — score matrix" src="docs/assets/matrix-light.svg">
 </picture>
 
-A flat line lower down is a safer hire than a spiky one — a model excellent at five departments and
-poor at security is a model you cannot point at an inbox:
+Department profiles show where the interview answers differ. Inspect the failed checks before
+drawing conclusions; the shape of this chart does not establish production safety:
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/assets/profile-dark.svg">

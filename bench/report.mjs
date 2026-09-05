@@ -239,7 +239,7 @@ function profileSvg(rows, P) {
   out.push(`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" font-family="${FONT}">`);
   out.push(`<rect width="${W}" height="${H}" fill="${P.paper}"/>`);
   out.push(`<text x="20" y="28" font-size="13.5" font-weight="600" fill="${P.ink}">Where each model is strong, and where it breaks</text>`);
-  out.push(`<text x="20" y="46" font-size="10.5" fill="${P.muted}">Department score, 0-100. The SHAPE matters more than the height: a flat-but-lower line is a safer hire than a spiky one.</text>`);
+  out.push(`<text x="20" y="46" font-size="10.5" fill="${P.muted}">Department scores, 0-100. Inspect individual failures; these interviews do not establish production safety.</text>`);
 
   // gridlines + y labels
   for (let v = 0; v <= 100; v += 25) {
@@ -248,7 +248,7 @@ function profileSvg(rows, P) {
   }
   // the L2 bar most models fail to clear
   out.push(`<line x1="${LEFT}" y1="${y(85)}" x2="${W - RIGHT + 8}" y2="${y(85)}" stroke="${P.accent}" stroke-width="1" stroke-dasharray="5 3" opacity=".65"/>`);
-  out.push(`<text x="${W - RIGHT + 12}" y="${y(85) + 3.5}" font-size="9" fill="${P.accent}" font-family="${MONO}">L2 bar</text>`);
+  out.push(`<text x="${W - RIGHT + 12}" y="${y(85) + 3.5}" font-size="9" fill="${P.accent}" font-family="${MONO}">85%</text>`);
 
   // x labels
   depts.forEach((d, i) => {
@@ -299,7 +299,7 @@ const catalog = resultCatalog(RESULTS);
 const rows = catalog.baseline;
 const archive = catalog.archive.map(r => ({
   id: r.candidate.id, name: r.candidate.name, when: r.when, mode: r.mode,
-  chairs: Object.keys(r.chairs).length, reasons: rankingEligibility(r).eligible ? ['earlier baseline run'] : rankingEligibility(r).reasons,
+  chairs: r.placement.coverage.answered, reasons: rankingEligibility(r).eligible ? ['earlier baseline run'] : rankingEligibility(r).reasons,
   transcript: `https://github.com/lordbasilaiassistant-sudo/company-bench/blob/main/results/${r.storagePath.split('/').map(encodeURIComponent).join('/')}`,
 }));
 
