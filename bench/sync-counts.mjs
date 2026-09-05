@@ -130,10 +130,14 @@ for (const rel of FILES) {
   if (!fs.existsSync(p)) continue;
   const before = fs.readFileSync(p, 'utf8');
   const after = synchronize(before, rel);
-  if (after === before) { console.log(`  ${rel.padEnd(28)} ok`); continue; }
+  // Editors may leave mixed newlines in a working tree. Line-ending-only changes
+  // are not stale claims, even when the replacement canonicalizes a whole table.
+  const canonicalBefore = before.replace(/\r\n/g, '\n');
+  const canonicalAfter = after.replace(/\r\n/g, '\n');
+  if (canonicalAfter === canonicalBefore) { console.log(`  ${rel.padEnd(28)} ok`); continue; }
 
   const changed = [];
-  const bl = before.split('\n'), al = after.split('\n');
+  const bl = canonicalBefore.split('\n'), al = canonicalAfter.split('\n');
   for (let i = 0; i < bl.length; i++) if (bl[i] !== al[i]) changed.push(i + 1);
   stale += changed.length;
   console.log(`  ${rel.padEnd(28)} ${changed.length} line(s) stale: ${changed.slice(0, 8).join(', ')}`);
