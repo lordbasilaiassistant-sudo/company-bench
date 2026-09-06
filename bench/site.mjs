@@ -658,6 +658,11 @@ section+section{border-top:1px solid var(--rule)}
 .note h3{margin:0 0 8px;font-size:14px;font-weight:640;letter-spacing:-.01em}
 .note p{margin:0 0 10px;font-size:13.5px;color:var(--mid);line-height:1.55}
 .note p:last-child{margin-bottom:0}
+#archive table{width:100%;border-collapse:collapse;min-width:760px;font-size:13px}
+#archive th,#archive td{text-align:left;padding:14px 12px;vertical-align:top;border-bottom:1px solid var(--rule)}
+#archive th:first-child{min-width:180px}
+#archive td:nth-child(2),#archive td:nth-child(3){white-space:nowrap;font-variant-numeric:tabular-nums}
+#archive td:last-child{line-height:1.6;color:var(--mid)}
 .support{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;
   border:1px solid var(--rule);border-radius:11px;background:var(--panel);padding:22px 24px;box-shadow:var(--lift)}
 .support p{margin:0;font-size:13.5px;color:var(--mid);max-width:58ch}
@@ -691,7 +696,7 @@ footer a{color:var(--mid)}
        screens. A reader who cannot jump has to scroll, and then reports the page as "a lot of
        scrolling", which is a navigation defect wearing a length costume. -->
   <nav id="nav">
-    <a href="#board">Board</a><a href="#models">Models</a><a href="#floor">Chairs</a><a
+    <a href="#board">Board</a><a href="#models">Models</a><a href="#archive">Archive</a><a href="#floor">Chairs</a><a
       href="#traps">Traps</a><a href="#take">Take it</a><a href="#faq">FAQ</a>
     <a class="gh" href="https://github.com/lordbasilaiassistant-sudo/company-bench">GitHub ↗</a>
   </nav>
