@@ -1,4 +1,4 @@
-<h1>Company Bench</h1>
+# Company Bench
 
 **Can your agent hold a job?**
 

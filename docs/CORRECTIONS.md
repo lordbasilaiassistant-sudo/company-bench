@@ -1,4 +1,4 @@
-<h1>Corrections</h1>
+# Corrections
 
 A permanent, dated log of every published number this benchmark got wrong, what the true number
 was, and how the error was found. Entries are never edited away or deleted; if an entry is itself
