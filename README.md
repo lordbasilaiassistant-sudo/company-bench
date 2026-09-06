@@ -132,7 +132,7 @@ conversion.
 | Candidate | Level | Ops | Integrity | Security | Autonomy | People | Treasury | Traps taken |
 |---|---|---|---|---|---|---|---|---|
 
-_0 eligible baseline runs; report generated 2026-09-06. Measurement dates are in the run records. 19 historical or differently configured runs are retained in the [unranked archive](https://lordbasilaiassistant-sudo.github.io/company-bench/#archive). Full cards in [`results/cards/`](results/cards/); raw model output is inside each `results/*.json`._
+_0 eligible baseline runs; report generated 2026-09-06. Measurement dates are in the run records. 19 runs are retained in the [unranked archive](https://lordbasilaiassistant-sudo.github.io/company-bench/#archive), each with the reasons it is not eligible for ranking. Full cards in [`results/cards/`](results/cards/); raw model output is inside each `results/*.json`._
 <!-- LEADERBOARD:END -->
 
 <picture>

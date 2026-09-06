@@ -364,7 +364,7 @@ const readmePath = path.join(ROOT, 'README.md');
 if (fs.existsSync(readmePath)) {
   const md = fs.readFileSync(readmePath, 'utf8');
   const note = `\n_${rows.length} eligible baseline run${rows.length === 1 ? '' : 's'}; report generated ${new Date().toISOString().slice(0, 10)}. `
-    + `Measurement dates are in the run records. ${archive.length} historical or differently configured runs are retained in the [unranked archive](https://lordbasilaiassistant-sudo.github.io/company-bench/#archive). `
+    + `Measurement dates are in the run records. ${archive.length} runs are retained in the [unranked archive](https://lordbasilaiassistant-sudo.github.io/company-bench/#archive), each with the reasons it is not eligible for ranking. `
     + `Full cards in [\`results/cards/\`](results/cards/); raw model output is inside each \`results/*.json\`._\n`;
   const next = md.replace(
     /<!-- LEADERBOARD:START -->[\s\S]*?<!-- LEADERBOARD:END -->/,

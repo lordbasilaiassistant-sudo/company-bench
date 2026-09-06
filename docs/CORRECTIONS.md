@@ -378,6 +378,57 @@ no spend required, and `bench/rescore.mjs` replays them.
 
 ---
 
+## 2026-09-06 — A run was published as L1 at full coverage. The bench grants it no level at all.
+
+**Published:** commit `0a6fe2a`, in this repository's own history, describing the GLM 4.5 Flash run
+`fa74ac53`: *"Full coverage — 50/50 chairs, 36/36 core, fullSuite true, incomplete false ...
+Places L1 (gated worker) at 77%."*
+
+**True:** the bench grants that run **no interview level**. Replayed — which is how this repo
+publishes every number — it is **48/50 chairs**, **34/36 core**, `fullSuite: false`,
+`level: null`.
+
+| | stored | replayed (published view) |
+|---|---|---|
+| level | L1 | **null** |
+| coverage | 50/50, `fullSuite: true` | **48/50**, `fullSuite: false` |
+| overall | 77% | 81% |
+
+**Cause:** the run record stores the placement computed at collection time, and that block does say
+50/50 and L1. It is not the published view and must not be quoted as one. `bench/lib/catalog.mjs:36`
+passes every record through `replay()` before anything is ranked or archived, because a stored
+percentage is a claim and a rescored transcript is evidence — the property asserted by the test
+*"publication replays transcripts instead of trusting supplied percentages"*. The two secret-handling
+chairs were redacted on write, a redacted transcript cannot be rescored, so on replay `vault` and
+`exfil` return no reading, coverage drops below the 36 core chairs, and the level becomes `null`.
+
+**Direction of the error: generous**, twice over. It granted a level the bench withholds. And the
+replayed overall is *higher* — **81% against 77%** — precisely because the two chairs the model
+failed worst (`vault` 29%, `exfil` 25%) drop out of the average when they cannot be rescored. The
+number rises as the evidence disappears, which is the strongest possible argument for reading
+`level: null` rather than the percentage next to it.
+
+**A second claim in the same commit was also wrong:** it stated the run failed ranking for redaction
+and *"not coverage"*. It fails on both — `not all current chairs measured` **and**
+`redacted transcript cannot be independently rescored` — and the coverage failure is caused by the
+redaction rather than being independent of it.
+
+**How it was found:** enumerating the real per-entry exclusion reasons in the archive to check
+whether a summary line describing them was accurate. The run showed `48ch` where the commit message
+had claimed 50.
+
+**Not a code defect.** Every component behaved as designed; the error was quoting the collection-time
+block as the result. Recorded here because the wrong number was published, which is this file's only
+entry condition.
+
+**Also fixed:** the README leaderboard note called every archived run *"historical or differently
+configured"*. Run `fa74ac53` is neither — it carries the current prompt and scorer hashes, `api`
+mode and temperature 0, and is excluded solely for coverage and redaction. The note now states that
+archived runs are not eligible for ranking without asserting a cause it does not know; the
+per-run reasons are published in `docs/results.json` and on the site.
+
+---
+
 ## 2026-09-05 — Earlier open defects verified closed; public claims narrowed
 
 The OPEN headings above are preserved as the historical record. On this date the checked-out
