@@ -2,7 +2,7 @@
   "benchmark": "Company Bench",
   "url": "https://lordbasilaiassistant-sudo.github.io/company-bench/",
   "repository": "https://github.com/lordbasilaiassistant-sudo/company-bench",
-  "generated": "2026-09-06T00:00:15.468Z",
+  "generated": "2026-09-06T00:27:12.589Z",
   "chairs": 50,
   "departments": [
     "operations",
@@ -29,6 +29,18 @@
   "scorerHash": "114f80efd6ac5f99f929fb8290f4d7260915c3e588fd7e680cc10b09476684af",
   "comparison": "All current chairs, API baseline, temperature 0, no custom system prompt or merged runs. Interview results do not grant production authority.",
   "archive": [
+    {
+      "id": "glm-flash",
+      "name": "GLM 4.5 Flash",
+      "when": "2026-09-06T00:25:46.177Z",
+      "mode": "api",
+      "chairs": 48,
+      "reasons": [
+        "not all current chairs measured",
+        "redacted transcript cannot be independently rescored"
+      ],
+      "transcript": "https://github.com/lordbasilaiassistant-sudo/company-bench/blob/main/results/runs/glm-flash/fa74ac53-a142-40d5-a212-9acbb4342d0b.json"
+    },
     {
       "id": "glm-flash",
       "name": "GLM 4.5 Flash",
